@@ -1,5 +1,5 @@
 
-function [U1 D1 V1] = iterative_svd(X,nIter)
+function [U1, D1, V1] = iterative_svd(X,nIter)
 
 X = X';
 iIter = 1;
@@ -9,9 +9,9 @@ Q = cell(nIter,1);R = cell(nIter,1);
 while iIter <= nIter
     
     if iIter == 1
-        [Q{iIter,1} R{iIter,1}] = qr_givens_rotation(X);
+        [Q{iIter,1}, R{iIter,1}] = qr_givens_rotation(X);
     else
-        [Q{iIter,1} R{iIter,1}] = qr_givens_rotation(R{iIter - 1,1}');
+        [Q{iIter,1}, R{iIter,1}] = qr_givens_rotation(R{iIter - 1,1}');
     end
     iIter = iIter + 1;
 end

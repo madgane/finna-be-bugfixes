@@ -1,4 +1,4 @@
-function [Qmatrix Rmatrix] = qr_givens_rotation(X)
+function [Qmatrix, Rmatrix] = qr_givens_rotation(X)
 
 [nRows,nCols] = size(X);
 
@@ -8,7 +8,6 @@ Qmatrix = eye(nRows);
 for iCol = 1:nCols
     for iRow = iCol:nRows
         if iCol == iRow
-            display('display');
             RotMatrix = eye(nRows);
             thetaOne = -angle(Xr(iRow,iCol));
             RotMatrix(iRow,iCol) = exp(sqrt(-1) * thetaOne);
@@ -29,5 +28,6 @@ for iCol = 1:nCols
 end
 
 Rmatrix = Xr;
+Qmatrix = Qmatrix';
 
 end
