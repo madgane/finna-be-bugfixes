@@ -125,27 +125,20 @@ if strcmp(SimParams.sysMode,'false')
         SimResults.thrptFairness = sum(SimParams.fairness(:,:,end),2);
         SimParams.sumThrpt = SimResults.sumThrpt;
         
-        %     figure(1);
-        %     cdfplot(SimParams.Thrpt);
-        %     xlabel('Capacity in b/s/Hz');ylabel('%of users');hold all;
-        
-        figure(1);hold all;
-        plot(SimParams.snrIndex,SimParams.sumThrpt,'LineStyle','-.','Marker','h','LineWidth',2);
-        xlabel('SNR in dB');ylabel('sum rate in bits/sec/Hz');grid on;
+        plotFigure(SimParams.snrIndex,SimParams.sumThrpt,1,'plot');
+        xlabel('SNR in dB');ylabel('sum rate in bits/sec/Hz');
         
         JainMean = mean(SimParams.Thrpt,2).^2;JainVar = var(SimParams.Thrpt,0,2);
         JainIndex_capacity = JainMean ./ (JainMean + JainVar);
         
-        figure(2);hold all;
-        plot(SimParams.snrIndex,JainIndex_capacity,'LineStyle','-.','Marker','h','LineWidth',2);
-        xlabel('SNR in dB');ylabel('Rate Deviation across Users in bits/sec/Hz');grid on;
+        plotFigure(SimParams.snrIndex,JainIndex_capacity,2,'plot');
+        xlabel('SNR in dB');ylabel('Rate Deviation across Users in bits/sec/Hz');
         
         JainMean = mean(SimParams.fairness,2).^2;JainVar = var(SimParams.fairness,0,2);
         JainIndex_utility = JainMean ./ (JainMean + JainVar);
         
-        figure(3);hold all;
-        plot(SimParams.snrIndex,JainIndex_utility,'LineStyle','-.','Marker','h','LineWidth',2);
-        xlabel('SNR in dB');ylabel('Network Utility Deviation across Users');grid on;
+        plotFigure(SimParams.snrIndex,JainIndex_utility,3,'plot');
+        xlabel('SNR in dB');ylabel('Network Utility Deviation across Users');
         
     else
         
@@ -185,7 +178,7 @@ else
     nT = 1e3;nPRB = 50;nREinPRB = 120;nTot = nT * nPRB * nREinPRB * 1e-6;    
     
     hold all;
-    cdfplot(SimParams.Thrpt(1,:,1) * nTot);
+    plotFigure(SimParams.Thrpt(1,:,1) * nTot,1,1,'cdfplot');
     xlabel('Throughput in Mbps');
     ylabel('CDF of Throughput in Mbps');
     
