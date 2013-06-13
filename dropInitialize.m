@@ -92,12 +92,12 @@ for iUser = 1:SimParams.nUsers
 end
 
 for iUser = 1:SimParams.nUsers
-    if SimParams.mdpFactor ~= 0
-        if SimParams.mdpFactor <= 1
-            SimStructs.userStruct{iUser,1}.weighingFactor = SimStructs.userStruct{iUser,1}.weighingFactor * (SimParams.mdpFactor)^(SimParams.elapsedFBDuration(iUser,1));
-        else
-            SimStructs.userStruct{iUser,1}.weighingFactor = SimStructs.userStruct{iUser,1}.weighingFactor * (1 - (SimParams.elapsedFBDuration(iUser,1) / SimParams.updateFeedback(iUser,1)))^(SimParams.elapsedFBDuration(iUser,1));
-        end
+    if SimParams.mdpFactor <= 1
+        SimStructs.userStruct{iUser,1}.weighingFactor = SimStructs.userStruct{iUser,1}.weighingFactor * (SimParams.mdpFactor)^(SimParams.elapsedFBDuration(iUser,1));
+    else
+        chnInstant = SimParams.elapsedFBDuration(iUser,1) * SimParams.sampTime;
+        mdpFactor = abs(besselj(0,(2 * pi * SimParams.userDoppler(iUser,1) * chnInstant)));
+        SimStructs.userStruct{iUser,1}.weighingFactor = SimStructs.userStruct{iUser,1}.weighingFactor * (mdpFactor)^(SimParams.elapsedFBDuration(iUser,1));
     end
 end
 

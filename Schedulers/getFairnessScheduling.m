@@ -104,9 +104,7 @@ for iBand = 1:SimParams.nBands
             case 2
                 
                 N = eye(SimParams.nTxAntenna);
-                schedUsers = zeros(SimParams.muxRank,1);
-                schedStreams = zeros(SimParams.muxRank,1);
-                
+                schedUsers = zeros(SimParams.muxRank,1);                
                 nullProj = zeros(SimParams.muxRank * kUsers,1);
                 for iRank = 1:SimParams.muxRank
                     

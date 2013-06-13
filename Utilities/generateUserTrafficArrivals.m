@@ -1,7 +1,7 @@
 
 function [SimParams,SimStructs] = generateUserTrafficArrivals(SimParams,SimStructs)
 
-enStatToolBox = 'false';
+enStatToolBox = 'true';
 
 for iUser = 1:SimParams.nUsers
    
@@ -10,7 +10,7 @@ for iUser = 1:SimParams.nUsers
     cLambda = SimStructs.userStruct{iUser,1}.trafficConfig.avgArrRate;
 
     if strcmp(enStatToolBox,'true')
-        poissonArrivals = [poissrnd(cLambda,1,...
+        poissonArrivals = [random('Poisson',cLambda,1,...
             (SimParams.nDrops - SimParams.gracePeriod)) zeros(1,SimParams.gracePeriod)];
     else
         poissonArrivals = [getPoisson(cLambda,1,...

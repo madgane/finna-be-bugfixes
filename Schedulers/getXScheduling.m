@@ -334,7 +334,7 @@ for iBand = 1:SimParams.nBands
             linkedUsers = cell(SimParams.nBases,1);
             for iBase = 1:SimParams.nBases
                 linkedUsers{iBase,1} = SimStructs.baseStruct{iBase,1}.linkedUsers;
-            end            
+            end
             
             for iUser = 1:SimParams.nUsers
                 for iBase = 1:SimParams.nBases
@@ -352,7 +352,7 @@ for iBand = 1:SimParams.nBands
                     if ~sum(linkedUsers{iBase,1} == iUser)
                         M = M * 0;
                     end
-                                        
+                    
                     Haug = [Haug M(:,1:SimParams.maxRank)];
                     
                     for iStream = 1:SimParams.maxRank
@@ -425,6 +425,83 @@ for iBand = 1:SimParams.nBands
                 SimStructs.baseStruct{iBase}.assignedUsers{iBand,1} = assUsers{iBase,iBand};
                 SimStructs.baseStruct{iBase}.assignedStreams{iBand,1} = assStreams{iBase,iBand};
             end
+            
+        case 'GroupProjection'
+            
+            nIterations = 10;
+            muxIFFreeRank = SimParams.muxRank;
+            
+            Nspace = cell(SimParams.nBases,1);
+            activeUsers = cell(SimParams.nBases,1);
+            activeStreams = cell(SimParams.nBases,1);
+            completeH = cell(SimParams.nUsers,SimParams.nBases);
+            
+            for iUser = 1:SimParams.nUsers
+                
+                bNode = SimStructs.userStruct{iUser,1}.baseNode;
+                Hd = SimStructs.linkChan{bNode,iBand}(:,:,iUser);
+                [U,~,~] = svd(Hd);
+                
+                for iBase = 1:SimParams.nBases
+                    Hk = SimStructs.linkChan{iBase,iBand}(:,:,iUser);M = U' * Hk;
+                    if SimParams.queueWt
+                        M = M(1:SimParams.maxRank,:).' * (SimStructs.userStruct{iUser,1}.weighingFactor);
+                    else
+                        M = M(1:SimParams.maxRank,:).' * sign(SimStructs.userStruct{iUser,1}.weighingFactor);
+                    end
+                    
+                    completeH{iUser,iBase} = [completeH{iUser,iBase} M];
+                end
+                
+            end
+            
+            uLocs = cell(SimParams.nBases,1);
+            for iBase = 1:SimParams.nBases
+                uLocs{iBase,1} = zeros(SimParams.nUsers * SimParams.maxRank,2);
+            end
+            
+            for iIter = 1:nIterations
+                
+                Dspace = cell(SimParams.nBases,1);
+                for iBase = 1:SimParams.nBases
+                    lkUsers = SimStructs.baseStruct{iBase,1}.linkedUsers;
+                    ppVolume = zeros(1,length(lkUsers) * SimParams.maxRank);
+                    for iStream = 1:muxIFFreeRank
+                        iIndex = 0;
+                        for iUser = 1:length(lkUsers)
+                            for jStream = 1:SimParams.maxRank
+                                iIndex = iIndex + 1;
+                                U = [Nspace{iBase,1} Dspace{iBase,1} completeH{lkUsers(iUser,1),iBase}(:,jStream)];
+                                ppVolume(1,iIndex) = real(det(U' * U));
+                                uLocs{iBase,1}(iIndex,:) = [lkUsers(iUser,1),jStream];
+                            end
+                        end
+                        
+                        [~,sortI] = sort(ppVolume,'descend');maxI = sortI(1,1);
+                        activeUsers{iBase,1}(1,iStream) = uLocs{iBase,1}(maxI,1);
+                        activeStreams{iBase,1}(1,iStream) = uLocs{iBase,1}(maxI,2);
+                        Dspace{iBase,1} = [Dspace{iBase,1} completeH{activeUsers{iBase,1}(1,iStream),iBase}(:,activeStreams{iBase,1}(1,iStream))];
+                    end
+                    
+                    Nspace = cell(SimParams.nBases,1);
+                    for kBase = 1:SimParams.nBases
+                        for jBase = 1:SimParams.nBases
+                            if kBase ~= jBase
+                                for iUser = 1:length(activeUsers{kBase,1})
+                                    cUser = activeUsers{kBase,1}(1,iUser);cStream = activeStreams{kBase,1}(1,iUser);
+                                    Nspace{jBase,1} = [Nspace{jBase,1} completeH{cUser,jBase}(:,cStream)];
+                                end
+                            end
+                        end
+                    end
+                end
+            end
+            
+            for iBase = 1:SimParams.nBases
+                SimStructs.baseStruct{iBase}.assignedUsers{iBand,1} = activeUsers{iBase,1}';
+                SimStructs.baseStruct{iBase}.assignedStreams{iBand,1} = activeStreams{iBase,1}';
+            end
+           
             
     end
     

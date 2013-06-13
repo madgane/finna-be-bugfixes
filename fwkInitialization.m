@@ -12,7 +12,14 @@ if ~isempty(uscore_index)
     pathLossModel = plModel(1:uscore_index(1,1) - 1);
 else
     pathLossModel = plModel;
-end    
+end 
+
+for iUser = 1:SimParams.nUsers
+    SimStructs.userStruct{iUser,1}.losFading = cell(SimParams.nBases,1);
+    for iBase = 1:SimParams.nBases
+        SimStructs.userStruct{iUser,1}.losFading{iBase,1} = 'false';
+    end
+end
 
 switch pathLossModel
     
@@ -59,6 +66,13 @@ switch pathLossModel
             uLocs = find(cCell == loadParams(:,2));
             SimParams.PL_Profile(iCell,uLocs) = loadParams(uLocs,end);
         end
+        
+    case '3GPP'
+        
+        SimParams.PL_Profile = zeros(SimParams.nBases,SimParams.nUsers);        
+        [SimParams, SimStructs] = configureLTEParams(SimParams,SimStructs);
+        [SimParams, SimStructs] = userLayoutGeneration(SimParams,SimStructs);
+        [SimParams, SimStructs] = userPathLossGeneration(SimParams,SimStructs);
         
     otherwise
         
@@ -134,6 +148,11 @@ if strcmp(SimParams.ChannelModel,'Jakes')
                 SimStructs.JakesChStruct{iUser,iBase,iBand}.NormalizePathGains = 1;
                 SimStructs.JakesChStruct{iUser,iBase,iBand}.PathGainsOutputPort = 1;  
                 SimStructs.JakesChStruct{iUser,iBase,iBand}.AveragePathGains = 0;
+                if strcmp(SimStructs.userStruct{iUser,1}.losFading{iBase,1},'true')
+                    kFactor = SimParams.sysConfig.Kfactor.avg + SimParams.sysConfig.Kfactor.std * randn;
+                    SimStructs.JakesChStruct{iUser,iBase,iBand}.KFactor = 10^(kFactor/10);
+                    SimStructs.JakesChStruct{iUser,iBase,iBand}.FadingDistribution = 'Rician';
+                end
             end
         end
     end

@@ -1,5 +1,5 @@
 
-function [Pmatrix Pavg] = performWFAlgorithm(PinvMatrix,Pt,Gains)
+function [Pmatrix, Pavg] = performWFAlgorithm(PinvMatrix,Pt,Gains)
 
 iIteration = 0;
 maxIteration = 1e5;

@@ -1,5 +1,5 @@
 
-function [Q1 R1] = qr_householder(X)
+function [Q1, R1] = qr_householder(X)
 
 [nRow,nCol] = size(X);
 

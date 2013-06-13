@@ -4,27 +4,27 @@ clc;clear all;
 SimParams.version = version;
 SimParams.outFile = 'outFile_x1.mat';
 
-pathAddition;
+% pathAddition;
 SimParams.sysMode = 'false';
 SimParams.DebugMode = 'false';
 SimParams.queueMode = 'false';
 SimParams.precoderWithIdealChn = 'false';
 
 SimParams.ChannelModel = 'Jakes';
-SimParams.pathLossModel = 'Random_30';
+SimParams.pathLossModel = 'Random_20';
 SimParams.DopplerType = 'Uniform_100';
 
-SimParams.queueWt = 1;
+SimParams.queueWt = 2;
 SimParams.mdpFactor = 2;
 SimParams.robustNoise = 0;
 
 SimParams.weighingEqual = 'true';
-SimParams.SchedType = 'BDScheduling_SP';
+SimParams.SchedType = 'PFScheduling_BF';
 SimParams.PrecodingMethod = 'Best_ZF_Method';
 SimParams.weightedSumRateMethod = 'StreamScheduling';
 
 SimParams.nDrops = 100;
-SimParams.snrIndex = [-5:5:30];
+SimParams.snrIndex = [-5:5:20];
 
 SimParams.PF_dur = 40;
 SimParams.SFSymbols = 14;
@@ -34,7 +34,7 @@ SimParams.fbFraction = 0.25;
 
 SimParams.nBands = 1;
 SimParams.nBases = 1;
-SimParams.nUsers = 10;
+SimParams.nUsers = 20;
 
 SimParams.nTxAntenna = 4;
 SimParams.nRxAntenna = 1;
@@ -42,7 +42,7 @@ SimParams.nRxAntenna = 1;
 SimParams.gracePeriod = 0;
 SimParams.arrivalDist = 'Constant';
 
-SimParams.maxArrival = 10;
+SimParams.maxArrival = 20;
 SimParams.FixedPacketArrivals = [10,10,10,10,10,10,1,1,1,1];
 SimParams.PL_Profile = [5 -inf 5 -inf 5 -inf 1e-20 0; -inf 5 -inf 5 -inf 5 0 1e-20];
 
@@ -129,23 +129,23 @@ if strcmp(SimParams.sysMode,'false')
         %     cdfplot(SimParams.Thrpt);
         %     xlabel('Capacity in b/s/Hz');ylabel('%of users');hold all;
         
-        figure(2);hold all;
-        plot(SimParams.snrIndex,SimParams.sumThrpt,'LineStyle','-','Marker','d','LineWidth',2);
+        figure(1);hold all;
+        plot(SimParams.snrIndex,SimParams.sumThrpt,'LineStyle','-.','Marker','h','LineWidth',2);
         xlabel('SNR in dB');ylabel('sum rate in bits/sec/Hz');grid on;
         
-        JainMean = mean(SimResults.sumThrpt,2).^2;JainVar = var(SimResults.sumThrpt,0,2);
+        JainMean = mean(SimParams.Thrpt,2).^2;JainVar = var(SimParams.Thrpt,0,2);
         JainIndex_capacity = JainMean ./ (JainMean + JainVar);
         
-        %     figure(2);hold all;
-        %     plot(SimParams.snrIndex,JainIndex_capacity,markerS);
-        %     xlabel('SNR in dB');ylabel('Capacity Deviation across Users in Bits/Sec/Hz');grid on;
+        figure(2);hold all;
+        plot(SimParams.snrIndex,JainIndex_capacity,'LineStyle','-.','Marker','h','LineWidth',2);
+        xlabel('SNR in dB');ylabel('Rate Deviation across Users in bits/sec/Hz');grid on;
         
-        JainMean = mean(SimResults.thrptFairness,2).^2;JainVar = var(SimResults.thrptFairness,0,2);
+        JainMean = mean(SimParams.fairness,2).^2;JainVar = var(SimParams.fairness,0,2);
         JainIndex_utility = JainMean ./ (JainMean + JainVar);
         
-        %     figure(3);hold all;
-        %     plot(SimParams.snrIndex,JainIndex_utility,markerS);
-        %     xlabel('SNR in dB');ylabel('Network Utility Deviation across Users');grid on;
+        figure(3);hold all;
+        plot(SimParams.snrIndex,JainIndex_utility,'LineStyle','-.','Marker','h','LineWidth',2);
+        xlabel('SNR in dB');ylabel('Network Utility Deviation across Users');grid on;
         
     else
         
@@ -182,8 +182,7 @@ if strcmp(SimParams.sysMode,'false')
     
 else
     
-    nT = 1e3;nPRB = 50;nREinPRB = 120;nTot = nT * nPRB * nREinPRB * 1e-6;
-    
+    nT = 1e3;nPRB = 50;nREinPRB = 120;nTot = nT * nPRB * nREinPRB * 1e-6;    
     
     hold all;
     cdfplot(SimParams.Thrpt(1,:,1) * nTot);
