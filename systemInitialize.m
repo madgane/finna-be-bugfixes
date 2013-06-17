@@ -9,6 +9,7 @@ for iUser = 1:SimParams.nUsers
     SimStructs.userStruct{iUser,1}.userID = iUser;
     SimStructs.userStruct{iUser,1}.tAllocation = 0;
     SimStructs.userStruct{iUser,1}.W = cell(SimParams.nBands,1);    
+    SimStructs.userStruct{iUser,1}.dropThrpt = zeros(SimParams.nDrops,1);
     
     SimStructs.userStruct{iUser,1}.trafficStats.backLogPkt = 0;
     SimStructs.userStruct{iUser,1}.trafficConfig.bufferLength = 'Inf';

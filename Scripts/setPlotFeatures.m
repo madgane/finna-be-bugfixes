@@ -80,4 +80,5 @@ set(plotHandle,'Marker',markerCell{markIndex,1});
 set(plotHandle,'Color',eval(colorCell{colIndex,1}));
 set(plotHandle,'LineStyle',lineTypeCell{linTIndex,1});
 set(plotHandle,'LineWidth',lineWidthCell{linWIndex,1});
+set(plotHandle,'MarkerFaceColor',eval(colorCell{colIndex,1}));
 

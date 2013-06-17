@@ -2,7 +2,7 @@
 function plotFigure(varargin)
 
 figColor = 'b';
-figMarker = 'd';
+figMarker = '+';
 figLineType = '--';
 figLineWidth = 1;
 

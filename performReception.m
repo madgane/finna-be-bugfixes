@@ -109,6 +109,7 @@ for iBand = 1:SimParams.nBands
         if ~isnan(xThrpt)
             SimStructs.userStruct{iUser,1}.crThrpt = SimStructs.userStruct{iUser,1}.crThrpt + xThrpt;
             SimStructs.userStruct{iUser,1}.lastThrpt = xThrpt + SimStructs.userStruct{iUser,1}.lastThrpt;
+            SimStructs.userStruct{iUser,1}.dropThrpt(SimParams.iDrop,1) = xThrpt;
         end
         
         if userActive 
