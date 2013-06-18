@@ -18,7 +18,11 @@ for iBase = 1:SimParams.nBases
             cUser = uIndices(iUser,1);
             
             [U,~,~] = svd(eH(:,:,iUser));
-            M = U' * eH(:,:,iUser) * sign(SimStructs.userStruct{cUser,1}.weighingFactor);
+            if SimParams.queueWt
+                M = U' * eH(:,:,iUser) * (SimStructs.userStruct{cUser,1}.weighingFactor);
+            else
+                M = U' * eH(:,:,iUser) * sign(SimStructs.userStruct{cUser,1}.weighingFactor);
+            end
             for iRank = 1:SimParams.maxRank
                 iIndex = iIndex + 1;
                 augE = [augE norm(M(iRank,:))];

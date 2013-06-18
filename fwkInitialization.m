@@ -111,7 +111,7 @@ SimParams.avgPktValues = randArrival(1,randIndices);
 
 % Doppler / Small scale related code
 
-legacychannelsim(true);
+% legacychannelsim(true);
 
 dopplerType = char(SimParams.DopplerType);
 uscore_index = find(dopplerType == '_');
@@ -149,9 +149,9 @@ if strcmp(SimParams.ChannelModel,'Jakes')
                 SimStructs.JakesChStruct{iUser,iBase,iBand}.PathGainsOutputPort = 1;  
                 SimStructs.JakesChStruct{iUser,iBase,iBand}.AveragePathGains = 0;
                 if strcmp(SimStructs.userStruct{iUser,1}.losFading{iBase,1},'true')
-                    kFactor = SimParams.sysConfig.Kfactor.avg + SimParams.sysConfig.Kfactor.std * randn;
-                    SimStructs.JakesChStruct{iUser,iBase,iBand}.KFactor = 10^(kFactor/10);
                     SimStructs.JakesChStruct{iUser,iBase,iBand}.FadingDistribution = 'Rician';
+                    kFactor = SimParams.sysConfig.Kfactor.avg + SimParams.sysConfig.Kfactor.std * randn;
+                    SimStructs.JakesChStruct{iUser,iBase,iBand}.KFactor = 10^(kFactor/10);                    
                 end
             end
         end

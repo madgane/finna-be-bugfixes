@@ -8,16 +8,19 @@ xIndex = 1;
 script_cells{xIndex,1}.mdpFactor = 0;
 script_cells{xIndex,1}.fbFraction = 0.00;
 script_cells{xIndex,1}.schedType = 'PFScheduling_SP';
+script_cells{xIndex,1}.weightedSumRateMethod = 'StreamScheduling';
 
 xIndex = xIndex + 1;
 script_cells{xIndex,1}.mdpFactor = 0;
 script_cells{xIndex,1}.fbFraction = 0.00;
 script_cells{xIndex,1}.schedType = 'PFScheduling_BF';
+script_cells{xIndex,1}.weightedSumRateMethod = 'StreamScheduling';
 
 xIndex = xIndex + 1;
 script_cells{xIndex,1}.mdpFactor = 0;
 script_cells{xIndex,1}.fbFraction = 0.00;
 script_cells{xIndex,1}.schedType = 'GreedyScheduling';
+script_cells{xIndex,1}.weightedSumRateMethod = 'StreamScheduling';
 
 % Feedback of 0.25 ....
 
@@ -25,16 +28,19 @@ xIndex = xIndex + 1;
 script_cells{xIndex,1}.mdpFactor = 0;
 script_cells{xIndex,1}.fbFraction = 0.25;
 script_cells{xIndex,1}.schedType = 'PFScheduling_SP';
+script_cells{xIndex,1}.weightedSumRateMethod = 'StreamScheduling';
 
 xIndex = xIndex + 1;
 script_cells{xIndex,1}.mdpFactor = 0;
 script_cells{xIndex,1}.fbFraction = 0.25;
 script_cells{xIndex,1}.schedType = 'PFScheduling_BF';
+script_cells{xIndex,1}.weightedSumRateMethod = 'StreamScheduling';
 
 xIndex = xIndex + 1;
 script_cells{xIndex,1}.mdpFactor = 0;
 script_cells{xIndex,1}.fbFraction = 0.25;
 script_cells{xIndex,1}.schedType = 'GreedyScheduling';
+script_cells{xIndex,1}.weightedSumRateMethod = 'StreamScheduling';
 
 % MDP ....
 
@@ -42,19 +48,42 @@ xIndex = xIndex + 1;
 script_cells{xIndex,1}.mdpFactor = 2;
 script_cells{xIndex,1}.fbFraction = 0.25;
 script_cells{xIndex,1}.schedType = 'PFScheduling_SP';
+script_cells{xIndex,1}.weightedSumRateMethod = 'StreamScheduling';
 
 xIndex = xIndex + 1;
 script_cells{xIndex,1}.mdpFactor = 2;
 script_cells{xIndex,1}.fbFraction = 0.25;
 script_cells{xIndex,1}.schedType = 'PFScheduling_BF';
+script_cells{xIndex,1}.weightedSumRateMethod = 'StreamScheduling';
 
 xIndex = xIndex + 1;
 script_cells{xIndex,1}.mdpFactor = 2;
 script_cells{xIndex,1}.fbFraction = 0.25;
 script_cells{xIndex,1}.schedType = 'GreedyScheduling';
+script_cells{xIndex,1}.weightedSumRateMethod = 'StreamScheduling';
+
+% MDP + Precoder ....
+
+xIndex = xIndex + 1;
+script_cells{xIndex,1}.mdpFactor = 2;
+script_cells{xIndex,1}.fbFraction = 0.25;
+script_cells{xIndex,1}.schedType = 'PFScheduling_SP';
+script_cells{xIndex,1}.weightedSumRateMethod = 'PreScheduling';
+
+xIndex = xIndex + 1;
+script_cells{xIndex,1}.mdpFactor = 2;
+script_cells{xIndex,1}.fbFraction = 0.25;
+script_cells{xIndex,1}.schedType = 'PFScheduling_BF';
+script_cells{xIndex,1}.weightedSumRateMethod = 'PreScheduling';
+
+xIndex = xIndex + 1;
+script_cells{xIndex,1}.mdpFactor = 2;
+script_cells{xIndex,1}.fbFraction = 0.25;
+script_cells{xIndex,1}.schedType = 'GreedyScheduling';
+script_cells{xIndex,1}.weightedSumRateMethod = 'PreScheduling';
 
 SimParams.version = version;
-SimParams.outFile = 'outFile_doppler_2.mat';
+SimParams.outFile = 'outFile_doppler_3.mat';
 pathAddition;
 
 for iScript = 1:length(script_cells)
@@ -68,15 +97,14 @@ for iScript = 1:length(script_cells)
     SimParams.pathLossModel = 'Random_30';
     SimParams.DopplerType = 'Uniform_100';
     
-    SimParams.queueWt = 2;
-    SimParams.robustNoise = 0;
+    SimParams.queueWt = 1;
+    SimParams.robustNoise = 1;
     
     SimParams.weighingEqual = 'true';
-    SimParams.PrecodingMethod = 'Best_ZF_Method';
-    SimParams.weightedSumRateMethod = 'StreamScheduling';
+    SimParams.PrecodingMethod = 'Best_WMMSE_Method';
     
     SimParams.nDrops = 1000;
-    SimParams.snrIndex = [-5:5:20];
+    SimParams.snrIndex = [-5:5:15];
     
     SimParams.PF_dur = 40;
     SimParams.SFSymbols = 14;
@@ -86,6 +114,7 @@ for iScript = 1:length(script_cells)
     SimParams.SchedType = script_cells{iScript,1}.schedType;
     SimParams.mdpFactor = script_cells{iScript,1}.mdpFactor;
     SimParams.fbFraction = script_cells{iScript,1}.fbFraction;
+    SimParams.weightedSumRateMethod = script_cells{iScript,1}.weightedSumRateMethod;
     
     chString = sprintf('Scheduling Type - %s, mdpFactor - %d, fbFraction - %d',...
                 SimParams.SchedType,SimParams.mdpFactor,SimParams.fbFraction);

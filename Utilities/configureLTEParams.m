@@ -19,6 +19,13 @@ switch pathLossModel
         SimParams.sysConfig.shadowing.NLOS = 4;
         SimParams.sysConfig.shadowing.OtoI = 0;
         
+        SimParams.sysConfig.baseTerminalBG = 0;
+        
+        SimParams.sysConfig.layoutFeatures.minDistance = 3.0;
+        SimParams.sysConfig.layoutFeatures.hUT = 2.5;
+        SimParams.sysConfig.layoutFeatures.hBS = 6.0;
+        
+        
     case 'UMi'
         
         SimParams.sysConfig.ISD = 200;
@@ -32,6 +39,13 @@ switch pathLossModel
         SimParams.sysConfig.shadowing.NLOS = 4;
         SimParams.sysConfig.shadowing.OtoI = 7;
         
+        SimParams.sysConfig.baseTerminalBG = 0;
+        
+        SimParams.sysConfig.layoutFeatures.minDistance = 10.0;
+        SimParams.sysConfig.layoutFeatures.hUT = 2.5;
+        SimParams.sysConfig.layoutFeatures.hBS = 10.0;
+
+        
     case 'UMa'
         
         SimParams.sysConfig.ISD = 500;
@@ -43,8 +57,14 @@ switch pathLossModel
         
         SimParams.sysConfig.shadowing.LOS = 4;
         SimParams.sysConfig.shadowing.NLOS = 6;
-        SimParams.sysConfig.shadowing.OtoI = 0;
+        SimParams.sysConfig.shadowing.OtoI = 17;
         
+        SimParams.sysConfig.baseTerminalBG = 17;
+        
+        SimParams.sysConfig.layoutFeatures.minDistance = 25.0;
+        SimParams.sysConfig.layoutFeatures.hUT = 1.5;
+        SimParams.sysConfig.layoutFeatures.hBS = 25.0;
+
     case 'SMa'
         
         SimParams.sysConfig.ISD = 1299;
@@ -57,7 +77,13 @@ switch pathLossModel
         SimParams.sysConfig.shadowing.LOS = 4;
         SimParams.sysConfig.shadowing.NLOS = 8;
         SimParams.sysConfig.shadowing.OtoI = 0;
-                
+        
+        SimParams.sysConfig.baseTerminalBG = 17;
+
+        SimParams.sysConfig.layoutFeatures.minDistance = 35.0;
+        SimParams.sysConfig.layoutFeatures.hUT = 1.5;
+        SimParams.sysConfig.layoutFeatures.hBS = 35.0;
+        
     case 'RMa'
         
         SimParams.sysConfig.ISD = 1732;
@@ -71,7 +97,21 @@ switch pathLossModel
         SimParams.sysConfig.shadowing.NLOS = 8;
         SimParams.sysConfig.shadowing.OtoI = 0;
         
+        SimParams.sysConfig.baseTerminalBG = 17;
+
+        SimParams.sysConfig.layoutFeatures.minDistance = 35.0;
+        SimParams.sysConfig.layoutFeatures.hUT = 1.5;
+        SimParams.sysConfig.layoutFeatures.hBS = 35.0;
+
 end
+
+SimParams.sysConfig.cableLoss = 2;
+SimParams.sysConfig.baseTerminalNF = 5;
+SimParams.sysConfig.userTerminalNF = 7;
+SimParams.sysConfig.userTerminalBG = 0;
+
+SimParams.sysConfig.layoutFeatures.antTilt = 10;
+SimParams.sysConfig.layoutFeatures.layoutAngleFromEast = 60.00;
 
 SimParams.sysConfig.systemBWHz = 10e6;SimParams.sysConfig.systemTones = 1024;
 SimParams.sysConfig.NoisePwr_dBm = -174 + 10 * log10(SimParams.sysConfig.systemBWHz);

@@ -3,7 +3,7 @@ clc;clear all;
 
 SimParams.version = version;
 SimParams.outFile = 'outFile_x1.mat';
-SimParams.plotMode = 'network_rate_convergence';
+SimParams.plotMode = 'sum_rate_analysis';
 
 % pathAddition;
 SimParams.sysMode = 'false';
@@ -11,8 +11,8 @@ SimParams.DebugMode = 'false';
 SimParams.precoderWithIdealChn = 'false';
 
 SimParams.ChannelModel = 'Jakes';
-SimParams.pathLossModel = 'Random_30';
-SimParams.DopplerType = 'Uniform_3';
+SimParams.pathLossModel = '3GPP_UMa';
+SimParams.DopplerType = 'Uniform_100';
 
 SimParams.queueWt = 1;
 SimParams.mdpFactor = 0;
@@ -21,20 +21,20 @@ SimParams.robustNoise = 0;
 SimParams.weighingEqual = 'true';
 SimParams.SchedType = 'BDScheduling_SP';
 SimParams.PrecodingMethod = 'Best_ZF_Method';
-SimParams.weightedSumRateMethod = 'PerformScheduling';
+SimParams.weightedSumRateMethod = 'StreamScheduling';
 
-SimParams.nDrops = 10;
-SimParams.snrIndex = [15];
+SimParams.nDrops = 100;
+SimParams.snrIndex = [0];
 
 SimParams.PF_dur = 40;
 SimParams.SFSymbols = 14;
 SimParams.sampTime = 1e-3;
 SimParams.estError = 0.00;
-SimParams.fbFraction = 0.00;
+SimParams.fbFraction = 0.25;
 
 SimParams.nBands = 1;
-SimParams.nBases = 2;
-SimParams.nUsers = 20;
+SimParams.nBases = 7;
+SimParams.nUsers = 70;
 
 SimParams.nTxAntenna = 4;
 SimParams.nRxAntenna = 1;
