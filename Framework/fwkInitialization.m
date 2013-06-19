@@ -12,7 +12,7 @@ if ~isempty(uscore_index)
     pathLossModel = plModel(1:uscore_index(1,1) - 1);
 else
     pathLossModel = plModel;
-end 
+end
 
 for iUser = 1:SimParams.nUsers
     SimStructs.userStruct{iUser,1}.losFading = cell(SimParams.nBases,1);
@@ -52,9 +52,9 @@ switch pathLossModel
         
     case 'LTE'
         
-        switch plModel(uscore_index(1,1) + 1:end)            
+        switch plModel(uscore_index(1,1) + 1:end)
             case 'UMi'
-                loadParams = importdata('Utilities\UserStats_uMicro10.dat');                
+                loadParams = importdata('Utilities\UserStats_uMicro10.dat');
             case 'UMa'
                 loadParams = importdata('Utilities\UserStats_uMacro10.dat');
         end
@@ -69,10 +69,10 @@ switch pathLossModel
         
     case '3GPP'
         
-        SimParams.PL_Profile = zeros(SimParams.nBases,SimParams.nUsers);        
+        SimParams.PL_Profile = zeros(SimParams.nBases,SimParams.nUsers);
         [SimParams, SimStructs] = configureLTEParams(SimParams,SimStructs);
+        [SimParams, SimStructs] = cellLayoutGeneration(SimParams,SimStructs);
         [SimParams, SimStructs] = userLayoutGeneration(SimParams,SimStructs);
-        [SimParams, SimStructs] = userPathLossGeneration(SimParams,SimStructs);
         
     otherwise
         
@@ -91,12 +91,12 @@ for iUser = 1:SimParams.nUsers
     SimStructs.userStruct{iUser,1}.trafficStats.pktService = zeros(length(SimParams.maxArrival),SimParams.nDrops);
 end
 
-switch SimParams.arrivalDist    
-    case 'Random'        
+switch SimParams.arrivalDist
+    case 'Random'
         nRandomness = 100;
         randArrival = rand(1,nRandomness) * SimParams.maxArrival(1,SimParams.iPkt);
-    case 'Constant'        
-        randArrival = SimParams.maxArrival(1,SimParams.iPkt);        
+    case 'Constant'
+        randArrival = SimParams.maxArrival(1,SimParams.iPkt);
 end
 
 if ~strcmp(SimParams.arrivalDist,'Fixed')
@@ -111,23 +111,25 @@ SimParams.avgPktValues = randArrival(1,randIndices);
 
 % Doppler / Small scale related code
 
-% legacychannelsim(true);
-
-dopplerType = char(SimParams.DopplerType);
-uscore_index = find(dopplerType == '_');
-
-if ~isempty(uscore_index)
-    dopType = dopplerType(1:uscore_index(1,1) - 1);
-    currDoppler = str2double(dopplerType(uscore_index(1,1) + 1:end));
+if strcmp(pathLossModel,'3GPP')
+    dopplerRealizations = ones(SimParams.nUsers,1) * SimParams.sysConfig.userDoppler;
 else
-    dopType = dopplerType;
-end    
-
-switch dopType
-    case 'Uniform'
-        dopplerRealizations = rand(SimParams.nUsers,1) * currDoppler;
-    case 'Constant'
-        dopplerRealizations = ones(SimParams.nUsers,1) * currDoppler;
+    dopplerType = char(SimParams.DopplerType);
+    uscore_index = find(dopplerType == '_');
+    
+    if ~isempty(uscore_index)
+        dopType = dopplerType(1:uscore_index(1,1) - 1);
+        currDoppler = str2double(dopplerType(uscore_index(1,1) + 1:end));
+    else
+        dopType = dopplerType;
+    end
+    
+    switch dopType
+        case 'Uniform'
+            dopplerRealizations = rand(SimParams.nUsers,1) * currDoppler;
+        case 'Constant'
+            dopplerRealizations = ones(SimParams.nUsers,1) * currDoppler;
+    end
 end
 
 SimParams.userDoppler = dopplerRealizations;
@@ -137,8 +139,8 @@ if strcmp(SimParams.ChannelModel,'Jakes')
     for iUser = 1:SimParams.nUsers
         currentDoppler = SimParams.userDoppler(iUser,1);
         for iBase = 1:SimParams.nBases
-            for iBand = 1:SimParams.nBands                
-                SimStructs.JakesChStruct{iUser,iBase,iBand} = comm.MIMOChannel;                
+            for iBand = 1:SimParams.nBands
+                SimStructs.JakesChStruct{iUser,iBase,iBand} = comm.MIMOChannel;
                 SimStructs.JakesChStruct{iUser,iBase,iBand}.SampleRate = SimParams.SFSymbols / SimParams.sampTime;
                 SimStructs.JakesChStruct{iUser,iBase,iBand}.MaximumDopplerShift = currentDoppler;
                 SimStructs.JakesChStruct{iUser,iBase,iBand}.NumTransmitAntennas = SimParams.nTxAntenna;
@@ -146,12 +148,12 @@ if strcmp(SimParams.ChannelModel,'Jakes')
                 SimStructs.JakesChStruct{iUser,iBase,iBand}.TransmitCorrelationMatrix = eye(SimParams.nTxAntenna);
                 SimStructs.JakesChStruct{iUser,iBase,iBand}.ReceiveCorrelationMatrix = eye(SimParams.nRxAntenna);
                 SimStructs.JakesChStruct{iUser,iBase,iBand}.NormalizePathGains = 1;
-                SimStructs.JakesChStruct{iUser,iBase,iBand}.PathGainsOutputPort = 1;  
+                SimStructs.JakesChStruct{iUser,iBase,iBand}.PathGainsOutputPort = 1;
                 SimStructs.JakesChStruct{iUser,iBase,iBand}.AveragePathGains = 0;
                 if strcmp(SimStructs.userStruct{iUser,1}.losFading{iBase,1},'true')
                     SimStructs.JakesChStruct{iUser,iBase,iBand}.FadingDistribution = 'Rician';
                     kFactor = SimParams.sysConfig.Kfactor.avg + SimParams.sysConfig.Kfactor.std * randn;
-                    SimStructs.JakesChStruct{iUser,iBase,iBand}.KFactor = 10^(kFactor/10);                    
+                    SimStructs.JakesChStruct{iUser,iBase,iBand}.KFactor = 10^(kFactor/10);
                 end
             end
         end

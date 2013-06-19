@@ -1,5 +1,6 @@
 function [SimParams, SimStructs] = configureLTEParams(SimParams,SimStructs)
 
+spLight = 3e8;
 plModel = char(SimParams.pathLossModel);
 uscore_index = find(plModel == '_');
 pathLossModel = plModel(uscore_index(1,1) + 1:end);
@@ -17,7 +18,6 @@ switch pathLossModel
                 
         SimParams.sysConfig.shadowing.LOS = 3;
         SimParams.sysConfig.shadowing.NLOS = 4;
-        SimParams.sysConfig.shadowing.OtoI = 0;
         
         SimParams.sysConfig.baseTerminalBG = 0;
         
@@ -25,6 +25,7 @@ switch pathLossModel
         SimParams.sysConfig.layoutFeatures.hUT = 2.5;
         SimParams.sysConfig.layoutFeatures.hBS = 6.0;
         
+        SimParams.sysConfig.userDoppler = 3;        
         
     case 'UMi'
         
@@ -37,7 +38,6 @@ switch pathLossModel
         
         SimParams.sysConfig.shadowing.LOS = 3;
         SimParams.sysConfig.shadowing.NLOS = 4;
-        SimParams.sysConfig.shadowing.OtoI = 7;
         
         SimParams.sysConfig.baseTerminalBG = 0;
         
@@ -45,6 +45,7 @@ switch pathLossModel
         SimParams.sysConfig.layoutFeatures.hUT = 2.5;
         SimParams.sysConfig.layoutFeatures.hBS = 10.0;
 
+        SimParams.sysConfig.userDoppler = 3;    
         
     case 'UMa'
         
@@ -57,7 +58,6 @@ switch pathLossModel
         
         SimParams.sysConfig.shadowing.LOS = 4;
         SimParams.sysConfig.shadowing.NLOS = 6;
-        SimParams.sysConfig.shadowing.OtoI = 17;
         
         SimParams.sysConfig.baseTerminalBG = 17;
         
@@ -65,6 +65,8 @@ switch pathLossModel
         SimParams.sysConfig.layoutFeatures.hUT = 1.5;
         SimParams.sysConfig.layoutFeatures.hBS = 25.0;
 
+        SimParams.sysConfig.userDoppler = 30;    
+        
     case 'SMa'
         
         SimParams.sysConfig.ISD = 1299;
@@ -76,13 +78,14 @@ switch pathLossModel
 
         SimParams.sysConfig.shadowing.LOS = 4;
         SimParams.sysConfig.shadowing.NLOS = 8;
-        SimParams.sysConfig.shadowing.OtoI = 0;
         
         SimParams.sysConfig.baseTerminalBG = 17;
 
         SimParams.sysConfig.layoutFeatures.minDistance = 35.0;
         SimParams.sysConfig.layoutFeatures.hUT = 1.5;
         SimParams.sysConfig.layoutFeatures.hBS = 35.0;
+        
+        SimParams.sysConfig.userDoppler = 90;    
         
     case 'RMa'
         
@@ -95,7 +98,6 @@ switch pathLossModel
 
         SimParams.sysConfig.shadowing.LOS = 4;
         SimParams.sysConfig.shadowing.NLOS = 8;
-        SimParams.sysConfig.shadowing.OtoI = 0;
         
         SimParams.sysConfig.baseTerminalBG = 17;
 
@@ -103,6 +105,8 @@ switch pathLossModel
         SimParams.sysConfig.layoutFeatures.hUT = 1.5;
         SimParams.sysConfig.layoutFeatures.hBS = 35.0;
 
+        SimParams.sysConfig.userDoppler = 120;    
+        
 end
 
 SimParams.sysConfig.cableLoss = 2;
@@ -111,10 +115,13 @@ SimParams.sysConfig.userTerminalNF = 7;
 SimParams.sysConfig.userTerminalBG = 0;
 
 SimParams.sysConfig.layoutFeatures.antTilt = 10;
-SimParams.sysConfig.layoutFeatures.layoutAngleFromEast = 60.00;
+SimParams.sysConfig.layoutFeatures.layoutAngleFromEast = 0.00;
 
+SimParams.sysConfig.usableTones = 600;
 SimParams.sysConfig.systemBWHz = 10e6;SimParams.sysConfig.systemTones = 1024;
 SimParams.sysConfig.NoisePwr_dBm = -174 + 10 * log10(SimParams.sysConfig.systemBWHz);
+
+SimParams.sysConfig.userDoppler = (SimParams.sysConfig.userDoppler * (5 / 18) * (SimParams.sysConfig.carrierFreqGHz * 1e9)) / spLight;
 
 end
 

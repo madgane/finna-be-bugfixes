@@ -8,9 +8,9 @@ itUsers = length(usersOverSystem_actual);
 sumCAdd = zeros(itUsers,4);
 sumCMult = zeros(itUsers,4);
 
-Nt = 8;
-Nr = 4;
-nPRB = 10;
+Nt = 4;
+Nr = 1;
+nPRB = 20;
 nSec = 1e3;
 nCmplxToRealMult = 4;
 nCmplxToRealAdd = 2;
@@ -22,8 +22,13 @@ usersOverSystem = usersOverSystem_actual * Nr;
 
 % SVD complexity
 
-svdComplexOperations = 4 * (Nr * 2)^2 * (Nt * 2) + 22 * (Nt * 2)^3;
-svdOperations = repmat((svdComplexOperations * usersOverSystem_actual)',1,4);
+if Nr == 1
+    svdComplexOperations = 0;
+    svdOperations = repmat((svdComplexOperations * usersOverSystem_actual)',1,4);
+else
+    svdComplexOperations = 4 * (Nr * 2)^2 * (Nt * 2) + 22 * (Nt * 2)^3;
+    svdOperations = repmat((svdComplexOperations * usersOverSystem_actual)',1,4);
+end
 
 % SUS algorithm using Nullspace
 
