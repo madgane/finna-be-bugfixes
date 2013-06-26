@@ -9,6 +9,7 @@ switch pathLossModel
     
     case 'InH'
         
+        antennaTilt = 0;
         SimParams.sysConfig.ISD = 60;
         SimParams.sysConfig.carrierFreqGHz = 3.4;
         SimParams.sysConfig.BStransmitPwr_dBm = 21;
@@ -22,6 +23,7 @@ switch pathLossModel
         SimParams.sysConfig.baseTerminalBG = 0;
         
         SimParams.sysConfig.layoutFeatures.minDistance = 3.0;
+        SimParams.sysConfig.layoutFeatures.maxDistance = 150.0;
         SimParams.sysConfig.layoutFeatures.hUT = 2.5;
         SimParams.sysConfig.layoutFeatures.hBS = 6.0;
         
@@ -29,6 +31,7 @@ switch pathLossModel
         
     case 'UMi'
         
+        antennaTilt = 12;
         SimParams.sysConfig.ISD = 200;
         SimParams.sysConfig.carrierFreqGHz = 2.5;
         SimParams.sysConfig.BStransmitPwr_dBm = 41;
@@ -42,6 +45,7 @@ switch pathLossModel
         SimParams.sysConfig.baseTerminalBG = 0;
         
         SimParams.sysConfig.layoutFeatures.minDistance = 10.0;
+        SimParams.sysConfig.layoutFeatures.maxDistance = 2000.0;
         SimParams.sysConfig.layoutFeatures.hUT = 2.5;
         SimParams.sysConfig.layoutFeatures.hBS = 10.0;
 
@@ -49,6 +53,7 @@ switch pathLossModel
         
     case 'UMa'
         
+        antennaTilt = 12;
         SimParams.sysConfig.ISD = 500;
         SimParams.sysConfig.carrierFreqGHz = 2.0;
         SimParams.sysConfig.BStransmitPwr_dBm = 46;
@@ -62,6 +67,7 @@ switch pathLossModel
         SimParams.sysConfig.baseTerminalBG = 17;
         
         SimParams.sysConfig.layoutFeatures.minDistance = 25.0;
+        SimParams.sysConfig.layoutFeatures.maxDistance = 5000.0;
         SimParams.sysConfig.layoutFeatures.hUT = 1.5;
         SimParams.sysConfig.layoutFeatures.hBS = 25.0;
 
@@ -69,6 +75,7 @@ switch pathLossModel
         
     case 'SMa'
         
+        antennaTilt = 12;
         SimParams.sysConfig.ISD = 1299;
         SimParams.sysConfig.carrierFreqGHz = 2.0;
         SimParams.sysConfig.BStransmitPwr_dBm = 46;
@@ -82,6 +89,7 @@ switch pathLossModel
         SimParams.sysConfig.baseTerminalBG = 17;
 
         SimParams.sysConfig.layoutFeatures.minDistance = 35.0;
+        SimParams.sysConfig.layoutFeatures.maxDistance = 5000.0;
         SimParams.sysConfig.layoutFeatures.hUT = 1.5;
         SimParams.sysConfig.layoutFeatures.hBS = 35.0;
         
@@ -89,6 +97,7 @@ switch pathLossModel
         
     case 'RMa'
         
+        antennaTilt = 6;
         SimParams.sysConfig.ISD = 1732;
         SimParams.sysConfig.carrierFreqGHz = 0.8;
         SimParams.sysConfig.BStransmitPwr_dBm = 46;
@@ -102,6 +111,7 @@ switch pathLossModel
         SimParams.sysConfig.baseTerminalBG = 17;
 
         SimParams.sysConfig.layoutFeatures.minDistance = 35.0;
+        SimParams.sysConfig.layoutFeatures.maxDistance = 5000.0;
         SimParams.sysConfig.layoutFeatures.hUT = 1.5;
         SimParams.sysConfig.layoutFeatures.hBS = 35.0;
 
@@ -114,7 +124,7 @@ SimParams.sysConfig.baseTerminalNF = 5;
 SimParams.sysConfig.userTerminalNF = 7;
 SimParams.sysConfig.userTerminalBG = 0;
 
-SimParams.sysConfig.layoutFeatures.antTilt = 10;
+SimParams.sysConfig.layoutFeatures.antTilt = antennaTilt;
 SimParams.sysConfig.layoutFeatures.layoutAngleFromEast = 0.00;
 
 SimParams.sysConfig.usableTones = 600;

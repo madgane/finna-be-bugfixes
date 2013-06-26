@@ -13,8 +13,8 @@ for iWrapMode = 1:wrapModelLayout
             
             separationM = abs(userPosition - basePosition);
                        
-            [xRSSI, losMeasures{currentSite,iWrapMode}] = evaluateLTE_PL(SimParams,separationM,'false');
-            antennaGain = getAntennaPatterGain(basePosition,userPosition,SimParams.sysConfig.layoutFeatures,iSector);
+            [xRSSI, losMeasures{currentSite,iWrapMode}, userH] = evaluateLTE_PL(SimParams,separationM,'false');
+            antennaGain = getAntennaPatterGain(basePosition,userPosition,SimParams.sysConfig.layoutFeatures,iSector,SimParams.nSectors,userH);
                        
             rssiMeasures(currentSite,iWrapMode) = xRSSI + antennaGain;
         end

@@ -185,4 +185,5 @@ varargout{1,1} = powerCompensation - pathLoss_dB - shadowFading - 10 * log10(Sim
 
 if nargout > 1
     varargout{1,2} = isLOS;
+    varargout{1,3} = hUT;
 end

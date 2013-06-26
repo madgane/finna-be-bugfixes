@@ -31,7 +31,7 @@ SimParams.estError = 0.00;
 SimParams.fbFraction = 0.00;
 
 SimParams.nBands = 1;
-SimParams.nTiers = 2;
+SimParams.nTiers = 3;
 SimParams.nSectors = 3;
 SimParams.nNeighbors = 2; % Number of neighbors to realize
 
