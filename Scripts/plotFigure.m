@@ -1,9 +1,9 @@
 
 function plotFigure(varargin)
 
-figColor = 'b';
-figMarker = 's';
-figLineType = '--';
+figColor = 'g';
+figMarker = '.';
+figLineType = '-';
 figLineWidth = 1;
 
 switch nargin
@@ -58,7 +58,8 @@ switch figType
         
     case 'cdfplot'
         
-        cdfplot(xValues,'Color',figColor,'LineWidth',figLineWidth,...
+        [yValues, xValues] = cdfcalc(xValues);        
+        plot(xValues,yValues(2:end),'Color',figColor,'LineWidth',figLineWidth,...
             'LineStyle',figLineType,'MarkerFaceColor',figColor,'Marker',figMarker);
 
 end

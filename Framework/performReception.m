@@ -1,6 +1,8 @@
 function [SimParams,SimStructs] = performReception(SimParams,SimStructs)
 
 singleNode = 1;
+uscoreIndex = find(SimParams.pathLossModel == '_');
+
 for iBand = 1:SimParams.nBands
     
     if strcmp(SimParams.DebugMode,'true')
@@ -29,12 +31,18 @@ for iBand = 1:SimParams.nBands
         
         for kBase = 1:length(baseNode)
             if ~isempty(find(iUser == SimStructs.baseStruct{baseNode(1,kBase),1}.assignedUsers{iBand,1}))
-                userActive = 1;break;
+                userActive = 1;
+                break;
             end
         end
         
         if userActive
-            I = SimParams.N * eye(SimParams.nRxAntenna);
+            if strcmp(SimParams.pathLossModel(1:uscoreIndex(1,1) - 1),'3GPP')
+                RoI = 10^(SimStructs.userStruct{iUser,1}.phyParams.restOfIF / 10);
+                I = (SimParams.N + RoI) * eye(SimParams.nRxAntenna);
+            else
+                I = SimParams.N * eye(SimParams.nRxAntenna);
+            end
         else
             I = 1;
         end

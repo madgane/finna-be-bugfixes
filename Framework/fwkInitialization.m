@@ -135,25 +135,56 @@ end
 SimParams.userDoppler = dopplerRealizations;
 SimStructs.JakesChStruct = cell(SimParams.nUsers,SimParams.nBases,SimParams.nBands);
 
-if strcmp(SimParams.ChannelModel,'Jakes')
-    for iUser = 1:SimParams.nUsers
-        currentDoppler = SimParams.userDoppler(iUser,1);
-        for iBase = 1:SimParams.nBases
-            for iBand = 1:SimParams.nBands
-                SimStructs.JakesChStruct{iUser,iBase,iBand} = comm.MIMOChannel;
-                SimStructs.JakesChStruct{iUser,iBase,iBand}.SampleRate = SimParams.SFSymbols / SimParams.sampTime;
-                SimStructs.JakesChStruct{iUser,iBase,iBand}.MaximumDopplerShift = currentDoppler;
-                SimStructs.JakesChStruct{iUser,iBase,iBand}.NumTransmitAntennas = SimParams.nTxAntenna;
-                SimStructs.JakesChStruct{iUser,iBase,iBand}.NumReceiveAntennas = SimParams.nRxAntenna;
-                SimStructs.JakesChStruct{iUser,iBase,iBand}.TransmitCorrelationMatrix = eye(SimParams.nTxAntenna);
-                SimStructs.JakesChStruct{iUser,iBase,iBand}.ReceiveCorrelationMatrix = eye(SimParams.nRxAntenna);
-                SimStructs.JakesChStruct{iUser,iBase,iBand}.NormalizePathGains = 1;
-                SimStructs.JakesChStruct{iUser,iBase,iBand}.PathGainsOutputPort = 1;
-                SimStructs.JakesChStruct{iUser,iBase,iBand}.AveragePathGains = 0;
-                if strcmp(SimStructs.userStruct{iUser,1}.losFading{iBase,1},'true')
-                    SimStructs.JakesChStruct{iUser,iBase,iBand}.FadingDistribution = 'Rician';
-                    kFactor = SimParams.sysConfig.Kfactor.avg + SimParams.sysConfig.Kfactor.std * randn;
-                    SimStructs.JakesChStruct{iUser,iBase,iBand}.KFactor = 10^(kFactor/10);
+if strcmp(pathLossModel,'3GPP')
+    if strcmp(SimParams.ChannelModel,'Jakes')
+        for iUser = 1:SimParams.nUsers
+            currentDoppler = SimParams.userDoppler(iUser,1);
+            xCites = SimStructs.userStruct{iUser,1}.phyParams.listedCites;
+            for iBase = 1:SimParams.nBases
+                if isempty(find(iBase == xCites))
+                    continue;
+                end
+                 for iBand = 1:SimParams.nBands
+                    SimStructs.JakesChStruct{iUser,iBase,iBand} = comm.MIMOChannel;
+                    SimStructs.JakesChStruct{iUser,iBase,iBand}.SampleRate = SimParams.SFSymbols / SimParams.sampTime;
+                    SimStructs.JakesChStruct{iUser,iBase,iBand}.MaximumDopplerShift = currentDoppler;
+                    SimStructs.JakesChStruct{iUser,iBase,iBand}.NumTransmitAntennas = SimParams.nTxAntenna;
+                    SimStructs.JakesChStruct{iUser,iBase,iBand}.NumReceiveAntennas = SimParams.nRxAntenna;
+                    SimStructs.JakesChStruct{iUser,iBase,iBand}.TransmitCorrelationMatrix = eye(SimParams.nTxAntenna);
+                    SimStructs.JakesChStruct{iUser,iBase,iBand}.ReceiveCorrelationMatrix = eye(SimParams.nRxAntenna);
+                    SimStructs.JakesChStruct{iUser,iBase,iBand}.NormalizePathGains = 1;
+                    SimStructs.JakesChStruct{iUser,iBase,iBand}.PathGainsOutputPort = 1;
+                    SimStructs.JakesChStruct{iUser,iBase,iBand}.AveragePathGains = 0;
+                    if strcmp(SimStructs.userStruct{iUser,1}.losFading{iBase,1},'true')
+                        SimStructs.JakesChStruct{iUser,iBase,iBand}.FadingDistribution = 'Rician';
+                        kFactor = SimParams.sysConfig.Kfactor.avg + SimParams.sysConfig.Kfactor.std * randn;
+                        SimStructs.JakesChStruct{iUser,iBase,iBand}.KFactor = 10^(kFactor/10);
+                    end
+                end
+            end
+        end
+    end
+else
+    if strcmp(SimParams.ChannelModel,'Jakes')
+        for iUser = 1:SimParams.nUsers
+            currentDoppler = SimParams.userDoppler(iUser,1);
+            for iBase = 1:SimParams.nBases
+                for iBand = 1:SimParams.nBands
+                    SimStructs.JakesChStruct{iUser,iBase,iBand} = comm.MIMOChannel;
+                    SimStructs.JakesChStruct{iUser,iBase,iBand}.SampleRate = SimParams.SFSymbols / SimParams.sampTime;
+                    SimStructs.JakesChStruct{iUser,iBase,iBand}.MaximumDopplerShift = currentDoppler;
+                    SimStructs.JakesChStruct{iUser,iBase,iBand}.NumTransmitAntennas = SimParams.nTxAntenna;
+                    SimStructs.JakesChStruct{iUser,iBase,iBand}.NumReceiveAntennas = SimParams.nRxAntenna;
+                    SimStructs.JakesChStruct{iUser,iBase,iBand}.TransmitCorrelationMatrix = eye(SimParams.nTxAntenna);
+                    SimStructs.JakesChStruct{iUser,iBase,iBand}.ReceiveCorrelationMatrix = eye(SimParams.nRxAntenna);
+                    SimStructs.JakesChStruct{iUser,iBase,iBand}.NormalizePathGains = 1;
+                    SimStructs.JakesChStruct{iUser,iBase,iBand}.PathGainsOutputPort = 1;
+                    SimStructs.JakesChStruct{iUser,iBase,iBand}.AveragePathGains = 0;
+                    if strcmp(SimStructs.userStruct{iUser,1}.losFading{iBase,1},'true')
+                        SimStructs.JakesChStruct{iUser,iBase,iBand}.FadingDistribution = 'Rician';
+                        kFactor = SimParams.sysConfig.Kfactor.avg + SimParams.sysConfig.Kfactor.std * randn;
+                        SimStructs.JakesChStruct{iUser,iBase,iBand}.KFactor = 10^(kFactor/10);
+                    end
                 end
             end
         end

@@ -11,8 +11,8 @@ SimParams.DebugMode = 'false';
 SimParams.precoderWithIdealChn = 'false';
 
 SimParams.ChannelModel = 'Jakes';
-SimParams.pathLossModel = '3GPP_UMa';
-SimParams.DopplerType = 'Uniform_100';
+SimParams.pathLossModel = 'Random_30';
+SimParams.DopplerType = 'Constant_100';
 
 SimParams.queueWt = 1;
 SimParams.mdpFactor = 0;
@@ -24,17 +24,17 @@ SimParams.PrecodingMethod = 'Best_ZF_Method';
 SimParams.weightedSumRateMethod = 'StreamScheduling';
 
 SimParams.nDrops = 100;
-SimParams.snrIndex = [0];
+SimParams.snrIndex = [-5:5:20];
 
 SimParams.PF_dur = 40;
 SimParams.SFSymbols = 14;
 SimParams.sampTime = 1e-3;
 SimParams.estError = 0.00;
-SimParams.fbFraction = 0.25;
+SimParams.fbFraction = 0.05;
 
 SimParams.nBands = 1;
-SimParams.nBases = 7;
-SimParams.nUsers = 70;
+SimParams.nBases = 1;
+SimParams.nUsers = 20;
 
 SimParams.nTxAntenna = 4;
 SimParams.nRxAntenna = 1;

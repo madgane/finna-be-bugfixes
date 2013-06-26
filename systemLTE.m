@@ -3,27 +3,25 @@ clc;clear all;
 
 SimParams.version = version;
 SimParams.outFile = 'outFile_x1.mat';
-SimParams.plotMode = 'sum_rate_analysis';
+SimParams.plotMode = 'system_efficiency_analysis';
 
 % pathAddition;
-SimParams.sysMode = 'false';
 SimParams.DebugMode = 'false';
 SimParams.precoderWithIdealChn = 'false';
 
 SimParams.ChannelModel = 'Jakes';
-SimParams.pathLossModel = '3GPP_RMa';
-SimParams.DopplerType = 'Uniform_100';
+SimParams.pathLossModel = '3GPP_UMi';
 
 SimParams.queueWt = 1;
 SimParams.mdpFactor = 0;
 SimParams.robustNoise = 0;
 
 SimParams.weighingEqual = 'true';
-SimParams.SchedType = 'BDScheduling_SP';
+SimParams.SchedType = 'PFBDScheduling_M-AHP-SP';
 SimParams.PrecodingMethod = 'Best_ZF_Method';
 SimParams.weightedSumRateMethod = 'StreamScheduling';
 
-SimParams.nDrops = 1000;
+SimParams.nDrops = 10;
 SimParams.snrIndex = [0];
 
 SimParams.PF_dur = 40;
@@ -32,30 +30,22 @@ SimParams.sampTime = 1e-3;
 SimParams.estError = 0.00;
 SimParams.fbFraction = 0.00;
 
-SimParams.nTiers = 3;
-SimParams.nSectors = 3;
-
 SimParams.nBands = 1;
-SimParams.nBases = getCellsOverLayout(SimParams.nTiers,SimParams.nSectors);
-SimParams.nUsers = SimParams.nBases * 10;
-SimParams.nNeighbors = 8;
+SimParams.nTiers = 2;
+SimParams.nSectors = 3;
+SimParams.nNeighbors = 2; % Number of neighbors to realize
 
 SimParams.nTxAntenna = 4;
 SimParams.nRxAntenna = 1;
+
+SimParams.nBases = getCellsOverLayout(SimParams.nTiers,SimParams.nSectors);
+SimParams.nUsers = SimParams.nBases * 10;
 
 SimParams.gracePeriod = 0;
 SimParams.arrivalDist = 'Constant';
 
 SimParams.maxArrival = 20;
 SimParams.FixedPacketArrivals = [10,10,10,10,10,10,1,1,1,1];
-SimParams.PL_Profile = [5 -inf 5 -inf 5 -inf 1e-20 0; -inf 5 -inf 5 -inf 5 0 1e-20];
-
-if strcmp(SimParams.sysMode,'true')
-    SimParams.snrIndex = [0];
-    SimParams.nBands = 1;
-    SimParams.nBases = 57;
-    SimParams.nUsers = 570;
-end
 
 SimParams.N = 1;
 nSINRSamples = length(SimParams.snrIndex);
@@ -126,7 +116,7 @@ for iPkt = 1:length(SimParams.maxArrival)
 end
 
 SimResults.avgTxPower = SimParams.txPower / SimParams.nDrops;
-    
+
 switch SimParams.plotMode
     
     case 'sum_rate_analysis'
@@ -149,7 +139,7 @@ switch SimParams.plotMode
         
         plotFigure(SimParams.snrIndex,JainIndex_utility,3,'plot');
         xlabel('SNR in dB');ylabel('Network Utility Deviation across Users');
-
+        
         
     case 'queue_analysis'
         
@@ -168,7 +158,7 @@ switch SimParams.plotMode
         plot(SimParams.maxArrival,sum(squeeze(SimResults.queueBackLogs(end,:,:)),1));
         xlabel('Average Arrival Rate');ylabel('Average Queue Size (pkts)');grid on;
         hold all;
-
+        
         
     case 'system_thrpt_analysis'
         
@@ -178,9 +168,17 @@ switch SimParams.plotMode
         plotFigure(SimParams.Thrpt(1,:,1) * nTot,1,1,'cdfplot');
         xlabel('Throughput in Mbps');
         ylabel('CDF of Throughput in Mbps');
-
+        
     case 'network_rate_convergence'
         
         plotFigure(1:SimParams.nDrops,sumRateInstant,1,'plot');
-
+        
+    case 'system_efficiency_analysis'
+        
+        hold all;
+        plotFigure(SimParams.Thrpt(1,:,1),1,1,'cdfplot');
+        xlabel('Sum Rate in bits / channel-use');
+        ylabel('CDF of Sum Rate');
+        
+        
 end

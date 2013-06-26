@@ -3,12 +3,27 @@ function [SimParams,SimStructs] = dropInitialize(SimParams,SimStructs)
 
 % Channel Generation + Addition of Path Loss
 
+uscoreIndex = find(SimParams.pathLossModel == '_');
+SimParams.elapsedFBDuration = zeros(SimParams.nUsers,1);
+
 for iBand = 1:SimParams.nBands
     for iBase = 1:SimParams.nBases
         for iUser = 1:SimParams.nUsers
             
-            PL = 10^(SimParams.PL_Profile(iBase,iUser) / 20);
-            estError = complex(randn(SimParams.nRxAntenna,SimParams.nTxAntenna),randn(SimParams.nRxAntenna,SimParams.nTxAntenna)) * sqrt(0.5 * SimParams.estError);
+            if strcmp(SimParams.pathLossModel(1:uscoreIndex(1,1) - 1),'3GPP')
+                xRSSI = SimStructs.userStruct{iUser,1}.phyParams.listedRSSI;
+                xCites = SimStructs.userStruct{iUser,1}.phyParams.listedCites;
+                if isempty(find(iBase == xCites))
+                    continue;
+                else
+                    cRSSI = xRSSI(find(iBase == xCites),1);
+                    PL = 10^(cRSSI / 20);
+                end
+            else
+                PL = 10^(SimParams.PL_Profile(iBase,iUser) / 20);
+            end
+            
+            estError = complex(randn(SimParams.nRxAntenna,SimParams.nTxAntenna),randn(SimParams.nRxAntenna,SimParams.nTxAntenna)) * sqrt(0.5 * SimParams.estError) * PL;
            
             switch (SimParams.ChannelModel)
                 
@@ -39,10 +54,12 @@ for iBand = 1:SimParams.nBands
                         end
                     end
                     
-                    if updateElapsedFeedbackDuration == 1
-                        SimParams.elapsedFBDuration(iUser,1) = 0;
-                    else
-                        SimParams.elapsedFBDuration(iUser,1) = SimParams.elapsedFBDuration(iUser,1) + 1;
+                    if SimStructs.userStruct{iUser,1}.baseNode == iBase
+                        if updateElapsedFeedbackDuration == 1
+                            SimParams.elapsedFBDuration(iUser,1) = 0;
+                        else
+                            SimParams.elapsedFBDuration(iUser,1) = SimParams.elapsedFBDuration(iUser,1) + 1;
+                        end
                     end                    
                     
             end

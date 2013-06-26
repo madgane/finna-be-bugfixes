@@ -31,15 +31,12 @@ for iCite = 1:nCites
                 xUser = xUser + 1;
                 userLocIndices{sortI(1,1),1} = [userLocIndices{sortI(1,1),1} userPosition];
                 SimStructs.userStruct{xUser,1}.phyParams.location = userPosition;
-                SimStructs.userStruct{xUser,1}.phyParams.servingBS = sortI(1,1);
-                SimStructs.userStruct{xUser,1}.phyParams.servingRSSI = sortV(1,1);
                 
-                SimStructs.userStruct{xUser,1}.phyParams.neighborCites = sortI(2:(SimParams.nNeighbors + 1),1);
-                SimStructs.userStruct{xUser,1}.phyParams.neighborRSSI = sortV(2:(SimParams.nNeighbors + 1),1);
-                SimStructs.userStruct{xUser,1}.losFading{sortI(1,1),1} = losMeasures{sortI(1,1),maxRSSIindex(sortI(1,1))};
+                SimStructs.userStruct{xUser,1}.phyParams.listedCites = sortI(1:(SimParams.nNeighbors + 1),1);
+                SimStructs.userStruct{xUser,1}.phyParams.listedRSSI = sortV(1:(SimParams.nNeighbors + 1),1);
                 
-                for iNeighbor = 1:SimParams.nNeighbors
-                    SimStructs.userStruct{xUser,1}.losFading{sortI((1 + iNeighbor),1),1} = losMeasures{sortI((1 + iNeighbor),1),maxRSSIindex(sortI((1 + iNeighbor),1))};
+                for iNeighbor = 1:(SimParams.nNeighbors + 1)
+                    SimStructs.userStruct{xUser,1}.losFading{sortI(iNeighbor,1),1} = losMeasures{sortI(iNeighbor,1),maxRSSIindex(sortI(iNeighbor,1))};
                 end
                 
                 SimStructs.userStruct{xUser,1}.phyParams.restOfIF = 10 * log10(sum(10.^(sortV((SimParams.nNeighbors + 2):end,1)./10)));
@@ -53,49 +50,4 @@ for iCite = 1:nCites
 end
 
 end
-
-% hexSide = SimParams.sysConfig.ISD * SimParams.nTiers;
-% 
-% for iUser = 1:SimParams.nUsers
-%     
-%     userPosition = getPointInRhombus(hexSide,0,eastRotRad,0);
-%     [rssiMeasures, losMeasures] = getRSSIMeasures(SimParams,userPosition);
-%     
-%     [maxRSSI, maxRSSIindex] = max(rssiMeasures,[],2);
-%     [sortV,sortI] = sort(maxRSSI,'descend');
-%     
-%     if length(userLocIndices{sortI(1,1),1}) < nUsersOverCell
-%         xUser = xUser + 1;
-%         userLocIndices{sortI(1,1),1} = [userLocIndices{sortI(1,1),1} userPosition];
-%         SimStructs.userStruct{xUser,1}.phyParams.location = userPosition;
-%         SimStructs.userStruct{xUser,1}.phyParams.servingBS = sortI(1,1);
-%         SimStructs.userStruct{xUser,1}.phyParams.servingRSSI = sortV(1,1);
-%         
-%         SimStructs.userStruct{xUser,1}.phyParams.neighborCites = sortI(2:(SimParams.nNeighbors + 1),1);
-%         SimStructs.userStruct{xUser,1}.phyParams.neighborRSSI = sortV(2:(SimParams.nNeighbors + 1),1);
-%         SimStructs.userStruct{xUser,1}.losFading{sortI(1,1),1} = losMeasures{sortI(1,1),maxRSSIindex(sortI(1,1))};
-%         
-%         for iNeighbor = 1:SimParams.nNeighbors
-%             SimStructs.userStruct{xUser,1}.losFading{sortI((1 + iNeighbor),1),1} = losMeasures{sortI((1 + iNeighbor),1),maxRSSIindex(sortI((1 + iNeighbor),1))};
-%         end
-%         
-%         SimStructs.userStruct{xUser,1}.phyParams.restOfIF = 10 * log10(sum(10.^(sortV((SimParams.nNeighbors + 2):end,1)./10)));
-%         
-%         linRSSI = 10.^(sortV./10);
-%         debugRSSI(xUser,1) = 10 * log10(linRSSI(1,1) / (SimParams.N + sum(linRSSI(2:end,1))));
-%         
-%     end
-%     
-%     
-% end
-% 
-% end
-
-% hold all;
-% plot(SimParams.wrapCellLocArray(:,1),'o');
-% for iCell = 1:length(SimParams.wrapCellLocArray(:,1))
-%     plot(userLocIndices{iCell,1},'.');
-% end
-% 
-% cdfplot(debugRSSI);
 
