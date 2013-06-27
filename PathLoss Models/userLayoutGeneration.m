@@ -6,11 +6,7 @@ nCites = getCellsOverLayout(SimParams.nTiers,1);
 nUsersOverCell = floor(SimParams.nUsers / SimParams.nBases);
 
 xUser = 0;
-if SimParams.nSectors == 3
-    hexSide = SimParams.sysConfig.ISD / 3;
-else
-    hexSide = SimParams.sysConfig.ISD / 2;
-end
+hexSide = SimParams.sysConfig.ISD / sqrt(3);
 eastRotRad = SimParams.sysConfig.layoutFeatures.layoutAngleFromEast * pi / 180;
 
 for iCite = 1:nCites
@@ -23,17 +19,11 @@ for iCite = 1:nCites
             reIterate = 1;
             userPosition = 0;
             while reIterate
-                switch SimParams.nSectors
-                    case 1
-                        userPosition = getPointInRhombus(hexSide,iSector,eastRotRad,0);
-                    case 3
-                        userPosition = getPointInRhombus(hexSide,iSector,eastRotRad,1);
-                end
+                userPosition = getPointInRhombus(hexSide,eastRotRad);
 
                 if abs(userPosition) > SimParams.sysConfig.layoutFeatures.minDistance
                     reIterate = 0;
                 end
-
             end
 
             userPosition = citeLocation + userPosition;

@@ -31,7 +31,6 @@ switch nSectors
 end
 
 elAntGain = -min(12 * ((phi - layoutParams.antTilt) / halfElAngle)^2 , minAntGain_dB);
-
 antPatternGain = -min(-(azAntGain + elAntGain),minAntGain_dB);
 
 end

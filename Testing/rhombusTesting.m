@@ -5,10 +5,10 @@ clear all;
 nIters = 1000;
 X = zeros(nIters,3);
 
-SimStructs = 1;
+load simparams;
 
 SimParams.nTiers = 3;
-SimParams.nSectors = 1;
+SimParams.nSectors = 3;
 SimParams.sysConfig.ISD = 300;
 SimParams.nBases = getCellsOverLayout(SimParams.nTiers,SimParams.nSectors);
 SimParams.nUsers = SimParams.nBases * 10;
@@ -20,9 +20,9 @@ SimParams.sysConfig.layoutFeatures.layoutAngleFromEast = 0;
 % mUserLocs = zeros(nIters,length(baseLocArray),3);
 
 for iIter = 1:nIters
-    X(iIter,1) = getPointInRhombus(SimParams.sysConfig.ISD/sqrt(3.3),1,0,0);
-    X(iIter,2) = getPointInRhombus(SimParams.sysConfig.ISD/2,2,0,0);
-    X(iIter,3) = getPointInRhombus(SimParams.sysConfig.ISD/2,3,0,0);
+    X(iIter,1) = getPointInRhombus(SimParams.sysConfig.ISD/sqrt(3),0);
+    X(iIter,2) = getPointInRhombus(SimParams.sysConfig.ISD/sqrt(3),0);
+    X(iIter,3) = getPointInRhombus(SimParams.sysConfig.ISD/sqrt(3),0);
 end
 
 hold all;

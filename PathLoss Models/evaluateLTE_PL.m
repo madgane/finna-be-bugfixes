@@ -42,8 +42,6 @@ switch pathLossModel
         hBS = SimParams.sysConfig.layoutFeatures.hBS;
         
         prob_LOS = min((18/separationM),1) * (1 - exp (-separationM / 36)) + exp (-separationM / 36);
-
-        prob_LOS = prob_LOS * outDoorUsers;
         breakDistance = (4 * (hBS - 1) * (hUT - 1) * Fc * 1e9) / spLight;
         
         if strcmp(disableLOS,'true')
