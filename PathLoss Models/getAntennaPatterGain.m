@@ -5,7 +5,6 @@ userLoc = varargin{1,2};
 layoutParams = varargin{1,3};
 cSector = varargin{1,4};
 nSectors = varargin{1,5};
-userH = varargin{1,6};
 
 limitAngle = 180;
 halfElAngle = 15;
@@ -22,7 +21,7 @@ if theta <= -limitAngle
     theta = theta + limitAngle * 2;
 end
 
-phi = atan((layoutParams.hBS - userH)/abs(userLoc - baseLoc)) * 180 / pi;
+phi = atan((layoutParams.hBS - layoutParams.hBS)/abs(userLoc - baseLoc)) * 180 / pi;
 
 switch nSectors
     case 1

@@ -37,10 +37,13 @@ switch pathLossModel
         
     case 'UMi'
         
+        outDoorUsers = (rand < 0.5);
         hUT = SimParams.sysConfig.layoutFeatures.hUT;
         hBS = SimParams.sysConfig.layoutFeatures.hBS;
         
         prob_LOS = min((18/separationM),1) * (1 - exp (-separationM / 36)) + exp (-separationM / 36);
+
+        prob_LOS = prob_LOS * outDoorUsers;
         breakDistance = (4 * (hBS - 1) * (hUT - 1) * Fc * 1e9) / spLight;
         
         if strcmp(disableLOS,'true')
@@ -62,12 +65,12 @@ switch pathLossModel
             shadowFading = randn * SimParams.sysConfig.shadowing.NLOS;
         end
         
-        vehiclePenetrationLoss = 20 * (rand < 0.5);
+        vehiclePenetrationLoss = 20 * outDoorUsers;
         shadowFading = shadowFading + vehiclePenetrationLoss;
         
     case 'UMa'
         
-        W = 20;h = 20;
+        W = rand * 45 + 5;h = rand * 45 + 5;
         hUT = SimParams.sysConfig.layoutFeatures.hUT;
         hBS = SimParams.sysConfig.layoutFeatures.hBS;
         
@@ -99,7 +102,7 @@ switch pathLossModel
         
     case 'SMa'
         
-        W = 20;h = 10;
+        W = rand * 45 + 5;h = rand * 45 + 5;
         hUT = SimParams.sysConfig.layoutFeatures.hUT;
         hBS = SimParams.sysConfig.layoutFeatures.hBS;
         breakDistance = (2 * pi * hBS * hUT * Fc * 1e9) / spLight;
@@ -139,7 +142,7 @@ switch pathLossModel
         
     case 'RMa'
         
-        W = 20;h = 5;
+        W = rand * 45 + 5;h = rand * 45 + 5;
         hUT = SimParams.sysConfig.layoutFeatures.hUT;
         hBS = SimParams.sysConfig.layoutFeatures.hBS;
         breakDistance = (2 * pi * hBS * hUT * Fc * 1e9) / spLight;
@@ -179,9 +182,13 @@ switch pathLossModel
         
 end
 
+if separationM > SimParams.sysConfig.layoutFeatures.maxDistance
+    pathLoss_dB = 5e6;
+end
+
 powerCompensation = SimParams.sysConfig.BStransmitPwr_dBm + SimParams.sysConfig.userTerminalBG + SimParams.sysConfig.baseTerminalBG;
-otherNoise = SimParams.sysConfig.baseTerminalNF + SimParams.sysConfig.userTerminalNF + SimParams.sysConfig.NoisePwr_dBm + SimParams.sysConfig.cableLoss;
-varargout{1,1} = powerCompensation - pathLoss_dB - shadowFading - 10 * log10(SimParams.sysConfig.usableTones) - otherNoise;
+otherNoise = SimParams.sysConfig.baseTerminalNF + SimParams.sysConfig.cableLoss;
+varargout{1,1} = powerCompensation - pathLoss_dB - shadowFading - otherNoise - 10 * log10(SimParams.sysConfig.usableTones);
 
 if nargout > 1
     varargout{1,2} = isLOS;

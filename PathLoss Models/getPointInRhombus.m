@@ -5,6 +5,8 @@ RAD_90 = (pi / 2);
 RAD_30 = (pi / 6);
 RAD_120 = (2 * pi / 3);
 
+hexSide = hexSide * 1.05;
+
 nRhombus = 3;
 rhombusSide = hexSide * cos(RAD_30);
 userLoc = complex(rand,rand) * rhombusSide;

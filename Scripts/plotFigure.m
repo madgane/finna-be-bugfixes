@@ -59,7 +59,7 @@ switch figType
     case 'cdfplot'
         
         [yValues, xValues] = cdfcalc(xValues);        
-        plot(xValues,yValues(2:end),'Color',figColor,'LineWidth',figLineWidth,...
+        stairs(xValues,yValues(2:end),'Color',figColor,'LineWidth',figLineWidth,...
             'LineStyle',figLineType,'MarkerFaceColor',figColor,'Marker',figMarker);
 
 end

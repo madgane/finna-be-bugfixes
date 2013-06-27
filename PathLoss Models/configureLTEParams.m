@@ -42,7 +42,7 @@ switch pathLossModel
         SimParams.sysConfig.shadowing.LOS = 3;
         SimParams.sysConfig.shadowing.NLOS = 4;
         
-        SimParams.sysConfig.baseTerminalBG = 0;
+        SimParams.sysConfig.baseTerminalBG = 17;
         
         SimParams.sysConfig.layoutFeatures.minDistance = 10.0;
         SimParams.sysConfig.layoutFeatures.maxDistance = 2000.0;
@@ -132,6 +132,7 @@ SimParams.sysConfig.systemBWHz = 10e6;SimParams.sysConfig.systemTones = 1024;
 SimParams.sysConfig.NoisePwr_dBm = -174 + 10 * log10(SimParams.sysConfig.systemBWHz);
 
 SimParams.sysConfig.userDoppler = (SimParams.sysConfig.userDoppler * (5 / 18) * (SimParams.sysConfig.carrierFreqGHz * 1e9)) / spLight;
+SimParams.systemNoise = SimParams.sysConfig.NoisePwr_dBm + SimParams.sysConfig.userTerminalNF;
 
 end
 
