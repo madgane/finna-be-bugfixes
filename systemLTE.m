@@ -34,12 +34,13 @@ SimParams.nBands = 1;
 SimParams.nTiers = 3;
 SimParams.nSectors = 3;
 SimParams.nNeighbors = 2; % Number of neighbors to realize
+SimParams.perCiteUsers = 10;
 
 SimParams.nTxAntenna = 4;
 SimParams.nRxAntenna = 1;
 
 SimParams.nBases = getCellsOverLayout(SimParams.nTiers,SimParams.nSectors);
-SimParams.nUsers = SimParams.nBases * 10;
+SimParams.nUsers = SimParams.nBases * SimParams.perCiteUsers;
 
 SimParams.gracePeriod = 0;
 SimParams.arrivalDist = 'Constant';
@@ -47,7 +48,6 @@ SimParams.arrivalDist = 'Constant';
 SimParams.maxArrival = 20;
 SimParams.FixedPacketArrivals = [10,10,10,10,10,10,1,1,1,1];
 
-SimParams.N = 1;
 nSINRSamples = length(SimParams.snrIndex);
 nPacketSamples = length(SimParams.maxArrival);
 SimStructs.userStruct = cell(SimParams.nUsers,1);
@@ -69,6 +69,7 @@ for iPkt = 1:length(SimParams.maxArrival)
     
     SimParams.iPkt = iPkt;
     [SimParams,SimStructs] = fwkInitialization(SimParams,SimStructs);
+    SimParams.N = 10^(SimParams.systemNoise / 10);
     
     for iSNR = 1:length(SimParams.snrIndex)
         

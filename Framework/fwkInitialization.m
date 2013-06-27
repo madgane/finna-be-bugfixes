@@ -73,7 +73,7 @@ switch pathLossModel
         [SimParams, SimStructs] = configureLTEParams(SimParams,SimStructs);
         [SimParams, SimStructs] = cellLayoutGeneration(SimParams,SimStructs);
         [SimParams, SimStructs] = userLayoutGeneration(SimParams,SimStructs);
-        
+                
     otherwise
         
         xdB = char(SimParams.pathLossModel);xI = strfind(xdB,'_');

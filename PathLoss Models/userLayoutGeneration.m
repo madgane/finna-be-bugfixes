@@ -6,7 +6,6 @@ positionArray = cell(SimParams.nBases,1);
 debugRSSI = zeros(SimParams.nUsers,1);
 userLocIndices = cell(SimParams.nBases,1);
 nCites = getCellsOverLayout(SimParams.nTiers,1);
-nUsersOverCell = floor(SimParams.nUsers / SimParams.nBases);
 
 xUser = 0;
 hexSide = SimParams.sysConfig.ISD / sqrt(3);
@@ -16,7 +15,7 @@ for iCite = 1:nCites
     citeLocation = SimParams.wrapCellLocArray(iCite,1);
     for iSector = 1:SimParams.nSectors
         cCite = (iCite - 1) * SimParams.nSectors + iSector;
-        while (length(userLocIndices{cCite,1}) < nUsersOverCell)
+        while (length(userLocIndices{cCite,1}) < SimParams.perCiteUsers)
             reIterate = 1;
             userPosition = 0;
             while reIterate
@@ -36,7 +35,7 @@ for iCite = 1:nCites
                 continue;
             end
 
-            if length(userLocIndices{sortI(1,1),1}) < nUsersOverCell
+            if length(userLocIndices{sortI(1,1),1}) < SimParams.perCiteUsers
                 xUser = xUser + 1;
                 userLocIndices{sortI(1,1),1} = [userLocIndices{sortI(1,1),1} userPosition];
                 SimStructs.userStruct{xUser,1}.phyParams.location = userPosition;
@@ -51,7 +50,7 @@ for iCite = 1:nCites
                 SimStructs.userStruct{xUser,1}.phyParams.restOfIF = 10 * log10(sum(10.^(sortV((SimParams.nNeighbors + 2):end,1)./10)));
 
                 linRSSI = 10.^(sortV./10);
-                debugRSSI(xUser,1) = 10 * log10(linRSSI(1,1) / (10^(SimParams.systemNoise / 10) * SimParams.N + sum(linRSSI(2:end,1))));
+                debugRSSI(xUser,1) = 10 * log10(linRSSI(1,1) / (10^(SimParams.systemNoise / 10) + sum(linRSSI(2:end,1))));
                 positionArray{SimStructs.userStruct{xUser,1}.phyParams.listedCites(1,1)} = [positionArray{SimStructs.userStruct{xUser,1}.phyParams.listedCites(1,1)} ; userPosition];
                 losArray(xUser,1) = strcmp(SimStructs.userStruct{xUser,1}.losFading{sortI(1,1)},'true');
 
