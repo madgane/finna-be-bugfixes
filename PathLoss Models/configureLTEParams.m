@@ -127,9 +127,9 @@ SimParams.sysConfig.userTerminalBG = 0;
 SimParams.sysConfig.layoutFeatures.antTilt = antennaTilt;
 SimParams.sysConfig.layoutFeatures.layoutAngleFromEast = 0.00;
 
-SimParams.sysConfig.usableTones = 600;
+SimParams.sysConfig.usableTones = 600;SimParams.sysConfig.subChnlBWHz = 15e3;
 SimParams.sysConfig.systemBWHz = 10e6;SimParams.sysConfig.systemTones = 1024;
-SimParams.sysConfig.NoisePwr_dBm = -174 + 10 * log10(SimParams.sysConfig.systemBWHz);
+SimParams.sysConfig.NoisePwr_dBm = -174 + 10 * log10(SimParams.sysConfig.subChnlBWHz);
 
 SimParams.sysConfig.userDoppler = (SimParams.sysConfig.userDoppler * (5 / 18) * (SimParams.sysConfig.carrierFreqGHz * 1e9)) / spLight;
 SimParams.systemNoise = SimParams.sysConfig.NoisePwr_dBm + SimParams.sysConfig.userTerminalNF;

@@ -21,7 +21,7 @@ if theta <= -limitAngle
     theta = theta + limitAngle * 2;
 end
 
-phi = atan((layoutParams.hBS - layoutParams.hBS)/abs(userLoc - baseLoc)) * 180 / pi;
+phi = atan((layoutParams.hBS - layoutParams.hUT)/abs(userLoc - baseLoc)) * 180 / pi;
 
 switch nSectors
     case 1

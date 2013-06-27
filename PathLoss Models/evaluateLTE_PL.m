@@ -190,5 +190,5 @@ varargout{1,1} = powerCompensation - pathLoss_dB - shadowFading - otherNoise - 1
 
 if nargout > 1
     varargout{1,2} = isLOS;
-    varargout{1,3} = hUT;
+    varargout{1,3} = pathLoss_dB + shadowFading;
 end

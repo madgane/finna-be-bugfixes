@@ -5,8 +5,7 @@ clear all;
 nIters = 1000;
 X = zeros(nIters,3);
 
-load simparams;
-
+SimStructs = 1;
 SimParams.nTiers = 3;
 SimParams.nSectors = 3;
 SimParams.sysConfig.ISD = 300;

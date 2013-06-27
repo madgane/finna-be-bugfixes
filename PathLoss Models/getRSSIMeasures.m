@@ -7,17 +7,18 @@ losMeasures = cell(SimParams.nBases,wrapModelLayout);
 
 for iWrapMode = 1:wrapModelLayout
     for iCite = 1:nCites
+        basePosition = SimParams.wrapCellLocArray(iCite,iWrapMode);
+        separationM = abs(userPosition - basePosition);
+        
+        [xRSSI, tempLOS, userH] = evaluateLTE_PL(SimParams,separationM,'false');
+        
         for iSector = 1:SimParams.nSectors
             currentSite = (iCite - 1) * SimParams.nSectors + iSector;
-            basePosition = SimParams.wrapCellLocArray(iCite,iWrapMode);
-            
-            separationM = abs(userPosition - basePosition);
-                       
-            [xRSSI, losMeasures{currentSite,iWrapMode}, userH] = evaluateLTE_PL(SimParams,separationM,'false');
+            losMeasures{currentSite,iWrapMode} = tempLOS;
             antennaGain = getAntennaPatterGain(basePosition,userPosition,SimParams.sysConfig.layoutFeatures,iSector,SimParams.nSectors,userH);
-                       
             rssiMeasures(currentSite,iWrapMode) = xRSSI + antennaGain;
         end
+        
     end
 end
 
