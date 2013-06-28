@@ -1,5 +1,12 @@
 function [SimParams] = getRandomPathLoss(SimParams)
 
+uscoreIndex = find(SimParams.pathLossModel == '_');
+if isempty(uscoreIndex)
+    minDistPerc = 0.48;
+else
+    minDistPerc = str2double(SimParams.pathLossModel(uscoreIndex + 1:end));
+end
+
 SimParams.nSectors = 1;
 currentPLModel = SimParams.pathLossModel;
 
@@ -39,7 +46,7 @@ switch SimParams.nBases
         end
         
         xUser = 0;
-        awayFromBS = SimParams.sysConfig.ISD * 0.35;
+        awayFromBS = SimParams.sysConfig.ISD * minDistPerc;
         
         for iCell = 1:SimParams.nBases            
             xCells = 1:SimParams.nBases;            
