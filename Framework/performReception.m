@@ -3,6 +3,10 @@ function [SimParams,SimStructs] = performReception(SimParams,SimStructs)
 singleNode = 1;
 uscoreIndex = find(SimParams.pathLossModel == '_');
 
+if isempty(uscoreIndex)
+    uscoreIndex = length(SimParams.pathLossModel) + 1;
+end
+
 for iBand = 1:SimParams.nBands
     
     if strcmp(SimParams.DebugMode,'true')

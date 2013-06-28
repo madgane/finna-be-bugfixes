@@ -1,6 +1,9 @@
 function [SimParams,SimStructs] = systemLinking(SimParams,SimStructs)
 
 uscoreIndex = find(SimParams.pathLossModel == '_');
+if isempty(uscoreIndex)
+    uscoreIndex = length(SimParams.pathLossModel) + 1;
+end
 
 if ~strcmp(SimParams.pathLossModel(1:uscoreIndex(1,1) - 1),'3GPP')
     

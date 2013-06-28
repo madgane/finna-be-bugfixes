@@ -6,6 +6,10 @@ function [SimParams,SimStructs] = dropInitialize(SimParams,SimStructs)
 uscoreIndex = find(SimParams.pathLossModel == '_');
 SimParams.elapsedFBDuration = zeros(SimParams.nUsers,1);
 
+if isempty(uscoreIndex)
+    uscoreIndex = length(SimParams.pathLossModel) + 1;
+end
+
 for iBand = 1:SimParams.nBands
     for iBase = 1:SimParams.nBases
         for iUser = 1:SimParams.nUsers
