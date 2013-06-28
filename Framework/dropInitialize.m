@@ -45,7 +45,7 @@ for iBand = 1:SimParams.nBands
                     
                     updateElapsedFeedbackDuration = 0;
                     [~,PathGains] = step(SimStructs.JakesChStruct{iUser,iBase,iBand},ones(SimParams.SFSymbols,SimParams.nTxAntenna));
-                    SimStructs.actualChannel{iBase,iBand}(:,:,iUser) = squeeze(PathGains(SimParams.SFSymbols,end,:,:)).' * PL;
+                    SimStructs.actualChannel{iBase,iBand}(:,:,iUser) = reshape(squeeze(PathGains(SimParams.SFSymbols,end,:,:)).',SimParams.nRxAntenna,SimParams.nTxAntenna) * PL;
                     
                     if ~mod((SimParams.iDrop - 1),SimParams.updateFeedback(iUser,1))
                         SimStructs.linkChan{iBase,iBand}(:,:,iUser) = sqrt(1 - SimParams.estError) * SimStructs.actualChannel{iBase,iBand}(:,:,iUser) + estError;

@@ -43,8 +43,7 @@ switch pathLossModel
         
     case 'Random'
         
-        plGain = str2double(plModel(uscore_index(1,1) + 1:end));
-        SimParams.PL_Profile = -rand(SimParams.nBases,SimParams.nUsers) * plGain;
+        [SimParams] = getRandomPathLoss(SimParams);
         
     case 'Fixed'
         
@@ -70,7 +69,8 @@ switch pathLossModel
     case '3GPP'
         
         SimParams.PL_Profile = zeros(SimParams.nBases,SimParams.nUsers);
-        [SimParams, SimStructs] = configureLTEParams(SimParams,SimStructs);
+        
+        [SimParams] = configureLTEParams(SimParams);
         [SimParams, SimStructs] = cellLayoutGeneration(SimParams,SimStructs);
         [SimParams, SimStructs] = userLayoutGeneration(SimParams,SimStructs);
                 

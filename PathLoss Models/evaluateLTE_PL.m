@@ -1,4 +1,4 @@
-function [varargout] = evaluateLTE_PL(SimParams,separationM,disableLOS)
+function [varargout] = evaluateLTE_PL(SimParams,separationM,disableLOS,disableShadowing)
 
 varargout = cell(1,nargout);
 spLight = 3e8;isLOS = 'false';
@@ -182,6 +182,10 @@ end
 
 if separationM > SimParams.sysConfig.layoutFeatures.maxDistance
     pathLoss_dB = 5e6;
+end
+
+if strcmp(disableShadowing,'true')
+    shadowFading = 0;
 end
 
 powerCompensation = SimParams.sysConfig.BStransmitPwr_dBm + SimParams.sysConfig.userTerminalBG + SimParams.sysConfig.baseTerminalBG;

@@ -59,9 +59,9 @@ for iCite = 1:nCites
     end
 end
 
-% SimParams.debugLayout.losArray = losArray;
-% SimParams.debugLayout.userRSSI = debugRSSI;
-% SimParams.debugLayout.positionArray = positionArray;
+SimParams.debugLayout.losArray = losArray;
+SimParams.debugLayout.userRSSI = debugRSSI;
+SimParams.debugLayout.positionArray = positionArray;
 
 % plotDebugLayout(SimParams);
 

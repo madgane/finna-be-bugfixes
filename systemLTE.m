@@ -9,7 +9,7 @@ SimParams.plotMode = 'system_efficiency_analysis';
 SimParams.DebugMode = 'false';
 SimParams.precoderWithIdealChn = 'false';
 
-SimParams.ChannelModel = 'Jakes';
+SimParams.ChannelModel = 'AWGN';
 SimParams.pathLossModel = '3GPP_UMi';
 
 SimParams.queueWt = 1;
@@ -17,7 +17,7 @@ SimParams.mdpFactor = 0;
 SimParams.robustNoise = 0;
 
 SimParams.weighingEqual = 'true';
-SimParams.SchedType = 'PFBDScheduling_M-AHP-SP';
+SimParams.SchedType = 'RRScheduling';
 SimParams.PrecodingMethod = 'Best_ZF_Method';
 SimParams.weightedSumRateMethod = 'StreamScheduling';
 
@@ -36,7 +36,7 @@ SimParams.nSectors = 3;
 SimParams.nNeighbors = 2; % Number of neighbors to realize
 SimParams.perCiteUsers = 10;
 
-SimParams.nTxAntenna = 4;
+SimParams.nTxAntenna = 1;
 SimParams.nRxAntenna = 1;
 
 SimParams.nBases = getCellsOverLayout(SimParams.nTiers,SimParams.nSectors);
@@ -177,9 +177,13 @@ switch SimParams.plotMode
     case 'system_efficiency_analysis'
         
         hold all;
-        plotFigure(SimParams.Thrpt(1,:,1),1,1,'cdfplot');
+        usableFraction = (120 / 168);
+        actThrpt = SimParams.Thrpt(1,:,1) * usableFraction;
+        plotFigure(actThrpt,1,1,'cdfplot');
         xlabel('Sum Rate in bits / channel-use');
         ylabel('CDF of Sum Rate');
         
+        SimParams.Reports.cellSpectralEfficiency = sum(SimParams.Thrpt) / (SimParams.nBases * SimParams.sysConfig.subChnlBWHz);
+        SimParams.Reports.cellSpectralEfficiency = usableFraction * SimParams.Reports.cellSpectralEfficiency / (SimParams.sampTime / SimParams.SFSymbols);
         
 end

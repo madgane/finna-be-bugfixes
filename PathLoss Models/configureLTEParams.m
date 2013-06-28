@@ -1,4 +1,4 @@
-function [SimParams, SimStructs] = configureLTEParams(SimParams,SimStructs)
+function [SimParams] = configureLTEParams(SimParams)
 
 spLight = 3e8;
 plModel = char(SimParams.pathLossModel);

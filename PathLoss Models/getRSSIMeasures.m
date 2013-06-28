@@ -10,12 +10,12 @@ for iWrapMode = 1:wrapModelLayout
         basePosition = SimParams.wrapCellLocArray(iCite,iWrapMode);
         separationM = abs(userPosition - basePosition);
         
-        [xRSSI, tempLOS, userH] = evaluateLTE_PL(SimParams,separationM,'false');
+        [xRSSI, tempLOS] = evaluateLTE_PL(SimParams,separationM,'false','false');
         
         for iSector = 1:SimParams.nSectors
             currentSite = (iCite - 1) * SimParams.nSectors + iSector;
             losMeasures{currentSite,iWrapMode} = tempLOS;
-            antennaGain = getAntennaPatterGain(basePosition,userPosition,SimParams.sysConfig.layoutFeatures,iSector,SimParams.nSectors,userH);
+            antennaGain = getAntennaPatterGain(basePosition,userPosition,SimParams,iSector);
             rssiMeasures(currentSite,iWrapMode) = xRSSI + antennaGain;
         end
         

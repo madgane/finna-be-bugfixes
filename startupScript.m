@@ -11,7 +11,7 @@ SimParams.DebugMode = 'false';
 SimParams.precoderWithIdealChn = 'false';
 
 SimParams.ChannelModel = 'Jakes';
-SimParams.pathLossModel = 'Random_30';
+SimParams.pathLossModel = 'Random_0.3';
 SimParams.DopplerType = 'Constant_100';
 
 SimParams.queueWt = 1;
@@ -33,8 +33,8 @@ SimParams.estError = 0.00;
 SimParams.fbFraction = 0.05;
 
 SimParams.nBands = 1;
-SimParams.nBases = 1;
-SimParams.nUsers = 20;
+SimParams.nBases = 2;
+SimParams.nUsers = 50;
 
 SimParams.nTxAntenna = 4;
 SimParams.nRxAntenna = 1;
