@@ -11,19 +11,19 @@ SimParams.DebugMode = 'false';
 SimParams.precoderWithIdealChn = 'false';
 
 SimParams.ChannelModel = 'Jakes';
-SimParams.pathLossModel = 'Random_0.35';
-SimParams.DopplerType = 'Constant_2';
+SimParams.pathLossModel = 'Random_0.15';
+SimParams.DopplerType = 'Constant_10';
 
 SimParams.queueWt = 1;
 SimParams.mdpFactor = 0;
 SimParams.robustNoise = 0;
 
 SimParams.weighingEqual = 'true';
-SimParams.SchedType = 'XScheduling_StreamSearch';
-SimParams.PrecodingMethod = 'Best_CZF_Method';
-SimParams.weightedSumRateMethod = 'StreamScheduling';
+SimParams.SchedType = 'BDScheduling_SP';
+SimParams.PrecodingMethod = 'Best_WSRM_SCP_Method';
+SimParams.weightedSumRateMethod = 'DistScheduling';
 
-SimParams.nDrops = 50;
+SimParams.nDrops = 20;
 SimParams.snrIndex = [0];
 
 SimParams.PF_dur = 40;

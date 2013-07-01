@@ -10,7 +10,7 @@ switch SimParams.weightedSumRateMethod
         
         [SimParams,SimStructs] = getWeightedMMSEDesign(SimParams,SimStructs);
         
-    case 'DistScheduling'
+    case 'DistributedScheduling'
         
         [SimParams,SimStructs] = getDWeightedMMSEDesign(SimParams,SimStructs);
         
@@ -27,6 +27,14 @@ switch SimParams.weightedSumRateMethod
         
         [SimParams,SimStructs] = getStrWeightedMMSEDesign(SimParams,SimStructs);
         
+    case 'DistScheduling'
+        
+        [SimParams,SimStructs] = getDistStrWeightedMMSEDesign(SimParams,SimStructs);
+        
+    case 'IndepScheduling'
+        
+        [SimParams,SimStructs] = getIndStrWeightedMMSEDesign(SimParams,SimStructs);
+                
     otherwise
         
         display('Unknown Weighted Sum Rate Option !');

@@ -1,5 +1,5 @@
 
-function [SimParams SimStructs] = getWSRS_SCP(SimParams,SimStructs)
+function [SimParams SimStructs] = getWSRM_SCP(SimParams,SimStructs)
 
 for iBand = 1:SimParams.nBands
     
@@ -114,21 +114,27 @@ for iBand = 1:SimParams.nBands
         if strcmp(cvx_status,'Solved')
             tOld = t;
             phi = sqrt(x)./beta_var;
+
+            if abs(z_old - z) < tolerance
+                const_iter = 0;
+            else
+                z_old = z;
+                const_iter = const_iter + 1;
+            end
+            
+            if const_iter > max_iter
+                const_iter = 0;
+            end
+            
+            if const_iter >= SimParams.iDrop
+                const_iter = 0;
+            end
+
         else
             phi = phi / 2; 
+            const_iter = 1;
         end
-        
-        if abs(z_old - z) < tolerance
-            const_iter = 0;
-        else
-            z_old = z;
-            const_iter = const_iter + 1;
-        end
-        
-        if const_iter > max_iter
-            const_iter = 0;
-        end
-        
+                      
     end
     
     iIndex = 0;
