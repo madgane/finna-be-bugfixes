@@ -17,8 +17,8 @@ for iBand = 1:SimParams.nBands
     kUserStreams = kUsers * SimParams.maxRank;
     
     alpha = ones(kUserStreams,1) * 1.5;
-    tOld = rand(kUserStreams,1) + 2;
-    phi = 1./rand(kUserStreams,1);
+    tOld = ones(kUserStreams,1) + rand(kUserStreams,1);
+    phi = sqrt(tOld - 1) ./ SimParams.N;
     
     scalingfactor = 1.5;
     while(min(alpha) <= 1)
@@ -126,8 +126,10 @@ for iBand = 1:SimParams.nBands
                 const_iter = 0;
             end
             
-            if const_iter >= SimParams.iDrop
-                const_iter = 0;
+            if strcmp(SimParams.plotMode,'network_rate_convergence')
+                if const_iter >= SimParams.iDrop
+                    const_iter = 0;
+                end
             end
 
         else

@@ -38,4 +38,6 @@ if strcmp(SimParams.ChannelModel,'Jakes')
     end
 end
 
+SimParams.Debug.activeStatus = zeros(SimParams.nUsers,1);
+SimParams.Debug.receivedRSSI = zeros(SimParams.nRxAntenna,SimParams.nRxAntenna,SimParams.nUsers);
 end

@@ -19,9 +19,9 @@ SimParams.mdpFactor = 0;
 SimParams.robustNoise = 0;
 
 SimParams.weighingEqual = 'true';
-SimParams.SchedType = 'BDScheduling_SP';
-SimParams.PrecodingMethod = 'Best_WSRM_SCP_Method';
-SimParams.weightedSumRateMethod = 'DistScheduling';
+SimParams.SchedType = 'SkipScheduling';
+SimParams.PrecodingMethod = 'Best_WMMSE_Method';
+SimParams.weightedSumRateMethod = 'PerformScheduling';
 
 SimParams.nDrops = 20;
 SimParams.snrIndex = [0];
