@@ -47,7 +47,7 @@ for iBand = 1:SimParams.nBands
             H = linkChannel{cUser.baseNode,iBand}(:,:,iUser);
             
             HdVd = H * V{iUser,1};
-            U{iUser,1} = inv(J) * HdVd;
+            U{iUser,1} = J \ HdVd;
             W{iUser,1} = inv(eye(nStreams) - U{iUser,1}' * H * V{iUser,1});
             Ui{iUser,1} = J - HdVd * HdVd' - eye(SimParams.nRxAntenna) * SimParams.N;
             

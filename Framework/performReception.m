@@ -62,7 +62,7 @@ for iBand = 1:SimParams.nBands
                 cBase = SimStructs.baseStruct{baseIndex,1};
                 
                 gP = cBase.P{iBand,1};
-                pIndices = iUser == cBase.assignedUsers{iBand,1};		
+                pIndices = iUser == cBase.assignedUsers{iBand,1};
                 P = gP(:,pIndices);
                 H = linkChannel{baseIndex,iBand}(:,:,iUser);
                 S = H * P + S;
@@ -71,7 +71,7 @@ for iBand = 1:SimParams.nBands
                 
                 pIndices = iUser ~= cBase.assignedUsers{iBand,1};
                 P = gP(:,pIndices);
-
+                
                 if ~isempty(P)
                     N = H * P;
                     if performCooperation
@@ -90,7 +90,7 @@ for iBand = 1:SimParams.nBands
             end
             
             % Inter Stream Calculation
-           
+            
             for iBase = 1:length(neighNode)
                 
                 baseIndex = neighNode(1,iBase);
@@ -113,6 +113,71 @@ for iBand = 1:SimParams.nBands
                 I = I + Nacc * Nacc';
             end
             
+            SimParams.Debug.receivedRSSI(:,:,iUser) = I;
+            SimParams.Debug.activeStatus(iUser,1) = 1;
+            
+        else
+            
+            for iBase = 1:length(baseNode)
+                
+                baseIndex = baseNode(1,iBase);
+                cBase = SimStructs.baseStruct{baseIndex,1};
+                
+                gP = cBase.P{iBand,1};
+                pIndices = iUser == cBase.assignedUsers{iBand,1};
+                P = gP(:,pIndices);
+                H = linkChannel{baseIndex,iBand}(:,:,iUser);
+                S = H * P + S;
+                
+                % Intra Stream Calculation
+                
+                pIndices = iUser ~= cBase.assignedUsers{iBand,1};
+                P = gP(:,pIndices);
+                
+                if ~isempty(P)
+                    N = H * P;
+                    if performCooperation
+                        Nacc = Nacc + N;
+                    else
+                        I = I + N * N';
+                    end
+                end
+                
+            end
+            
+            if SimParams.nBases > 1
+                if isempty(neighNode)
+                    display('No Neighbors');
+                end
+            end
+            
+            % Inter Stream Calculation
+            
+            for iBase = 1:length(neighNode)
+                
+                baseIndex = neighNode(1,iBase);
+                cBase = SimStructs.baseStruct{baseIndex,1};
+                
+                gP = cBase.P{iBand,1};
+                pIndices = iUser ~= cBase.assignedUsers{iBand,1};
+                P = gP(:,pIndices);
+                
+                H = linkChannel{baseIndex,iBand}(:,:,iUser);
+                
+                if ~isempty(P)
+                    N = H * P;
+                    I = I + N * N';
+                end
+                
+            end
+            
+            if performCooperation
+                I = I + Nacc * Nacc';
+            end
+            
+            SimParams.Debug.receivedRSSI(:,:,iUser) = I;
+            SimParams.Debug.activeStatus(iUser,1) = 0;            
+            
         end
         
         L = eye(size(I)) + (S * S') / (I);
@@ -124,11 +189,11 @@ for iBand = 1:SimParams.nBands
             SimStructs.userStruct{iUser,1}.dropThrpt(SimParams.iDrop,1) = xThrpt;
         end
         
-        if userActive 
+        if userActive
             if sign(xThrpt)
                 SimStructs.userStruct{iUser,1}.tAllocation = SimStructs.userStruct{iUser,1}.tAllocation + 1;
             end
-        end        
+        end
         
     end
     

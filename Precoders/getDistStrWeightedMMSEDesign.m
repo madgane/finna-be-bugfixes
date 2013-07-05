@@ -62,7 +62,7 @@ for iBand = 1:SimParams.nBands
             
             H = linkChannel{cUser.baseNode,iBand}(:,:,combUIndex);
             
-            U{combUIndex,1} = inv(J) * H * V{combUIndex,1};
+            U{combUIndex,1} = J \ (H * V{combUIndex,1});
             W{combUIndex,1} = inv(eye(nStreams) - U{combUIndex,1}' * H * V{combUIndex,1});
             
         end
@@ -111,8 +111,10 @@ for iBand = 1:SimParams.nBands
             
         end
         
-        if iIter >= SimParams.iDrop
-            continueAgain = 0;
+        if strcmp(SimParams.plotMode,'network_rate_convergence')
+            if iIter >= SimParams.iDrop
+                continueAgain = 0;
+            end
         end
 
         W_prev = W;
