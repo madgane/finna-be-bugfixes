@@ -65,7 +65,7 @@ for iBand = 1:SimParams.nBands
                     G = SimParams.N;
                     cIndex = (iBase - 1) * length(txUserSet{iBase,1}) * SimParams.maxRank + (iUser - 1) * SimParams.maxRank + iStream;
                     
-                    S = W{cIndex,1}' * H{iBase,iBand}(:,:,iiUser) * X(:,cIndex);
+                    S = real(W{cIndex,1}' * H{iBase,iBand}(:,:,iiUser) * X(:,cIndex));
                     vector = [0.5 * (S - (0.5 * x(cIndex,1) / phi(cIndex,1)) - 1) ; sqrt(0.5 * phi(cIndex,1)) * beta_var(cIndex,1)];
                     
                     {vector,0.5 * (S - (0.5 * x(cIndex,1) / phi(cIndex,1)) + 1)} <In> complex_lorentz(length(vector));
