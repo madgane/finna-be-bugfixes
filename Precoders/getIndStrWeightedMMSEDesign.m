@@ -6,7 +6,7 @@ maxIter = 1e4;
 epsilonCheck = min(1e-4,(SimParams.sPower)^(-2));
 nStreams = min(SimParams.maxRank,SimParams.nRxAntenna);
 
-SumCapacity = cell(SimParams.nBands,1);
+SumCapacity = cell(SimParams.nBands,SimParams.nBases);
 
 for iBand = 1:SimParams.nBands
     
@@ -16,112 +16,93 @@ for iBand = 1:SimParams.nBands
     V = cell(SimParams.nUsers,1);
     linkChannel = SimStructs.linkChan;
     
-    combUsers = [];
-    gCombUsers = [];
-    gCombStreams = [];
     for iBase = 1:SimParams.nBases
-        combUsers = [combUsers ; unique(SimStructs.baseStruct{iBase,1}.assignedUsers{iBand,1})];
-        gCombUsers = [gCombUsers ; SimStructs.baseStruct{iBase,1}.assignedUsers{iBand,1}];
-        gCombStreams = [gCombStreams ; SimStructs.baseStruct{iBase,1}.assignedStreams{iBand,1}];
-    end
-    
-    for iUser = 1:length(combUsers)
         
-        combUIndex = combUsers(iUser,1);
-        cUser = SimStructs.userStruct{combUIndex,1};
-        [~,~,Z] = svd(linkChannel{cUser.baseNode,iBand}(:,:,combUIndex));
-        
-        uLocs = find(gCombUsers == combUIndex);
-        uStreams = gCombStreams(uLocs,1);
-        
-        V{combUIndex,1} = zeros(SimParams.nTxAntenna,nStreams);
-        for iStream = 1:length(uStreams)
-            V{combUIndex,1}(:,uStreams(iStream,1)) = complex(ones(SimParams.nTxAntenna,1),ones(SimParams.nTxAntenna,1));
-        end
-        
-        V{combUIndex,1} = sqrt(SimParams.sPower / (SimParams.nUsers / SimParams.nBases)) * V{combUIndex,1} / (SimParams.nTxAntenna * SimParams.nRxAntenna * 2);
-        
-    end
-    
-    while continueAgain
-        
-        % U Matrix calculation
+        combUsers = SimStructs.baseStruct{iBase,1}.assignedUsers{iBand,1};
+        combStreams = SimStructs.baseStruct{iBase,1}.assignedStreams{iBand,1};
         
         for iUser = 1:length(combUsers)
             
             combUIndex = combUsers(iUser,1);
-            cUser = SimStructs.userStruct{combUIndex,1};
-            J = eye(SimParams.nRxAntenna) * SimParams.N;
-                        
-            for jUser = 1:length(combUsers)
-                combIFUIndex = combUsers(jUser,1);
-                if isempty(find(combIFUIndex == SimStructs.baseStruct{cUser.baseNode,1}.assignedUsers{iBand,1}))
-                    continue;
-                end
-                ifUser = SimStructs.userStruct{combIFUIndex,1};
-                HV = linkChannel{ifUser.baseNode,iBand}(:,:,combUIndex) * V{combIFUIndex,1};
-                J = J + HV * HV';
+            uLocs = find(combUsers == combUIndex);
+            uStreams = combStreams(uLocs,1);
+            
+            V{combUIndex,1} = zeros(SimParams.nTxAntenna,nStreams);
+            for iStream = 1:length(uStreams)
+                V{combUIndex,1}(:,uStreams(iStream,1)) = complex(ones(SimParams.nTxAntenna,1),ones(SimParams.nTxAntenna,1));
             end
             
-            H = linkChannel{cUser.baseNode,iBand}(:,:,combUIndex);
+            V{combUIndex,1} = sqrt(SimParams.sPower / (SimParams.nUsers / SimParams.nBases)) * V{combUIndex,1} / (SimParams.nTxAntenna * SimParams.nRxAntenna * 2);
             
-            U{combUIndex,1} = J \ (H * V{combUIndex,1});
-            W{combUIndex,1} = inv(eye(nStreams) - U{combUIndex,1}' * H * V{combUIndex,1});            
         end
         
-        for iBase = 1:SimParams.nBases
+        while continueAgain
             
-            cBase = SimStructs.baseStruct{iBase,1};
-            linkedUsers = unique(cBase.assignedUsers{iBand,1});
+            % U Matrix calculation
+            
+            for iUser = 1:length(combUsers)
+                
+                combUIndex = combUsers(iUser,1);
+                cUser = SimStructs.userStruct{combUIndex,1};
+                J = eye(SimParams.nRxAntenna) * SimParams.N;
+                
+                for jUser = 1:length(combUsers)
+                    combIFUIndex = combUsers(jUser,1);
+                    ifUser = SimStructs.userStruct{combIFUIndex,1};
+                    HV = linkChannel{ifUser.baseNode,iBand}(:,:,combUIndex) * V{combIFUIndex,1};
+                    J = J + HV * HV';
+                end
+                
+                H = linkChannel{cUser.baseNode,iBand}(:,:,combUIndex);
+                
+                U{combUIndex,1} = J \ (H * V{combUIndex,1});
+                U{combUIndex,1} = U{combUIndex,1} + SimParams.Debug.receivedRSSI(:,:,combUIndex,iBand) - eye(SimParams.nRxAntenna) * SimParams.N;
+                W{combUIndex,1} = inv(eye(nStreams) - U{combUIndex,1}' * H * V{combUIndex,1});
+            end
             
             Isum = 0;Dsum = 0;
             for iUser = 1:length(combUsers)
                 combUIndex = combUsers(iUser,1);
-                if isempty(find(combUIndex == linkedUsers))
-                    continue;
-                end
                 cUser = SimStructs.userStruct{combUIndex,1};
                 H_HU = linkChannel{iBase,iBand}(:,:,combUIndex)' * U{combUIndex,1};
                 Isum = Isum + cUser.weighingFactor * H_HU * W{combUIndex,1} * H_HU';
-                if cUser.baseNode == iBase
-                    W_2 = W{combUIndex,1} * W{combUIndex,1};
-                    Dsum = Dsum + cUser.weighingFactor^2 * H_HU * W_2 * H_HU';
-                end
+                W_2 = W{combUIndex,1} * W{combUIndex,1};
+                Dsum = Dsum + cUser.weighingFactor^2 * H_HU * W_2 * H_HU';
             end
             
             mu_star = bisectionEstimateMU(Isum,Dsum,SimParams.sPower);
             Isum = Isum + mu_star * eye(SimParams.nTxAntenna);
             
             Iinv = pinv(Isum);
-            for iUser = 1:length(linkedUsers)
-                cIndex = linkedUsers(iUser,1);
+            for iUser = 1:length(combUsers)
+                cIndex = combUsers(iUser,1);
                 cUser = SimStructs.userStruct{cIndex,1};
                 V{cIndex,1} = cUser.weighingFactor * Iinv * linkChannel{iBase,iBand}(:,:,cIndex)' * U{cIndex,1} * W{cIndex,1};
             end
             
-        end
-        
-        if ~iIter
-            continueAgain = 1;
-        else
-            currDeviation = 0;
-            for iUser = 1:length(combUsers)
-                combUIndex = combUsers(iUser,1);
-                currDeviation = currDeviation + abs(log(det(W{combUIndex,1})) - log(det(W_prev{combUIndex,1})));
+            if ~iIter
+                continueAgain = 1;
+            else
+                currDeviation = 0;
+                for iUser = 1:length(combUsers)
+                    combUIndex = combUsers(iUser,1);
+                    currDeviation = currDeviation + abs(log(det(W{combUIndex,1})) - log(det(W_prev{combUIndex,1})));
+                end
+                
+                if currDeviation < epsilonCheck
+                    continueAgain = 0;
+                end
+                
+                if iIter > maxIter
+                    continueAgain = 0;
+                end
             end
             
-            if currDeviation < epsilonCheck
-                continueAgain = 0;
-            end
+            W_prev = W;
+            iIter = iIter + 1;
+            SumCapacity{iBand,iBase} = [SumCapacity{iBand,iBase} ; performMockReception(SimParams,SimStructs,V,iBand)];
             
-            if iIter > maxIter
-                continueAgain = 0;
-            end
         end
-        
-        W_prev = W;
-        iIter = iIter + 1;
-        SumCapacity{iBand,1} = [SumCapacity{iBand,1} ; performMockReception(SimParams,SimStructs,V,iBand)];
         
     end
     

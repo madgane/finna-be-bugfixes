@@ -19,9 +19,9 @@ SimParams.mdpFactor = 0;
 SimParams.robustNoise = 0;
 
 SimParams.weighingEqual = 'true';
-SimParams.SchedType = 'SkipScheduling';
+SimParams.SchedType = 'BDScheduling_SPIF';
 SimParams.PrecodingMethod = 'Best_WMMSE_Method';
-SimParams.weightedSumRateMethod = 'PerformScheduling';
+SimParams.weightedSumRateMethod = 'IndepScheduling';
 
 SimParams.nDrops = 20;
 SimParams.snrIndex = [0];
@@ -87,7 +87,7 @@ for iPkt = 1:length(SimParams.maxArrival)
         resetRandomness;
         
         for iDrop = 1:SimParams.nDrops
-            SimParams.iDrop = iDrop;
+            SimParams.iDrop = iDrop;SimParams.Debug.activeStatus(:,1)'
             [SimParams,SimStructs] = dropInitialize(SimParams,SimStructs);
             [SimParams,SimStructs] = getScheduledUsers(SimParams,SimStructs);
             

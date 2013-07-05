@@ -52,6 +52,13 @@ if nargin == 2
             display('Unknown Scheduling Type');
     end
     
+    for iBand = 1:SimParams.nBands
+        for iBase = 1:SimParams.nBases
+            SimStructs.baseStruct{iBase,1}.assignedUsers{iBand,1} = SimStructs.baseStruct{iBase,1}.assignedUsers{iBand,1}(SimStructs.baseStruct{iBase,1}.assignedUsers{iBand,1} ~= 0);
+            SimStructs.baseStruct{iBase,1}.assignedStreams{iBand,1} = SimStructs.baseStruct{iBase,1}.assignedStreams{iBand,1}(SimStructs.baseStruct{iBase,1}.assignedStreams{iBand,1} ~= 0);
+        end
+    end
+
 else
     
     switch scheduleMethod

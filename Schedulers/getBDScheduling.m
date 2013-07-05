@@ -173,15 +173,29 @@ for iBase = 1:SimParams.nBases
                 xLocs = zeros(kUsers * SimParams.maxRank,2);
                 augE = [];
                 
+                userGains = zeros(kUsers,1);
                 for iUser = 1:kUsers
+                    userGains(iUser,1) = log(trace(SimParams.Debug.receivedRSSI(:,:,uIndices(iUser,1),iBand)));
+                    if userGains(iUser,1) == Inf
+                        userGains(iUser,1) = 1;
+                    end
+                end
+                
+                nUsersToSelect = min(SimParams.iDrop,SimParams.muxRank);
+                
+                for iUser = 1:kUsers
+                    
                     cUser = uIndices(iUser,1);
                     [U,~,~] = svd(eH(:,:,iUser));
-                    %[U,~,~] = iterative_svd(eH(:,:,iUser),4);
+
                     if SimParams.queueWt
                         M = U' * eH(:,:,iUser) * (SimStructs.userStruct{cUser,1}.weighingFactor);
                     else
                         M = U' * eH(:,:,iUser) * sign(SimStructs.userStruct{cUser,1}.weighingFactor);
                     end
+                    
+                    M = M * userGains(iUser,1);
+                    
                     for iRank = 1:SimParams.maxRank
                         iIndex = iIndex + 1;
                         augE = [augE M(iRank,:).'];
@@ -190,7 +204,7 @@ for iBase = 1:SimParams.nBases
                 end
                 
                 [~,~,sortA] = qr(augE,0);
-                for iRank = 1:min(SimParams.muxRank,kUsers)
+                for iRank = 1:min(nUsersToSelect,kUsers)
                     schedUsers(iRank,1) = xLocs(sortA(1,iRank),1);
                     schedStreams(iRank,1) = xLocs(sortA(1,iRank),2);
                 end
@@ -205,4 +219,4 @@ for iBase = 1:SimParams.nBases
     
 end
 
-
+end

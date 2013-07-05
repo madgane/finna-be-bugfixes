@@ -9,6 +9,7 @@ end
 
 SimParams.nSectors = 1;
 currentPLModel = SimParams.pathLossModel;
+SimParams.PL_Profile = zeros(SimParams.nBases,SimParams.nUsers);
 
 SimParams.pathLossModel = '3GPP_UMi';
 [SimParams] = configureLTEParams(SimParams);

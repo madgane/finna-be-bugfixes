@@ -97,6 +97,14 @@ for iBand = 1:SimParams.nBands
                 continueAgain = 0;
                 display('Lack of Convergence !');
             end
+            
+%             if strcmp(SimParams.plotMode,'network_rate_convergence')
+%                 if iIter >= SimParams.iDrop
+%                     continueAgain = 0;
+%                 end
+%             end
+
+            
         end
         
         W_prev = W;

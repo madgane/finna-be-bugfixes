@@ -8,7 +8,7 @@ for iBase = 1:SimParams.nBases
         Q = zeros(SimParams.muxRank,1);
         pickUsers = SimStructs.baseStruct{iBase,1}.assignedUsers{iBand,1};
         pickStreams = SimStructs.baseStruct{iBase,1}.assignedStreams{iBand,1};
-    
+        
         for iUser = 1:length(pickUsers)
             cUser = pickUsers(iUser,1);cStream = pickStreams(iUser,1);
             [W,~,~] = svd(SimStructs.linkChan{iBase,iBand}(:,:,cUser));
@@ -17,7 +17,7 @@ for iBase = 1:SimParams.nBases
             Q(iUser,1) = SimStructs.userStruct{cUser,1}.trafficStats.backLogPkt;
         end
 
-        eP = pinv(augH);
+        eP = ((augH' * augH) + SimParams.N * eye(SimParams.nTxAntenna)) \ augH';
         switch SimParams.queueWt
             case 1
                 [SimStructs.baseStruct{iBase}.P{iBand,1}] = performWFAlgorithm(eP,SimParams.sPower);

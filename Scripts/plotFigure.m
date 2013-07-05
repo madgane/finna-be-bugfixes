@@ -1,8 +1,8 @@
 
 function plotFigure(varargin)
 
-figColor = 'm';
-figMarker = 'o';
+figColor = 'g';
+figMarker = 'd';
 figLineType = '-';
 figLineWidth = 1;
 

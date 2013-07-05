@@ -113,8 +113,8 @@ for iBand = 1:SimParams.nBands
                 I = I + Nacc * Nacc';
             end
             
-            SimParams.Debug.receivedRSSI(:,:,iUser) = I;
-            SimParams.Debug.activeStatus(iUser,1) = 1;
+            SimParams.Debug.receivedRSSI(:,:,iUser,iBand) = I;
+            SimParams.Debug.activeStatus(iUser,iBand) = 1;
             
         else
             
@@ -175,8 +175,8 @@ for iBand = 1:SimParams.nBands
                 I = I + Nacc * Nacc';
             end
             
-            SimParams.Debug.receivedRSSI(:,:,iUser) = I;
-            SimParams.Debug.activeStatus(iUser,1) = 0;            
+            SimParams.Debug.receivedRSSI(:,:,iUser,iBand) = I;
+            SimParams.Debug.activeStatus(iUser,iBand) = 0;
             
         end
         
