@@ -198,4 +198,6 @@ for iUser = 1:SimParams.nUsers
     SimParams.updateFeedback(iUser,1) = round(feedbackCycle / SimParams.sampTime) + 1;
 end
 
+SimParams.updateFeedback = SimParams.updateFeedback + randi([0,min(SimParams.updateFeedback) - 1],SimParams.nUsers,1);
+
 end
