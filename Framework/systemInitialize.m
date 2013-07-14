@@ -38,6 +38,13 @@ if strcmp(SimParams.ChannelModel,'Jakes')
     end
 end
 
+for iBase = 1:SimParams.nBases
+    for iBand = 1:SimParams.nBands
+        SimStructs.actualChannel{iBase,iBand} = zeros(SimParams.nRxAntenna,SimParams.nTxAntenna,SimParams.nUsers);
+        SimStructs.linkChan{iBase,iBand} = zeros(SimParams.nRxAntenna,SimParams.nTxAntenna,SimParams.nUsers);
+    end
+end
+
 SimParams.Debug.activeStatus = zeros(SimParams.nUsers,SimParams.nBands);
 SimParams.Debug.receivedRSSI = zeros(SimParams.nRxAntenna,SimParams.nRxAntenna,SimParams.nUsers,SimParams.nBands);
 

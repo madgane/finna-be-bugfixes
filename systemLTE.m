@@ -1,37 +1,42 @@
 
+% -------------------------------------------------------------------------
+% SRA - sum-rate plot, QA - queue analysis, STA - system throughput
+% analysis, NRA - network rate analysis, SEA - spectral efficiency analysis
+% -------------------------------------------------------------------------
+
 clc;clear all;
 
 SimParams.version = version;
 SimParams.outFile = 'outFile_x1.mat';
-SimParams.plotMode = 'system_efficiency_analysis';
+SimParams.plotMode = 'SEA';
 
 % pathAddition;
 SimParams.DebugMode = 'false';
 SimParams.precoderWithIdealChn = 'false';
 
-SimParams.ChannelModel = 'AWGN';
-SimParams.pathLossModel = '3GPP_UMi';
+SimParams.ChannelModel = 'Jakes';
+SimParams.pathLossModel = '3GPP_RMa';
 
 SimParams.queueWt = 1;
-SimParams.mdpFactor = 0;
+SimParams.mdpFactor = 2;
 SimParams.robustNoise = 0;
 
 SimParams.weighingEqual = 'true';
-SimParams.SchedType = 'RRScheduling';
+SimParams.SchedType = 'PFScheduling_BF';
 SimParams.PrecodingMethod = 'Best_ZF_Method';
 SimParams.weightedSumRateMethod = 'StreamScheduling';
 
-SimParams.nDrops = 10;
+SimParams.nDrops = 100;
 SimParams.snrIndex = [0];
 
 SimParams.PF_dur = 40;
 SimParams.SFSymbols = 14;
 SimParams.sampTime = 1e-3;
 SimParams.estError = 0.00;
-SimParams.fbFraction = 0.00;
+SimParams.fbFraction = 0.50;
 
 SimParams.nBands = 1;
-SimParams.nTiers = 3;
+SimParams.nTiers = 2;
 SimParams.nSectors = 3;
 SimParams.nNeighbors = 2; % Number of neighbors to realize
 SimParams.perCiteUsers = 10;
@@ -43,7 +48,7 @@ SimParams.nBases = getCellsOverLayout(SimParams.nTiers,SimParams.nSectors);
 SimParams.nUsers = SimParams.nBases * SimParams.perCiteUsers;
 
 SimParams.gracePeriod = 0;
-SimParams.arrivalDist = 'Constant';
+SimParams.arrivalDist = 'Constant_10';
 
 SimParams.maxArrival = 20;
 SimParams.FixedPacketArrivals = [10,10,10,10,10,10,1,1,1,1];
@@ -64,6 +69,10 @@ queueBacklogs = zeros(nSINRSamples,SimParams.nUsers,nPacketSamples);
 sumRateInstant = zeros(nSINRSamples,SimParams.nDrops,nPacketSamples);
 queueBacklogsOverTime = zeros(nSINRSamples,SimParams.nUsers,nPacketSamples,SimParams.nDrops);
 SimParams.txPower = zeros(length(SimParams.maxArrival),length(SimParams.snrIndex),SimParams.nBases);
+
+if strcmp(SimParams.DebugMode,'true')
+    keyboard;
+end
 
 for iPkt = 1:length(SimParams.maxArrival)
     
@@ -120,7 +129,7 @@ SimResults.avgTxPower = SimParams.txPower / SimParams.nDrops;
 
 switch SimParams.plotMode
     
-    case 'sum_rate_analysis'
+    case 'SRA'
         
         SimResults.sumThrpt = sum(SimParams.Thrpt(:,:,end),2);
         SimResults.thrptFairness = sum(SimParams.fairness(:,:,end),2);
@@ -142,7 +151,7 @@ switch SimParams.plotMode
         xlabel('SNR in dB');ylabel('Network Utility Deviation across Users');
         
         
-    case 'queue_analysis'
+    case 'QA'
         
         SimResults.queueBackLogs = queueBacklogs;
         SimResults.queueBackLogsOverTime = queueBacklogsOverTime;
@@ -161,7 +170,7 @@ switch SimParams.plotMode
         hold all;
         
         
-    case 'system_thrpt_analysis'
+    case 'STA'
         
         nT = 1e3;nPRB = 50;nREinPRB = 120;nTot = nT * nPRB * nREinPRB * 1e-6;
         
@@ -170,11 +179,11 @@ switch SimParams.plotMode
         xlabel('Throughput in Mbps');
         ylabel('CDF of Throughput in Mbps');
         
-    case 'network_rate_convergence'
+    case 'NRA'
         
         plotFigure(1:SimParams.nDrops,sumRateInstant,1,'plot');
         
-    case 'system_efficiency_analysis'
+    case 'SEA'
         
         hold all;
         usableFraction = (120 / 168);

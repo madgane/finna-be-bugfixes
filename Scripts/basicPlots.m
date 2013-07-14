@@ -1,11 +1,15 @@
 
 clc;
-clear all;
+clear all;close all;
 
-load 'Y:\simResults\outFile_doppler_5.mat';
+load '.\..\..\MATLAB\outFile_doppler_4.mat';
 LineVariable = {'-','--','-.',':'};
 MarkerVariable = {'o','+','p','d','s','^','>'};
 ColorVariable = {'b','g','r','m','c','k'};
+
+LineVariable = {'-','-','-',':',':',':','-.','-.','-.'};
+MarkerVariable = {'o','d','p','o','d','p','o','d','p'};
+ColorVariable = {'b','g','r','b','g','r','b','g','r'};
 
 for iPlot = 1:gIndex
     
@@ -31,7 +35,7 @@ for iPlot = 1:gIndex
     figure(2);hold all;
     plot(xValues,yValues,'Color',figColor,'LineWidth',figLineWidth,...
         'LineStyle',figLineType,'MarkerFaceColor',figColor,'Marker',figMarker);
-    xlabel('SNR in dB');ylabel('Rate Deviation across Users in bits/sec/Hz');
+    xlabel('SNR in dB');ylabel('Jain Index for user rates');
     
     JainMean = mean(gParams{iPlot,1}.fairness,2).^2;JainVar = var(gParams{iPlot,1}.fairness,0,2);
     yValues = JainMean ./ (JainMean + JainVar);

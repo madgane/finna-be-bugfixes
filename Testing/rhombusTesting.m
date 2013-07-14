@@ -6,7 +6,7 @@ nIters = 1000;
 X = zeros(nIters,3);
 
 SimStructs = 1;
-SimParams.nTiers = 3;
+SimParams.nTiers = 2;
 SimParams.nSectors = 3;
 SimParams.sysConfig.ISD = 300;
 SimParams.nBases = getCellsOverLayout(SimParams.nTiers,SimParams.nSectors);

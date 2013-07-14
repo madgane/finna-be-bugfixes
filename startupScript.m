@@ -1,9 +1,13 @@
+% -------------------------------------------------------------------------
+% SRA - sum-rate plot, QA - queue analysis, STA - system throughput
+% analysis, NRA - network rate analysis
+% -------------------------------------------------------------------------
 
 clc;clear all;
 
 SimParams.version = version;
 SimParams.outFile = 'outFile_x1.mat';
-SimParams.plotMode = 'network_rate_convergence';
+SimParams.plotMode = 'NRA';
 
 % pathAddition;
 SimParams.sysMode = 'false';
@@ -14,7 +18,7 @@ SimParams.ChannelModel = 'Jakes';
 SimParams.pathLossModel = 'Random_0.15';
 SimParams.DopplerType = 'Constant_10';
 
-SimParams.queueWt = 1;
+SimParams.queueWt = 0;
 SimParams.mdpFactor = 0;
 SimParams.robustNoise = 0;
 
@@ -33,14 +37,14 @@ SimParams.estError = 0.00;
 SimParams.fbFraction = 0.00;
 
 SimParams.nBands = 1;
-SimParams.nBases = 2;
-SimParams.nUsers = 20;
+SimParams.nBases = 1;
+SimParams.nUsers = 10;
 
 SimParams.nTxAntenna = 4;
 SimParams.nRxAntenna = 1;
 
 SimParams.gracePeriod = 0;
-SimParams.arrivalDist = 'Constant';
+SimParams.arrivalDist = 'Constant_10';
 
 SimParams.maxArrival = 20;
 SimParams.FixedPacketArrivals = [10,10,10,10,10,10,1,1,1,1];
@@ -69,6 +73,10 @@ queueBacklogs = zeros(nSINRSamples,SimParams.nUsers,nPacketSamples);
 sumRateInstant = zeros(nSINRSamples,SimParams.nDrops,nPacketSamples);
 queueBacklogsOverTime = zeros(nSINRSamples,SimParams.nUsers,nPacketSamples,SimParams.nDrops);
 SimParams.txPower = zeros(length(SimParams.maxArrival),length(SimParams.snrIndex),SimParams.nBases);
+
+if strcmp(SimParams.DebugMode,'true')
+    keyboard;
+end
 
 for iPkt = 1:length(SimParams.maxArrival)
     
@@ -125,7 +133,7 @@ SimResults.avgTxPower = SimParams.txPower / SimParams.nDrops;
     
 switch SimParams.plotMode
     
-    case 'sum_rate_analysis'
+    case 'SRA'
         
         SimResults.sumThrpt = sum(SimParams.Thrpt(:,:,end),2);
         SimResults.thrptFairness = sum(SimParams.fairness(:,:,end),2);
@@ -147,7 +155,7 @@ switch SimParams.plotMode
         xlabel('SNR in dB');ylabel('Network Utility Deviation across Users');
 
         
-    case 'queue_analysis'
+    case 'QA'
         
         SimResults.queueBackLogs = queueBacklogs;
         SimResults.queueBackLogsOverTime = queueBacklogsOverTime;
@@ -166,7 +174,7 @@ switch SimParams.plotMode
         hold all;
 
         
-    case 'system_thrpt_analysis'
+    case 'STA'
         
         nT = 1e3;nPRB = 50;nREinPRB = 120;nTot = nT * nPRB * nREinPRB * 1e-6;
         
@@ -175,7 +183,7 @@ switch SimParams.plotMode
         xlabel('Throughput in Mbps');
         ylabel('CDF of Throughput in Mbps');
 
-    case 'network_rate_convergence'
+    case 'NRA'
         
         plotFigure(1:SimParams.nDrops,sumRateInstant,1,'plot');
 

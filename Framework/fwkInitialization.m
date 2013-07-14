@@ -91,22 +91,27 @@ for iUser = 1:SimParams.nUsers
     SimStructs.userStruct{iUser,1}.trafficStats.pktService = zeros(length(SimParams.maxArrival),SimParams.nDrops);
 end
 
-switch SimParams.arrivalDist
-    case 'Random'
-        nRandomness = 100;
-        randArrival = rand(1,nRandomness) * SimParams.maxArrival(1,SimParams.iPkt);
-    case 'Constant'
-        randArrival = SimParams.maxArrival(1,SimParams.iPkt);
-end
+queueModel = char(SimParams.arrivalDist);
+uscore_index_q = find(queueModel == '_');
 
-if ~strcmp(SimParams.arrivalDist,'Fixed')
-    randIndices = randi([1,length(randArrival)],1,SimParams.nUsers);
+if ~isempty(uscore_index_q)
+    queueType = queueModel(1:uscore_index_q(1,1) - 1);
+    maxPktArrival = str2double(queueModel(uscore_index_q(1,1) + 1:end));
 else
-    randIndices = 1:SimParams.nUsers;
-    randArrival = SimParams.FixedPacketArrivals;
+    queueType = queueModel;
+    maxPktArrival = SimParams.maxArrival(1,SimParams.iPkt);
 end
 
-SimParams.avgPktValues = randArrival(1,randIndices);
+switch queueType
+    case 'Uniform'
+        randArrival = rand(1,SimParams.nUsers) * maxPktArrival;
+    case 'Constant'
+        randArrival = ones(1,SimParams.nUsers) * maxPktArrival;
+    case 'Fixed'
+        randArrival = SimParams.FixedPacketArrivals;
+end
+
+SimParams.avgPktValues = randArrival;
 [SimParams,SimStructs] = generateUserTrafficArrivals(SimParams,SimStructs);
 
 % Doppler / Small scale related code
@@ -198,6 +203,6 @@ for iUser = 1:SimParams.nUsers
     SimParams.updateFeedback(iUser,1) = round(feedbackCycle / SimParams.sampTime) + 1;
 end
 
-SimParams.updateFeedback = SimParams.updateFeedback + randi([0,min(SimParams.updateFeedback) - 1],SimParams.nUsers,1);
+SimParams.feedbackOffset = randi([0,min(SimParams.updateFeedback) - 1],SimParams.nUsers,1);
 
 end

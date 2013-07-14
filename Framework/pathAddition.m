@@ -1,11 +1,10 @@
 
 if isunix
-    cd '~';cd 'finna-be-bugfixes';
-    addpath('..//simResults//');
-    addpath('..//cvx//');cvx_setup;
+    addpath('.//Results//');
+%     addpath('..//cvx//');cvx_setup;
 else
-    addpath('..\\simResults\\');
-    addpath('..\\cvx\\');cvx_setup;
+    addpath('.\\Results\\');
+%     addpath('..\\cvx\\');cvx_setup;
 end
 
 processID = feature('GetPid');
@@ -35,11 +34,11 @@ for iDirectory = 1:length(currentDIR)
     end
 end
 
-cvx_quiet('false');
-cvx_solver('sedumi');
+% cvx_quiet('false');
+% cvx_solver('sdpt3');
 
 if isunix
-    SimParams.outFile = sprintf('..//simResults//%s',SimParams.outFile);
+    SimParams.outFile = sprintf('.//Results//%s',SimParams.outFile);
 else
-    SimParams.outFile = sprintf('..\\simResults\\%s',SimParams.outFile);
+    SimParams.outFile = sprintf('.\\Results\\%s',SimParams.outFile);
 end
