@@ -1,5 +1,5 @@
 
-function [SimParams SimStructs] = getIndStrWeightedMMSEDesign(SimParams,SimStructs)
+function [SimParams, SimStructs] = getIndStrWeightedMMSEDesign(SimParams,SimStructs)
 
 iIter = 0;
 maxIter = 1e4;
@@ -56,7 +56,6 @@ for iBand = 1:SimParams.nBands
                 H = linkChannel{cUser.baseNode,iBand}(:,:,combUIndex);
                 
                 U{combUIndex,1} = J \ (H * V{combUIndex,1});
-                U{combUIndex,1} = U{combUIndex,1} + SimParams.Debug.receivedRSSI(:,:,combUIndex,iBand) - eye(SimParams.nRxAntenna) * SimParams.N;
                 W{combUIndex,1} = inv(eye(nStreams) - U{combUIndex,1}' * H * V{combUIndex,1});
             end
             

@@ -1,5 +1,5 @@
 
-function [SimParams SimStructs] = getDistStrWeightedMMSEDesign(SimParams,SimStructs)
+function [SimParams, SimStructs] = getDistStrWeightedMMSEDesign(SimParams,SimStructs)
 
 iIter = 0;
 maxIter = 1e4;
@@ -116,7 +116,7 @@ for iBand = 1:SimParams.nBands
             
         end
         
-        if strcmp(SimParams.plotMode,'network_rate_convergence')
+        if strcmp(SimParams.plotMode,'NRA')
             if iIter >= SimParams.iDrop
                 continueAgain = 0;
             end

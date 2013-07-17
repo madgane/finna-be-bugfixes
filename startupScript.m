@@ -7,7 +7,7 @@ clc;clear all;
 
 SimParams.version = version;
 SimParams.outFile = 'outFile_x1.mat';
-SimParams.plotMode = 'NRA';
+SimParams.plotMode = 'QA';
 
 % pathAddition;
 SimParams.sysMode = 'false';
@@ -15,26 +15,26 @@ SimParams.DebugMode = 'false';
 SimParams.precoderWithIdealChn = 'false';
 
 SimParams.ChannelModel = 'Jakes';
-SimParams.pathLossModel = 'Random_0.15';
-SimParams.DopplerType = 'Constant_10';
+SimParams.pathLossModel = 'Random_0';
+SimParams.DopplerType = 'Uniform_10';
 
-SimParams.queueWt = 0;
+SimParams.queueWt = 2;
 SimParams.mdpFactor = 0;
 SimParams.robustNoise = 0;
 
-SimParams.weighingEqual = 'true';
-SimParams.SchedType = 'BDScheduling_SPIF';
-SimParams.PrecodingMethod = 'Best_WMMSE_Method';
+SimParams.weighingEqual = 'false';
+SimParams.SchedType = 'BDScheduling_SP';
+SimParams.PrecodingMethod = 'Best_ZF_Method';
 SimParams.weightedSumRateMethod = 'IndepScheduling';
 
-SimParams.nDrops = 20;
-SimParams.snrIndex = [0];
+SimParams.nDrops = 100;
+SimParams.snrIndex = [10];
 
 SimParams.PF_dur = 40;
 SimParams.SFSymbols = 14;
 SimParams.sampTime = 1e-3;
 SimParams.estError = 0.00;
-SimParams.fbFraction = 0.00;
+SimParams.fbFraction = 0.5;
 
 SimParams.nBands = 1;
 SimParams.nBases = 1;
@@ -44,9 +44,9 @@ SimParams.nTxAntenna = 4;
 SimParams.nRxAntenna = 1;
 
 SimParams.gracePeriod = 0;
-SimParams.arrivalDist = 'Constant_10';
+SimParams.arrivalDist = 'Constant';
 
-SimParams.maxArrival = 20;
+SimParams.maxArrival = 2;
 SimParams.FixedPacketArrivals = [10,10,10,10,10,10,1,1,1,1];
 SimParams.PL_Profile = [5 -inf 5 -inf 5 -inf 1e-20 0; -inf 5 -inf 5 -inf 5 0 1e-20];
 
@@ -95,7 +95,12 @@ for iPkt = 1:length(SimParams.maxArrival)
         resetRandomness;
         
         for iDrop = 1:SimParams.nDrops
-            SimParams.iDrop = iDrop;SimParams.Debug.activeStatus(:,1)'
+            SimParams.iDrop = iDrop;
+
+            if strcmp(SimParams.DebugMode,'true')
+                SimParams.Debug.activeStatus(:,1)'
+            end
+            
             [SimParams,SimStructs] = dropInitialize(SimParams,SimStructs);
             [SimParams,SimStructs] = getScheduledUsers(SimParams,SimStructs);
             
@@ -160,16 +165,13 @@ switch SimParams.plotMode
         SimResults.queueBackLogs = queueBacklogs;
         SimResults.queueBackLogsOverTime = queueBacklogsOverTime;
         
-        figure(4);hold all;
-        plot(1:SimParams.nDrops,sum(squeeze(SimResults.queueBackLogsOverTime(end,:,end,:)),1));
+        plotFigure(1:SimParams.nDrops,sum(squeeze(SimResults.queueBackLogsOverTime(end,:,end,:)),1),4,'plot');
         xlabel('Slot Index');ylabel('Queue Backlogs (pkts) over Time');grid on;
         
-        figure(5);hold all;
-        plot(1:SimParams.nDrops,std(squeeze(SimResults.queueBackLogsOverTime(end,:,end,:)),1));
+        plotFigure(1:SimParams.nDrops,std(squeeze(SimResults.queueBackLogsOverTime(end,:,end,:)),1),5,'plot');
         xlabel('Slot Index');ylabel('{\sigma_Q} Queue Backlogs (pkts) over Time');grid on;
         
-        figure(6);hold all;
-        plot(SimParams.maxArrival,sum(squeeze(SimResults.queueBackLogs(end,:,:)),1));
+        plotFigure(SimParams.maxArrival,sum(squeeze(SimResults.queueBackLogs(end,:,:)),1),6,'plot');
         xlabel('Average Arrival Rate');ylabel('Average Queue Size (pkts)');grid on;
         hold all;
 

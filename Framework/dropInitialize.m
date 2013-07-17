@@ -47,26 +47,26 @@ for iBand = 1:SimParams.nBands
                     
                 case 'Jakes'
                     
-                    updateElapsedFeedbackDuration = 0;
+                    SimParams.Debug.feedbackUpdate(iUser,1) = 0;
                     [~,PathGains] = step(SimStructs.JakesChStruct{iUser,iBase,iBand},ones(SimParams.SFSymbols,SimParams.nTxAntenna));
                     SimStructs.actualChannel{iBase,iBand}(:,:,iUser) = reshape(squeeze(PathGains(SimParams.SFSymbols,end,:,:)).',SimParams.nRxAntenna,SimParams.nTxAntenna) * PL;
                     
                     if ~mod((SimParams.iDrop + SimParams.feedbackOffset(iUser,1) - 1),SimParams.updateFeedback(iUser,1))
                         SimStructs.linkChan{iBase,iBand}(:,:,iUser) = sqrt(1 - SimParams.estError) * SimStructs.actualChannel{iBase,iBand}(:,:,iUser) + estError;
                         if iBase * iBand == 1
-                            updateElapsedFeedbackDuration = 1;
+                            SimParams.Debug.feedbackUpdate(iUser,1) = 1;
                         end
                     end
                     
                     if SimParams.iDrop == 1
                         SimStructs.linkChan{iBase,iBand}(:,:,iUser) = sqrt(1 - SimParams.estError) * SimStructs.actualChannel{iBase,iBand}(:,:,iUser) + estError;
                         if iBase * iBand == 1
-                            updateElapsedFeedbackDuration = 1;
+                            SimParams.Debug.feedbackUpdate(iUser,1) = 1;
                         end
                     end
                     
                     if SimStructs.userStruct{iUser,1}.baseNode == iBase
-                        if updateElapsedFeedbackDuration == 1
+                        if SimParams.Debug.feedbackUpdate(iUser,1) == 1
                             SimParams.elapsedFBDuration(iUser,1) = 0;
                         else
                             SimParams.elapsedFBDuration(iUser,1) = SimParams.elapsedFBDuration(iUser,1) + 1;
@@ -123,7 +123,7 @@ for iUser = 1:SimParams.nUsers
     switch SimParams.mdpFactor
         case 0
         case 2
-            chnInstant = SimParams.elapsedFBDuration(iUser,1) * SimParams.sampTime;
+            chnInstant = SimParams.sampTime;
             mdpFactor = abs(besselj(0,(2 * pi * SimParams.userDoppler(iUser,1) * chnInstant)));
             SimStructs.userStruct{iUser,1}.weighingFactor = SimStructs.userStruct{iUser,1}.weighingFactor * (mdpFactor)^(SimParams.elapsedFBDuration(iUser,1));
         otherwise

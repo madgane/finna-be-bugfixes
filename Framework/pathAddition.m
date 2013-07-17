@@ -1,10 +1,8 @@
 
 if isunix
-    addpath('.//Results//');
-%     addpath('..//cvx//');cvx_setup;
+    addpath('..//cvx//');cvx_setup;
 else
-    addpath('.\\Results\\');
-%     addpath('..\\cvx\\');cvx_setup;
+    addpath('..\\cvx\\');cvx_setup;
 end
 
 processID = feature('GetPid');
@@ -34,8 +32,8 @@ for iDirectory = 1:length(currentDIR)
     end
 end
 
-% cvx_quiet('false');
-% cvx_solver('sdpt3');
+cvx_quiet('false');
+cvx_solver('sdpt3');
 
 if isunix
     SimParams.outFile = sprintf('.//Results//%s',SimParams.outFile);

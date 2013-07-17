@@ -23,17 +23,20 @@ userLocArray = zeros(SimParams.nUsers,1);
 switch SimParams.nBases
     
     case 1
-        baseLocArray(1,1) = 0;
-        for iUser = 1:SimParams.nUsers
-            reIterate = 1;
-            while reIterate
-                userPosition = getPointInRhombus(hexSide,eastRotRad);
-                if abs(userPosition) > SimParams.sysConfig.layoutFeatures.minDistance
-                    reIterate = 0;
-                end
-            end
-            userLocArray(iUser,1) = userPosition;
-        end
+        SimParams.pathLossModel = currentPLModel;
+        SimParams.PL_Profile = -rand(SimParams.nBases,SimParams.nUsers) * minDistPerc;
+        return;
+%         baseLocArray(1,1) = 0;
+%         for iUser = 1:SimParams.nUsers
+%             reIterate = 1;
+%             while reIterate
+%                 userPosition = getPointInRhombus(hexSide,eastRotRad);
+%                 if abs(userPosition) > SimParams.sysConfig.layoutFeatures.minDistance
+%                     reIterate = 0;
+%                 end
+%             end
+%             userLocArray(iUser,1) = userPosition;
+%         end
         
     case 2
         tierOffset = pi / 6;
