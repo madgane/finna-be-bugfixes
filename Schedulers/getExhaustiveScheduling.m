@@ -74,9 +74,9 @@ switch scheduleMethod
                     
                     eP = pinv(augH);
                     if SimParams.queueWt == 2
-                        eP = performQueuedWF(eP,SimParams.sPower,Q);
+                        eP = performQueuedWF(eP,SimStructs.baseStruct{iBase,1}.sPower(1,iBand),Q);
                     else
-                        eP = performWFAlgorithm(eP,SimParams.sPower);
+                        eP = performWFAlgorithm(eP,SimStructs.baseStruct{iBase,1}.sPower(1,iBand));
                     end
                     
                     for iUser = 1:kUsers

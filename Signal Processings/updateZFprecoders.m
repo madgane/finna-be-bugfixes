@@ -13,12 +13,12 @@ for iBand = 1:SimParams.nBands
         end
         eP = pinv(augH);
         if performWF
-            [SimStructs.baseStruct{iBase}.P{iBand,1}] = performWFAlgorithm(eP,SimParams.sPower);
+            [SimStructs.baseStruct{iBase}.P{iBand,1}] = performWFAlgorithm(eP,SimStructs.baseStruct{iBase,1}.sPower(1,iBand));
         else
             for iUser = 1:length(pickUsers)
                 eP(:,1) = eP(:,1) / norm(eP(:,1));
             end
-            eP = eP * sqrt(SimParams.sPower / length(pickUsers));
+            eP = eP * sqrt(SimStructs.baseStruct{iBase,1}.sPower(1,iBand) / length(pickUsers));
             [SimStructs.baseStruct{iBase}.P{iBand,1}] = eP;
         end
     end

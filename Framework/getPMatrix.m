@@ -40,6 +40,9 @@ if nargin == 2
         case 'Best_WSRM_SCP_Method'
             [SimParams,SimStructs] = getWSRM_SCP(SimParams,SimStructs);
             
+        case 'Best_QwtWSRM_Method'
+            [SimParams,SimStructs] = getQWtdWSRM(SimParams,SimStructs);
+            
         otherwise
             display('Unknown Precoder Design !');
             

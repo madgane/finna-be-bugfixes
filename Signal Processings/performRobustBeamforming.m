@@ -52,7 +52,7 @@ for iUser = 1:kUsers
 end
 
 lambda >= 0;
-real(trace(X)) <= SimParams.sPower;
+real(trace(X)) <= SimStructs.baseStruct{iBase,1}.sPower(1,iBand);
 
 cvx_end
 

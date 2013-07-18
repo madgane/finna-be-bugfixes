@@ -18,7 +18,7 @@ for iBase = 1:SimParams.nBases
         end
 
         eP = pinv(augH);
-        [X,Pwr] = performWFAlgorithm(eP,SimParams.sPower);
+        [X,Pwr] = performWFAlgorithm(eP,SimStructs.baseStruct{iBase,1}.sPower(1,iBand));
         [sIndexP] = find((Pwr / max(Pwr)) >= epsilon);
         
         augX = zeros(size(augH));
@@ -28,7 +28,7 @@ for iBase = 1:SimParams.nBases
         end
         
         eP = pinv(augX);
-        [SimStructs.baseStruct{iBase}.P{iBand,1}] = performWFAlgorithm(eP,SimParams.sPower);
+        [SimStructs.baseStruct{iBase}.P{iBand,1}] = performWFAlgorithm(eP,SimStructs.baseStruct{iBase,1}.sPower(1,iBand));
         SimStructs.baseStruct{iBase}.assignedUsers{iBand,1} = pickUsers(sIndexP);
         SimStructs.baseStruct{iBase}.assignedStreams{iBand,1} = pickStreams(sIndexP);
         

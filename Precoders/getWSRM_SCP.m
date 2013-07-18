@@ -101,7 +101,7 @@ for iBand = 1:SimParams.nBands
                 end
             end
             
-            norm(B) <= sqrt(SimParams.sPower);
+            norm(B) <= sqrt(SimStructs.baseStruct{iBase,1}.sPower(1,iBand));
             
         end
         

@@ -15,7 +15,6 @@ for iBase = 1:SimParams.nBases
             [W{iUser,1}, ~, ~] = svd(eH(:,:,iUser));
         end
         
-        chGain = zeros(SimParams.maxRank,1);
         augH = zeros(SimParams.maxRank,SimParams.nTxAntenna);
         [~, sortIndex] = sort(eG(:),'descend');sortIndex = sortIndex - 1;
         
@@ -32,7 +31,7 @@ for iBase = 1:SimParams.nBases
         [Q R] = qr(transpose(augH));
         
         eP = conj(Q);
-        SimStructs.baseStruct{iBase}.P(:,:,iBand) = performWFAlgorithm(eP,SimParams.sPower,diag(R).^-2);
+        SimStructs.baseStruct{iBase}.P(:,:,iBand) = performWFAlgorithm(eP,SimStructs.baseStruct{iBase,1}.sPower(1,iBand),diag(R).^-2);
         SimStructs.baseStruct{iBase}.allocPattern(:,iBand) = sortIndex;
         SimStructs.baseStruct{iBase}.allocGains(:,:,iBand) = eG;
         

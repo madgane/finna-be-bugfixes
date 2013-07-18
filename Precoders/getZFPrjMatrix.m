@@ -44,7 +44,7 @@ for iBase = 1:SimParams.nBases
         end
         
         eP = pinv(augH);
-        SimStructs.baseStruct{iBase}.P(:,:,iBand) = performWFAlgorithm(eP,SimParams.sPower);
+        SimStructs.baseStruct{iBase}.P(:,:,iBand) = performWFAlgorithm(eP,SimStructs.baseStruct{iBase,1}.sPower(1,iBand));
         SimStructs.baseStruct{iBase}.allocPattern(:,iBand) = sortIndex;
         SimStructs.baseStruct{iBase}.allocGains(:,:,iBand) = eG;
         

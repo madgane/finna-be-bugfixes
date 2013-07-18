@@ -17,7 +17,7 @@ for iBase = 1:SimParams.nBases
         end
 
         eP = augH;
-        [SimStructs.baseStruct{iBase}.P{iBand,1}] = performWFAlgorithm(eP,SimParams.sPower,1./diag(eP' * eP));
+        [SimStructs.baseStruct{iBase}.P{iBand,1}] = performWFAlgorithm(eP,SimStructs.baseStruct{iBase,1}.sPower(1,iBand),1./diag(eP' * eP));
 %         [SimParams SimStructs] = updateMMSEreceiver(SimParams,SimStructs,1);
         
     end

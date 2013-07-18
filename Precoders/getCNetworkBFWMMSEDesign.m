@@ -3,13 +3,13 @@ function [SimParams SimStructs] = getCNetworkBFWMMSEDesign(SimParams,SimStructs)
 
 iIter = 0;
 maxIter = 1e4;
-epsilonCheck = min(1e-4,(SimParams.sPower)^(-2));
+epsilonCheck = min(1e-4,max(SimParams.sPower)^(-2));
 nStreams = min(SimParams.maxRank,SimParams.nRxAntenna);
 
 SumCapacity = cell(SimParams.nBands,1);
 
 for iBand = 1:SimParams.nBands
-    
+   
     continueAgain = 1;
     W = cell(SimParams.nUsers,SimParams.nBases);
     U = cell(SimParams.nUsers,SimParams.nBases);
@@ -19,7 +19,7 @@ for iBand = 1:SimParams.nBands
     for iBase = 1:SimParams.nBases
         for iUser = 1:SimParams.nUsers
             V{iUser,iBase} = complex(ones(SimParams.nTxAntenna,nStreams),ones(SimParams.nTxAntenna,nStreams));
-            V{iUser,iBase} = sqrt(SimParams.sPower / (SimParams.nUsers / SimParams.nBases)) * V{iUser,iBase} / trace(V{iUser,iBase}' * V{iUser,iBase});
+            V{iUser,iBase} = sqrt(SimStructs.baseStruct{iBase,1}.sPower(1,iBand) / (SimParams.nUsers / SimParams.nBases)) * V{iUser,iBase} / trace(V{iUser,iBase}' * V{iUser,iBase});
         end
     end
     
@@ -64,7 +64,7 @@ for iBand = 1:SimParams.nBands
                 end
             end
             
-            mu_star = bisectionEstimateMU(Isum,Dsum,SimParams.sPower);
+            mu_star = bisectionEstimateMU(Isum,Dsum,SimStructs.baseStruct{iBase,1}.sPower(1,iBand));
             Isum = Isum + mu_star * eye(SimParams.nTxAntenna);
             
             Iinv = pinv(Isum);

@@ -65,10 +65,10 @@ for iBand = 1:SimParams.nBands
             end
         end
         
-        norm(X(:)) <= sqrt(SimParams.sPower);
+        norm(X(:)) <= sqrt(SimStructs.baseStruct{iBase,1}.sPower(1,iBand));
         
         if SimParams.nBases > 1
-            norm(Y(:)) <= sqrt(SimParams.sPower);
+            norm(Y(:)) <= sqrt(SimStructs.baseStruct{iBase,1}.sPower(1,iBand));
         end
         
         cvx_end

@@ -31,7 +31,7 @@ for iBase = 1:SimParams.nBases
             
         end
         
-        SimStructs.baseStruct{iBase}.P{iBand,1} = X * sqrt(SimParams.sPower / trace(X' * X));
+        SimStructs.baseStruct{iBase}.P{iBand,1} = X * sqrt(SimStructs.baseStruct{iBase,1}.sPower(1,iBand) / trace(X' * X));
         
     end
 end

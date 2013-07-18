@@ -33,9 +33,9 @@ for iBase = 1:SimParams.nBases
         end
         
         if SimParams.queueWt == 2
-            [SimStructs.baseStruct{iBase}.P{iBand,1}] = performQueuedWF(eP,SimParams.sPower,Q);
+            [SimStructs.baseStruct{iBase}.P{iBand,1}] = performQueuedWF(eP,SimStructs.baseStruct{iBase,1}.sPower(1,iBand),Q);
         else
-            [SimStructs.baseStruct{iBase}.P{iBand,1}] = performQueuedWF(eP,SimParams.sPower,eigLoading);
+            [SimStructs.baseStruct{iBase}.P{iBand,1}] = performQueuedWF(eP,SimStructs.baseStruct{iBase,1}.sPower(1,iBand),eigLoading);
         end
         
     end

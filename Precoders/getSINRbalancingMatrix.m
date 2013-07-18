@@ -1,12 +1,12 @@
 function [SimParams,SimStructs] = getSINRbalancingMatrix(SimParams,SimStructs)
 
-SINRbalancing_t.Pt = SimParams.sPower;
 SINRbalancing_t.nUsers = SimParams.muxRank;
 SINRbalancing_t.H = cell(SimParams.muxRank,1);
 SINRbalancing_t.W = cell(SimParams.muxRank,1);
 SINRbalancing_t.pFactor = ones(SimParams.muxRank,1);
 
 for iBase = 1:SimParams.nBases
+    
     uIndices = SimStructs.baseStruct{iBase,1}.linkedUsers;
     kUsers = length(uIndices);
     
@@ -17,12 +17,14 @@ for iBase = 1:SimParams.nBases
     
     for iBand = 1:SimParams.nBands
         
+        SINRbalancing_t.Pt = SimStructs.baseStruct{iBase,1}.sPower(1,iBand);
+        
         W = cell(kUsers,1);
         eG = zeros(SimParams.maxRank,kUsers);
         eH = SimStructs.linkChan{iBase,iBand}(:,:,uIndices);
         for iUser = 1:kUsers
             d = svd(eH(:,:,iUser));
-            eG(1:length(d),iUser) = log2(1 + d.^2 * SimParams.sPower) / pF(iUser,1);
+            eG(1:length(d),iUser) = log2(1 + d.^2 * SimStructs.baseStruct{iBase,1}.sPower(1,iBand)) / pF(iUser,1);
             [W{iUser,1}, ~, ~] = svd(eH(:,:,iUser));
         end
         

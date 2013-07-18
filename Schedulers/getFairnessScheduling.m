@@ -41,7 +41,7 @@ for iBand = 1:SimParams.nBands
             
             for iRank = 1:SimParams.maxRank
                 iIndex = iIndex + 1;
-                currentRate = log2(1 + D(iRank,iRank).^2 * SimParams.sPower / (SimParams.N * SimParams.maxRank));
+                currentRate = log2(1 + D(iRank,iRank).^2 * SimStructs.baseStruct{iBase,1}.sPower(1,iBand) / (SimParams.N * SimParams.maxRank));
                 
                 switch fairnessType
                     case 'BF'
@@ -111,7 +111,7 @@ for iBand = 1:SimParams.nBands
                     for iUser = 1:kUsers * SimParams.maxRank
                         currentUser = floor((iUser - 1)/SimParams.maxRank) + 1;
                         weightFactor = SimStructs.userStruct{linkedUsers(currentUser,1)}.weighingFactor;
-                        currentRate = log2(1 + norm(N * X(:,iUser)).^2 * SimParams.sPower / (SimParams.N * SimParams.maxRank));
+                        currentRate = log2(1 + norm(N * X(:,iUser)).^2 * SimStructs.baseStruct{iBase,1}.sPower(1,iBand) / (SimParams.N * SimParams.maxRank));
                         nullProj(iUser,1) = currentRate * weightFactor;
                     end
                     

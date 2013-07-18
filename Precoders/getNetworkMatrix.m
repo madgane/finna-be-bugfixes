@@ -21,7 +21,7 @@ for iBand = 1:SimParams.nBands
     end
     
     eP = pinv(Haug);
-    eP = performWFAlgorithm(eP,SimParams.sPower * SimParams.nBases);
+    eP = performWFAlgorithm(eP,SimParams.sPower(1,iBand) * SimParams.nBases);
     for iBase = 1:SimParams.nBases
         sI = (iBase - 1) * SimParams.nTxAntenna + 1;
         eI = sI + SimParams.nTxAntenna - 1;eK = eP(sI:eI,:);

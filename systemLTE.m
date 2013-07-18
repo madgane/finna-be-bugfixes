@@ -43,6 +43,7 @@ SimParams.perCiteUsers = 10;
 
 SimParams.nTxAntenna = 1;
 SimParams.nRxAntenna = 1;
+SimParams.ffrProfile_dB = zeros(1,SimParams.nBands);
 
 SimParams.nBases = getCellsOverLayout(SimParams.nTiers,SimParams.nSectors);
 SimParams.nUsers = SimParams.nBases * SimParams.perCiteUsers;

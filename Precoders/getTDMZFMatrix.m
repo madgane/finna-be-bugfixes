@@ -17,7 +17,7 @@ for iBase = 1:SimParams.nBases
 
         eP = pinv(augH);
         if mod((SimParams.iDrop - 1),SimParams.nBases) == (iBase - 1)
-            effPower = SimParams.sPower * SimParams.nBases;
+            effPower = SimStructs.baseStruct{iBase,1}.sPower(1,iBand) * SimParams.nBases;
             [SimStructs.baseStruct{iBase}.P{iBand,1}] = performWFAlgorithm(eP,effPower);
         else
             SimStructs.baseStruct{iBase}.P{iBand,1} = eP * 0;

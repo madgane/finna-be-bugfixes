@@ -20,10 +20,10 @@ for iPop = 1:GenStruct.xPop
         end
     end
     
-    basePrecoders = getZFprecoders(groupChannel,GenStruct.SimParams.sPower);
+    basePrecoders = getZFprecoders(groupChannel,max(GenStruct.SimParams.sPower));
     
     interH = cell(GenStruct.nGenes - 1,1);
-    interP = cell(GenStruct.nGenes - 1,1);    
+    interP = cell(GenStruct.nGenes - 1,1);
     
     for iBase = 1:GenStruct.nGenes
         intraP = basePrecoders{iBase,1};

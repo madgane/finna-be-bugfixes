@@ -39,7 +39,7 @@ for iBand = 1:SimParams.nBands
         end
         
         eP = pinv(Haug{iBase,1});eP = eP(:,1:length(assignedUsers{iBase,1}));
-        [SimStructs.baseStruct{iBase,1}.P{iBand,1}] = performWFAlgorithm(eP,SimParams.sPower);
+        [SimStructs.baseStruct{iBase,1}.P{iBand,1}] = performWFAlgorithm(eP,SimStructs.baseStruct{iBase,1}.sPower(1,iBand));
         
     end       
         

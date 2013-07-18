@@ -3,11 +3,11 @@ function [SimParams SimStructs] = getPreWeightedMMSEDesign(SimParams,SimStructs)
 
 iIter = 0;
 maxIter = 1e4;
-epsilonCheck = min(1e-4,(SimParams.sPower)^(-2));
+epsilonCheck = min(1e-4,max(SimParams.sPower)^(-2));
 nStreams = min(SimParams.maxRank,SimParams.nRxAntenna);
 
 for iBand = 1:SimParams.nBands
-    
+
     continueAgain = 1;
     W = cell(SimParams.nUsers,1);
     U = cell(SimParams.nUsers,1);
@@ -30,7 +30,7 @@ for iBand = 1:SimParams.nBands
         userN{iUser,1} = abs(1 - besselj(0,(2 * pi * SimParams.userDoppler(combUIndex,1) * chnInstant))) * trace(Chn*Chn') * eye(SimParams.nRxAntenna);
 
         V{combUIndex,1} = Z(:,1:SimParams.maxRank);
-        V{combUIndex,1} = sqrt(SimParams.sPower / (SimParams.nUsers / SimParams.nBases)) * V{combUIndex,1};
+        V{combUIndex,1} = sqrt(max(SimParams.sPower) / (SimParams.nUsers / SimParams.nBases)) * V{combUIndex,1};
     end
     
     while continueAgain
@@ -74,7 +74,7 @@ for iBand = 1:SimParams.nBands
                 end
             end
             
-            mu_star = bisectionEstimateMU(Isum,Dsum,SimParams.sPower);
+            mu_star = bisectionEstimateMU(Isum,Dsum,SimStructs.baseStruct{iBase,1}.sPower(1,iBand));
             Isum = Isum + mu_star * eye(SimParams.nTxAntenna);
             
             Iinv = pinv(Isum);

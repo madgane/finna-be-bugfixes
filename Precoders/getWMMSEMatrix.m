@@ -43,13 +43,16 @@ end
 
 if strcmp(SimParams.DebugMode,'true')
     
-    displayArray = zeros(1,SimParams.nBases + 1);
+    displayArray = zeros(SimParams.nBands,SimParams.nBases + 1);
     
-    for iBase = 1:SimParams.nBases
-        displayArray(1,iBase) = trace(SimStructs.baseStruct{iBase,1}.P{1,1}' * SimStructs.baseStruct{iBase,1}.P{1,1});
+    for iBand = 1:SimParams.nBands
+        for iBase = 1:SimParams.nBases
+            displayArray(iBand,iBase) = trace(SimStructs.baseStruct{iBase,1}.P{iBand,1}' * SimStructs.baseStruct{iBase,1}.P{iBand,1});
+        end
+       
+        displayArray(iBand,iBase + 1) = SimParams.sPower(1,iBand);
     end
     
-    displayArray(1,iBase + 1) = SimParams.sPower;
     display(displayArray);
     
 end

@@ -20,11 +20,11 @@ for iBase = 1:SimParams.nBases
         eP = ((augH' * augH) + SimParams.N * eye(SimParams.nTxAntenna)) \ augH';
         switch SimParams.queueWt
             case 1
-                [SimStructs.baseStruct{iBase}.P{iBand,1}] = performWFAlgorithm(eP,SimParams.sPower);
+                [SimStructs.baseStruct{iBase}.P{iBand,1}] = performWFAlgorithm(eP,SimStructs.baseStruct{iBase,1}.sPower(1,iBand));
             case 2
-                [SimStructs.baseStruct{iBase}.P{iBand,1}] = performQueuedWF(eP,SimParams.sPower,Q);
+                [SimStructs.baseStruct{iBase}.P{iBand,1}] = performQueuedWF(eP,SimStructs.baseStruct{iBase,1}.sPower(1,iBand),Q);
             otherwise
-                 [SimStructs.baseStruct{iBase}.P{iBand,1}] = performWFAlgorithm(eP,SimParams.sPower);
+                 [SimStructs.baseStruct{iBase}.P{iBand,1}] = performWFAlgorithm(eP,SimStructs.baseStruct{iBase,1}.sPower(1,iBand));
         end
         
     end
