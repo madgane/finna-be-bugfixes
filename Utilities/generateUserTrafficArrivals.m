@@ -17,7 +17,7 @@ for iUser = 1:SimParams.nUsers
             (SimParams.nDrops - SimParams.gracePeriod)) zeros(1,SimParams.gracePeriod)];
     end
     
-    poissonArrivals = SimParams.avgPktValues(1,iUser) * ones(1,length(poissonArrivals));
+%     poissonArrivals = SimParams.avgPktValues(1,iUser) * ones(1,length(poissonArrivals));
     SimStructs.userStruct{iUser,1}.trafficHistory.pktArrival = poissonArrivals;
     
 end
