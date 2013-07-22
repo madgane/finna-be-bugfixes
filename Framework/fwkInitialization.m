@@ -91,27 +91,8 @@ for iUser = 1:SimParams.nUsers
     SimStructs.userStruct{iUser,1}.trafficStats.pktService = zeros(length(SimParams.maxArrival),SimParams.nDrops);
 end
 
-queueModel = char(SimParams.arrivalDist);
-uscore_index_q = find(queueModel == '_');
+% Traffic Modeling
 
-if ~isempty(uscore_index_q)
-    queueType = queueModel(1:uscore_index_q(1,1) - 1);
-    maxPktArrival = str2double(queueModel(uscore_index_q(1,1) + 1:end));
-else
-    queueType = queueModel;
-    maxPktArrival = SimParams.maxArrival(1,SimParams.iPkt);
-end
-
-switch queueType
-    case 'Uniform'
-        randArrival = rand(1,SimParams.nUsers) * maxPktArrival;
-    case 'Constant'
-        randArrival = ones(1,SimParams.nUsers) * maxPktArrival;
-    case 'Fixed'
-        randArrival = SimParams.FixedPacketArrivals;
-end
-
-SimParams.avgPktValues = randArrival;
 [SimParams,SimStructs] = generateUserTrafficArrivals(SimParams,SimStructs);
 
 % Doppler / Small scale related code
@@ -204,5 +185,7 @@ for iUser = 1:SimParams.nUsers
 end
 
 SimParams.feedbackOffset = randi([0,min(SimParams.updateFeedback) - 1],SimParams.nUsers,1);
+SimParams.Debug.resAllocation = zeros(SimParams.nDrops,SimParams.nBands,SimParams.nUsers,length(SimParams.snrIndex));
+SimParams.Debug.privateExchanges.resAllocation = zeros(SimParams.nBands,SimParams.nUsers);
 
 end

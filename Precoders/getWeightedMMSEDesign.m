@@ -8,7 +8,13 @@ nStreams = min(SimParams.maxRank,SimParams.nRxAntenna);
 
 SumCapacity = cell(SimParams.nBands,1);
 
-for iBand = 1:SimParams.nBands
+if isfield(SimParams.Debug.privateExchanges,'takeOverBand')
+    bandRange = SimParams.Debug.privateExchanges.takeOverBand;
+else
+    bandRange = 1:SimParams.nBands;
+end            
+        
+for iBand = bandRange
 
     continueAgain = 1;
     W = cell(SimParams.nUsers,1);

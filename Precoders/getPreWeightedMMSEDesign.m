@@ -135,8 +135,7 @@ for iBand = 1:SimParams.nBands
         end
         
         cBase.assignedUsers{iBand,1} = agUser;        
-        SimStructs.baseStruct{iBase,1} = cBase;
-        
+        SimStructs.baseStruct{iBase,1} = cBase;        
         
     end
     
