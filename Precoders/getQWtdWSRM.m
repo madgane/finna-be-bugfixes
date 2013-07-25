@@ -35,16 +35,19 @@ for iBase = 1:SimParams.nBases
                 
                 cvx_begin
                 
-                variable min_var
+                variables min_var z_var
                 variables t_k(nUsers,1) mu_k_n(nUsers,nSB) beta_k_n(nUsers,nSB)
-                variable M_k_n(SimParams.nTxAntenna,nUsers,nSB) complex
+                variable M_k_n(SimParams.nTxAntenna,nUsers,nSB) complex;
                 expressions x_1 x_2 beta_IF
                 
-                minimize(min_var)
+                dual y1
+                
+                minimize(min_var - log(z_var) * nSB * nUsers * log2(exp(1)))
                 
                 subject to
                 
-                norm(t_k,1) <= min_var;
+                norm(t_k,2) <= min_var;
+                y1:geo_mean(vec(mu_k_n)) >= z_var;
                 
                 for iSB = 1:nSB
                     norm(vec(M_k_n(:,:,iSB)),2) <= sqrt(SimStructs.baseStruct{iBase,1}.sPower(1,iSB));
@@ -84,7 +87,7 @@ for iBase = 1:SimParams.nBases
                 if strfind(cvx_status,'Solved')
                     for iUser = 1:nUsers
                         for iSB = 1:nSB
-                            phi(iUser,iSB) = sqrt(mu_k_n(iUser,iSB) - 1) / beta_k_n(iUser,iSB);
+                            phi(iUser,iSB) = real(sqrt(mu_k_n(iUser,iSB) - 1) / beta_k_n(iUser,iSB));
                         end
                     end
                     
@@ -101,12 +104,12 @@ for iBase = 1:SimParams.nBases
                     re_iterate = 0;
                 end
                 
-            end  
+            end
             
             for iSB = 1:nSB
                 SimStructs.baseStruct{iBase,1}.P{iSB,1} = M_k_n(:,:,iSB);
             end
-
+            
         case 'DCApproach'
             
             th_tol = 1e-3;
@@ -132,23 +135,24 @@ for iBase = 1:SimParams.nBases
             end
             
             phi = i_ur_k_n ./ i_beta_k_n;
-                        
+            
             cvx_quiet('false');
             
             while re_iterate
                 
                 cvx_begin
                 
-                variable min_var
+                variables min_var z_var
                 variables t_k(nUsers,1) mu_k_n(nUsers,nSB) beta_k_n(nUsers,nSB)
                 variable M_k_n(SimParams.nTxAntenna,nUsers,nSB) complex
                 expressions beta_IF ur_k_n(nUsers,nSB) ui_k_n(nUsers,nSB)
-                
-                minimize(min_var)
+
+                minimize(min_var - log(z_var) * nSB * nUsers * log2(exp(1)))
                 
                 subject to
                 
                 norm(t_k,2) <= min_var;
+                z_var <= geo_mean(vec(mu_k_n));
                 
                 for iSB = 1:nSB
                     norm(vec(M_k_n(:,:,iSB)),2) <= sqrt(SimStructs.baseStruct{iBase,1}.sPower(1,iSB));
@@ -225,7 +229,7 @@ for iBase = 1:SimParams.nBases
             
             SimParams.PrecodingMethod = 'Best_WMMSE_Method';
             SimParams.weightedSumRateMethod = 'PerformScheduling';
-                        
+            
             for iBand = 1:SimParams.nBands
                 
                 for iUser = 1:nUsers
@@ -238,9 +242,9 @@ for iBase = 1:SimParams.nBases
                 
                 [SimParams,SimStructs] = performDummyReception(SimParams,SimStructs,iBand);
                 Queues = max(Queues - SimParams.Debug.privateExchanges.resAllocation(iBand,:)',0);
-
+                
             end
-               
+            
             SimParams.PrecodingMethod = currentDesign;
             SimParams.weightedSumRateMethod = currentApproach;
             SimParams.privateExchanges = rmfield(SimParams.Debug.privateExchanges,'takeOverBand');
@@ -262,15 +266,15 @@ for iBase = 1:SimParams.nBases
                 
                 [SimParams,SimStructs] = performDummyReception(SimParams,SimStructs,iBand);
                 Queues = max(Queues - SimParams.Debug.privateExchanges.resAllocation(iBand,:)',0);
-
+                
             end
-               
+            
             SimParams.PrecodingMethod = currentDesign;
             SimParams.weightedSumRateMethod = currentApproach;
             SimParams.privateExchanges = rmfield(SimParams.Debug.privateExchanges,'takeOverBand');
             
         case 'AltWMMSEApproach'
-
+            
             th_tol = 1e-3;
             t_k_hist = 1e5;
             re_iterate = 1;
@@ -302,15 +306,15 @@ for iBase = 1:SimParams.nBases
                 subject to
                 
                 for iUser = 1:nUsers
-                     wts_k_n(iUser,:) * rateAchieved(:,iUser) >= t_k(iUser,1);
-                     norm(wts_k_n(iUser,:),1) <= 1;
+                    wts_k_n(iUser,:) * rateAchieved(:,iUser) >= t_k(iUser,1);
+                    norm(wts_k_n(iUser,:),1) <= 1;
                 end
                 
                 wts_k_n >= 0;
-                                
+                
                 cvx_end
                 
-                priorityWts = wts_k_n;               
+                priorityWts = wts_k_n;
                 
                 if abs(norm(t_k,2) - t_k_hist) / norm(t_k,2) < th_tol
                     re_iterate = 0;
@@ -321,6 +325,92 @@ for iBase = 1:SimParams.nBases
             end
             
             SimParams.privateExchanges = rmfield(SimParams.Debug.privateExchanges,'takeOverBand');
+            
+        case 'SINRBalancing'
+            
+            th_tol = 1e-3;
+            t_k_hist = 1e5;
+            re_iterate = 1;
+            phi = rand(nUsers,nSB);
+            
+            while re_iterate
+                
+                cvx_begin
+
+                variable min_var
+                variables t_k(nUsers,1) mu_k_n(nUsers,nSB) beta_k_n(nUsers,nSB)
+                variable M_k_n(SimParams.nTxAntenna,nUsers,nSB) complex
+                expressions beta_IF ur_k_n(nUsers,nSB) ui_k_n(nUsers,nSB)
+                
+                minimize(min_var)
+                
+                subject to
+                
+                norm(Queues - t_k .* (2.^(Queues ./ nSB)),2) <= min_var;
+                
+                for iSB = 1:nSB
+                    norm(vec(M_k_n(:,:,iSB)),2) <= sqrt(SimStructs.baseStruct{iBase,1}.sPower(1,iSB));
+                end
+                
+                for iUser = 1:nUsers
+                    geo_mean(mu_k_n(iUser,:)) >= t_k(iUser,1) * 2^(Queues(iUser,1) / nSB);
+                end
+                
+                for iUser = 1:nUsers
+                    icUser = currentUsers(iUser,1);
+                    for iSB = 1:nSB
+                        betaIF = sqrt(SimParams.N);
+                        for jUser = 1:nUsers
+                            if jUser ~= iUser
+                                betaIF = [betaIF ; cH{iBase,iSB}(:,:,icUser) * M_k_n(:,jUser,iSB)];
+                            end
+                        end
+                        
+                        norm(betaIF,2) <= beta_k_n(iUser,iSB);
+                        x_1 = (phi(iUser,iSB) / 2) * beta_k_n(iUser,iSB)^2;
+                        x_2 = (1 / (2 * phi(iUser,iSB))) * (mu_k_n(iUser,iSB) - 1);
+                        
+                        x_1 + x_2  <= real(cH{iBase,iSB}(:,:,icUser) * M_k_n(:,iUser,iSB));
+                        imag(cH{iBase,iSB}(:,:,icUser) * M_k_n(:,iUser,iSB)) == 0;
+                        
+                        mu_k_n(iUser,iSB) >= 1;
+                        
+                    end
+                end
+                
+                t_k >= 0;
+                t_k <= 1;
+                
+                cvx_end
+                
+                [t_k mu_k_n Queues  sum(log2(mu_k_n),2)]
+                
+                if strfind(cvx_status,'Solved')
+                    for iUser = 1:nUsers
+                        for iSB = 1:nSB
+                            phi(iUser,iSB) = sqrt(mu_k_n(iUser,iSB) - 1) / beta_k_n(iUser,iSB);
+                        end
+                    end
+                    
+                    iter_count = iter_count + 1;
+                    if abs(min_var - t_k_hist) < th_tol
+                        re_iterate = 0;
+                    end
+                    t_k_hist = min_var;
+                else
+                    phi = phi./2;
+                end
+                
+                if iter_count > max_iterations
+                    re_iterate = 0;
+                end
+                
+            end
+            
+            for iSB = 1:nSB
+                SimStructs.baseStruct{iBase,1}.P{iSB,1} = M_k_n(:,:,iSB);
+            end
+
             
         otherwise
             
