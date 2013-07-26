@@ -37,8 +37,8 @@ if nargin == 2
         case 'Best_CZF_Method'
             [SimParams,SimStructs] = getCZFMatrix(SimParams,SimStructs);
             
-        case 'Best_WSRM_SCP_Method'
-            [SimParams,SimStructs] = getWSRM_SCP(SimParams,SimStructs);
+        case 'Best_WSRM_Method'
+            [SimParams,SimStructs] = getWSRMMatrix(SimParams,SimStructs);
             
         case 'Best_QwtWSRM_Method'
             [SimParams,SimStructs] = getQWtdWSRM(SimParams,SimStructs);
