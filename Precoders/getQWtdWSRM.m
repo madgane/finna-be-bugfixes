@@ -143,7 +143,7 @@ for iBase = 1:SimParams.nBases
                 variables t_k(nUsers,1) mu_k_n(nUsers,nSB) beta_k_n(nUsers,nSB)
                 variable M_k_n(SimParams.nTxAntenna,nUsers,nSB) complex
                 expressions beta_IF ur_k_n(nUsers,nSB) ui_k_n(nUsers,nSB)
-
+                
                 minimize(min_var - log(z_var) * nSB * nUsers * log2(exp(1)))
                 
                 subject to
@@ -256,29 +256,34 @@ for iBase = 1:SimParams.nBases
             re_iterate = 1;
             threshold = 1e-3;
             prod_history = 1e10;
+            qWeights = Queues;
             
             while re_iterate
                 
                 cvx_begin
                 
                 expressions prod_t U_r(nUsers,nSB) U_i(nUsers,nSB)
-                variables beta_k_n(nUsers,nSB) t_k_n(nUsers,nSB) max_var
+                variables beta_k_n(nUsers,nSB) t_k_n(nUsers,nSB) max_var(nSB,1) max_obj
                 variable M_k_n(SimParams.nTxAntenna,SimParams.nRxAntenna,nUsers,nSB) complex
                 
-                maximize(max_var)
+                maximize(max_obj)
                 
                 subject to
                 
-                prod_t = vec(t_k_n);
-                geomean(prod_t) >= max_var;
+                for iSB = 1:nSB
+                    prod_t = t_k_n(:,iSB);
+                    {prod_t,max_var(iSB,1)} == geo_mean_cone(nUsers,1,qWeights,'POS');
+                end
                 
-                for iUser = 1:nUsers                    
-                    cUser = currentUsers(iUser,1);                                       
+                {max_var,max_obj} == geo_mean_cone(nSB,1,'POS');
+                
+                for iUser = 1:nUsers
+                    cUser = currentUsers(iUser,1);
                     
-                    for iSB = 1:nSB                    
+                    for iSB = 1:nSB
                         if_vector = sqrt(SimParams.N);
-                        currentH = cH{iBase,iSB}(:,:,cUser);                        
-                    
+                        currentH = cH{iBase,iSB}(:,:,cUser);
+                        
                         for jUser = 1:nUsers
                             if jUser ~= iUser
                                 if_vector = [if_vector ; currentH * M_k_n(:,:,jUser,iSB)];
@@ -292,7 +297,7 @@ for iBase = 1:SimParams.nBases
                             (U_r_o(iUser,iSB) * (U_r(iUser,iSB) - U_r_o(iUser,iSB)) + U_i_o(iUser,iSB) * (U_i(iUser,iSB) - U_i_o(iUser,iSB))) ...
                             + beta_k_n(iUser,iSB) >= (t_k_n_o(iUser,iSB) * beta_k_n_o(iUser,iSB) / 2) * ...
                             ((t_k_n(iUser,iSB) / t_k_n_o(iUser,iSB))^2 + (beta_k_n(iUser,iSB) / beta_k_n_o(iUser,iSB))^2);
-
+                        
                         U_i == 0;
                         
                     end
@@ -308,7 +313,7 @@ for iBase = 1:SimParams.nBases
                     end
                     {x_vec,sqrt(SimStructs.baseStruct{iBase,1}.sPower(1,iSB))} == complex_lorentz(length(x_vec));
                 end
-                  
+                
                 t_k_n >= 1;
                 
                 cvx_end
@@ -317,7 +322,7 @@ for iBase = 1:SimParams.nBases
                 
                 if strfind(cvx_status,'Solved')
                     t_k_n_o = abs(t_k_n);
-                    beta_k_n_o = abs(beta_k_n);                    
+                    beta_k_n_o = abs(beta_k_n);
                     U_r_o = U_r;U_i_o = U_i;
                     
                     if abs(prod_history - cvx_optval) <= threshold
@@ -332,15 +337,87 @@ for iBase = 1:SimParams.nBases
                     t_k_n_o = max(U_r_o ./ beta_k_n_o,1);
                 end
                 
-            end 
+            end
             
             for iSB = 1:nSB
                 for iUser = 1:nUsers
                     SimStructs.baseStruct{iBase,1}.P{iSB,1} = [SimStructs.baseStruct{iBase,1}.P{iSB,1} M_k_n(:,:,iUser,iSB)];
                 end
             end
-
             
+        case 'BalancingApproach'
+            
+            re_iterate = 1;cvx_hist = 100;
+            qWeights = Queues / log2(exp(1));
+            m_k_n_o = -rand(nUsers,nSB) * 10;
+            
+            while re_iterate
+                
+                cvx_begin
+                
+                expression m_k_n(nUsers,nSB)
+                variable M_k_n(SimParams.nTxAntenna,nUsers,nSB) complex
+                variables t_k_n(nUsers,nSB) b_k_n(nUsers,nSB) g_k_n(nUsers,nSB)
+                variables obj_var(nUsers,1) obj_func_var
+                
+                minimize(obj_func_var)
+                
+                subject to
+                
+                for iUser = 1:nUsers
+                    Queues(iUser,1) - sum(t_k_n(iUser,:)) * qWeights(iUser,1) <= obj_var(iUser,1);
+                end
+                
+                obj_func_var >= norm(obj_var,2);
+                
+                for iUser = 1:nUsers
+                    cUser = currentUsers(iUser,1);
+                    for iSB = 1:nSB
+                        if_vector = sqrt(SimParams.N);
+                        cCH = cH{iBase,iSB}(:,:,cUser);
+                        for jUser = 1:nUsers
+                            if jUser ~= iUser
+                                if_vector = [if_vector ; cCH * M_k_n(:,jUser,iSB)];
+                            end
+                        end
+                        norm(if_vector,2) <= sqrt(b_k_n(iUser,iSB));
+                        log(1 + g_k_n(iUser,iSB)) >= t_k_n(iUser,iSB) * qWeights(iUser,1);
+                        
+                        m_k_n(iUser,iSB) = g_k_n(iUser,iSB) - b_k_n(iUser,iSB);
+                        4 * real(cCH * M_k_n(:,iUser,iSB)) + m_k_n_o(iUser,iSB)^2 + 2 * m_k_n_o(iUser,iSB) * (m_k_n(iUser,iSB) - m_k_n_o(iUser,iSB)) ...
+                            >= (g_k_n(iUser,iSB) + b_k_n(iUser,iSB))^2;
+                        imag(cCH * M_k_n(:,iUser,iSB)) == 0;
+                    end
+                    norm(t_k_n(iUser,:),1) <= 1;
+                end
+                
+                for iSB = 1:nSB
+                    norm(vec(M_k_n(:,:,iSB)),2) <= sqrt(SimStructs.baseStruct{iBase,1}.sPower(1,iSB));
+                end
+                
+                g_k_n >= 0;
+                t_k_n >= 0;
+                t_k_n <= 1;
+                
+                cvx_end
+                
+                if strcmp(cvx_status,'Solved')
+                    m_k_n_o = g_k_n - b_k_n;
+                    if abs(cvx_optval - cvx_hist) <= 1e-5
+                        re_iterate = 0;
+                    else
+                        cvx_hist = cvx_optval;
+                    end
+                else
+                    m_k_n_o = m_k_n_o * 2;
+                end
+                
+            end
+            
+            for iSB = 1:nSB
+                SimStructs.baseStruct{iBase,1}.P{iSB,1} = M_k_n(:,:,iSB);
+            end
+
         otherwise
             
             display('Undefined Optimization Approach !');
