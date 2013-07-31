@@ -361,14 +361,17 @@ for iBase = 1:SimParams.nBases
                 variables obj_var(nUsers,1) obj_func_var
                 
                 minimize(obj_func_var)
+%                 maximize(obj_func_var);
                 
                 subject to
                 
                 for iUser = 1:nUsers
                     Queues(iUser,1) - sum(t_k_n(iUser,:)) * qWeights(iUser,1) <= obj_var(iUser,1);
+%                     qWeights(iUser,1) * sum(t_k_n(iUser,:)) >= obj_var(iUser,1);
                 end
                 
                 obj_func_var >= norm(obj_var,2);
+%                 obj_func_var <= sum(obj_var);
                 
                 for iUser = 1:nUsers
                     cUser = currentUsers(iUser,1);
@@ -417,7 +420,7 @@ for iBase = 1:SimParams.nBases
             for iSB = 1:nSB
                 SimStructs.baseStruct{iBase,1}.P{iSB,1} = M_k_n(:,:,iSB);
             end
-
+            
         otherwise
             
             display('Undefined Optimization Approach !');
