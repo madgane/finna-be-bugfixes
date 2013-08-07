@@ -67,7 +67,7 @@ for iBand = 1:SimParams.nBands
             case 'MSApproach'
                 
                 iIter = 0;                
-                randElement = rand(SimParams.nTxAntenna,1) * 10;
+                randElement = zeros(SimParams.nTxAntenna,1);
                 while re_iterate
                     
                     sqCLambda = sqrt(cLambda);
@@ -85,7 +85,9 @@ for iBand = 1:SimParams.nBands
                     
                     Psi = real(diag(Vt * diag(LtM) * Vt'));                   
                     F = ones(SimParams.nTxAntenna,1) - Psi;
-                    Psi_Plus = randElement;Psi_Minus = randElement - F;
+                    randK = repmat(min(Psi),SimParams.nTxAntenna,1);
+                    
+                    Psi_Plus = randK + F;Psi_Minus = randK;
                     nLambda = (diag(Psi_Plus)^-1) * (powerProfile + diag(Psi_Minus) * diag(cLambda));
                     
                     EM = zeros(SimParams.nTxAntenna,1);
@@ -156,8 +158,8 @@ for iBand = 1:SimParams.nBands
             SimParams.Debug.tempResource{1,1}(:,SimParams.iSNR) = iterCapacity + SimParams.Debug.tempOne(:,SimParams.iSNR);
         end
         
-        hold all;
-        plot(iterCapacity(iterCapacity ~= 0));keyboard;
+%         hold all;
+%         plot(iterCapacity(iterCapacity ~= 0),'o-.');keyboard;
         
     end
 end
