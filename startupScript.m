@@ -5,9 +5,10 @@
 
 clc;clear all;
 
+SimParams.maxDebugCells = 4;
 SimParams.version = version;
 SimParams.outFile = 'outFile_x1.mat';
-SimParams.plotMode = 'QA';
+SimParams.plotMode = 'SRA';
 
 % pathAddition;
 SimParams.sysMode = 'false';
@@ -15,17 +16,17 @@ SimParams.DebugMode = 'false';
 SimParams.precoderWithIdealChn = 'false';
 
 SimParams.ChannelModel = 'IID';
-SimParams.pathLossModel = 'CellEdge';
+SimParams.pathLossModel = 'Random_10';
 SimParams.DopplerType = 'Uniform_10';
 
-SimParams.queueWt = 2;
+SimParams.queueWt = 1;
 SimParams.mdpFactor = 0;
 SimParams.robustNoise = 0;
 
 SimParams.weighingEqual = 'false';
 SimParams.SchedType = 'SkipScheduling';
-SimParams.PrecodingMethod = 'Best_WSRM_Method';
-SimParams.weightedSumRateMethod = 'WSRMApproach';
+SimParams.PrecodingMethod = 'Best_PerAntPwrConst_Method';
+SimParams.weightedSumRateMethod = 'MSApproach';
 
 SimParams.nDrops = 1;
 SimParams.snrIndex = [10];
@@ -37,17 +38,17 @@ SimParams.estError = 0.00;
 SimParams.fbFraction = 0.0;
 
 SimParams.nBands = 1;
-SimParams.nBases = 2;
-SimParams.nUsers = 8;
+SimParams.nBases = 1;
+SimParams.nUsers = 1;
 
-SimParams.nTxAntenna = 2;
-SimParams.nRxAntenna = 1;
+SimParams.nTxAntenna = 8;
+SimParams.nRxAntenna = 8;
 SimParams.ffrProfile_dB = zeros(1,SimParams.nBands);
 
 SimParams.gracePeriod = 0;
 SimParams.arrivalDist = 'ConstFixed';
 
-SimParams.maxArrival = 10;
+SimParams.maxArrival = 100;
 SimParams.FixedPacketArrivals = [2,2,2,2,2];
 SimParams.PL_Profile = [5 -inf 5 -inf 5 -inf 1e-20 0; -inf 5 -inf 5 -inf 5 0 1e-20];
 
@@ -151,14 +152,14 @@ switch SimParams.plotMode
         JainMean = mean(SimParams.Thrpt,2).^2;JainVar = var(SimParams.Thrpt,0,2);
         JainIndex_capacity = JainMean ./ (JainMean + JainVar);
         
-        plotFigure(SimParams.snrIndex,JainIndex_capacity,2,'plot');
-        xlabel('SNR in dB');ylabel('Rate Deviation across Users in bits/sec/Hz');
+%         plotFigure(SimParams.snrIndex,JainIndex_capacity,2,'plot');
+%         xlabel('SNR in dB');ylabel('Rate Deviation across Users in bits/sec/Hz');
         
         JainMean = mean(SimParams.fairness,2).^2;JainVar = var(SimParams.fairness,0,2);
         JainIndex_utility = JainMean ./ (JainMean + JainVar);
         
-        plotFigure(SimParams.snrIndex,JainIndex_utility,3,'plot');
-        xlabel('SNR in dB');ylabel('Network Utility Deviation across Users');
+%         plotFigure(SimParams.snrIndex,JainIndex_utility,3,'plot');
+%         xlabel('SNR in dB');ylabel('Network Utility Deviation across Users');
 
         
     case 'QA'
