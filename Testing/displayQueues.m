@@ -1,6 +1,4 @@
 
-clc;
-
 Queues = zeros(SimParams.nUsers,1);
 txPkts = zeros(SimParams.nUsers,SimParams.nBands);
 
@@ -9,4 +7,9 @@ for iUser = 1:SimParams.nUsers
     txPkts(iUser,:) = squeeze(SimParams.Debug.resAllocation(end,:,iUser,end));
 end
 
-[Queues sum(txPkts,2) txPkts]
+servedPkts = sum(txPkts,2);
+Qdeviation = sum(max((Queues - servedPkts),0));
+
+display(Qdeviation);
+[Queues servedPkts txPkts]
+

@@ -67,7 +67,6 @@ for iBand = 1:SimParams.nBands
             case 'MSApproach'
                 
                 iIter = 0;                
-                randElement = zeros(SimParams.nTxAntenna,1);
                 while re_iterate
                     
                     sqCLambda = sqrt(cLambda);
@@ -139,6 +138,47 @@ for iBand = 1:SimParams.nBands
                 
                 [V, D] = eig(S);
                 V = V * sqrt(D);
+                
+            case 'AltOptApproach'
+                                
+                Szz = diag(powerProfile)^(-1);
+                Ht = H * Szz^(-0.5);
+                
+                cvx_begin sdp quiet
+                
+                variable t
+                variable Sxx(SimParams.nTxAntenna,SimParams.nTxAntenna) complex hermitian
+                
+                maximize(t);
+                
+                log_det(Ht.' * Sxx * Ht + eye(SimParams.nTxAntenna)) >= t;
+                
+                subject to
+                
+                real(trace(Sxx)) <= 1;
+                                
+                cvx_end
+                
+                cvx_begin sdp quiet
+
+                variable t
+                variable Szz(SimParams.nTxAntenna,SimParams.nTxAntenna) complex hermitian
+
+                minimize(t);
+                
+                log_det(H.' * Sxx * H + Szz) - log_det(Szz) >= t;
+                
+                subject to
+                
+                trace(Szz * diag(powerProfile)) <= 1;
+                
+                
+                
+                cvx_begin sdp
+                
+                cvx_end
+                
+                
                 
         end
         

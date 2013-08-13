@@ -55,13 +55,16 @@ for iBase = 1:SimParams.nBases
             
             re_iterate = 1;cvx_hist = 100;
             qWeights = Queues / log2(exp(1));
-            m_k_n_o = -rand(nUsers,nSB) * 10;
             
+            r_M_k_n_o = rand(nUsers,nSB)/nUsers;
+            i_M_k_n_o = rand(nUsers,nSB)/nUsers;
+            m_k_n_o = rand(nUsers,nSB) * 20 + 1;
+                        
             while re_iterate
                 
                 cvx_begin
                 
-                expression m_k_n(nUsers,nSB)
+                expressions m_k_n(nUsers,nSB) r_M_k_n(nUsers,nSB) i_M_k_n(nUsers,nSB)
                 variable M_k_n(SimParams.nTxAntenna,nUsers,nSB) complex
                 variables t_k_n(nUsers,nSB) b_k_n(nUsers,nSB) g_k_n(nUsers,nSB)
                 variables obj_var(nUsers,1) obj_func_var
@@ -71,10 +74,10 @@ for iBase = 1:SimParams.nBases
                 subject to
                 
                 for iUser = 1:nUsers
-                    Queues(iUser,1) - sum(t_k_n(iUser,:)) * qWeights(iUser,1) <= obj_var(iUser,1);
+                    Queues(iUser,1) - sum(t_k_n(iUser,:)) <= obj_var(iUser,1);
                 end
                 
-                obj_func_var >= norm(obj_var,2);
+                obj_func_var >= norm(obj_var,1);
                 
                 for iUser = 1:nUsers
                     cUser = currentUsers(iUser,1);
@@ -87,14 +90,21 @@ for iBase = 1:SimParams.nBases
                             end
                         end
                         norm(if_vector,2) <= sqrt(b_k_n(iUser,iSB));
-                        log(1 + g_k_n(iUser,iSB)) >= t_k_n(iUser,iSB) * qWeights(iUser,1);
+                        log(1 + g_k_n(iUser,iSB)) >= t_k_n(iUser,iSB);
                         
-                        m_k_n(iUser,iSB) = g_k_n(iUser,iSB) - b_k_n(iUser,iSB);
-                        4 * real(cCH * M_k_n(:,iUser,iSB)) + m_k_n_o(iUser,iSB)^2 + 2 * m_k_n_o(iUser,iSB) * (m_k_n(iUser,iSB) - m_k_n_o(iUser,iSB)) ...
-                            >= (g_k_n(iUser,iSB) + b_k_n(iUser,iSB))^2;
-                        imag(cCH * M_k_n(:,iUser,iSB)) == 0;
+                        r_M_k_n(iUser,iSB) = real(cCH * M_k_n(:,iUser,iSB));
+                        i_M_k_n(iUser,iSB) = imag(cCH * M_k_n(:,iUser,iSB));
+                        m_k_n(iUser,iSB) = b_k_n(iUser,iSB);
+                        
+                        (r_M_k_n_o(iUser,iSB)^2 + i_M_k_n_o(iUser,iSB)^2) / m_k_n_o(iUser,iSB) + ...
+                            (2 / m_k_n_o(iUser,iSB)) * (r_M_k_n_o(iUser,iSB) * (r_M_k_n(iUser,iSB) - r_M_k_n_o(iUser,iSB)) + ...
+                            i_M_k_n_o(iUser,iSB) * (i_M_k_n(iUser,iSB) - i_M_k_n_o(iUser,iSB))) + ...
+                            -((r_M_k_n_o(iUser,iSB)^2 + i_M_k_n_o(iUser,iSB)^2) / (2 * m_k_n_o(iUser,iSB))) * (m_k_n(iUser,iSB) - m_k_n_o(iUser,iSB)) ...
+                            >= g_k_n(iUser,iSB);
+                        
+                        i_M_k_n(iUser,iSB) == 0;
                     end
-                    norm(t_k_n(iUser,:),1) <= 1;
+                    norm(t_k_n(iUser,:),1) <= qWeights(iUser,1);
                 end
                 
                 for iSB = 1:nSB
@@ -103,13 +113,22 @@ for iBase = 1:SimParams.nBases
                 
                 g_k_n >= 0;
                 t_k_n >= 0;
-                t_k_n <= 1;
                 
                 cvx_end
                 
                 if strcmp(cvx_status,'Solved')
-                    m_k_n_o = g_k_n - b_k_n;
-                    if abs(cvx_optval - cvx_hist) <= 1e-5
+                    
+                    m_k_n_o = b_k_n;
+                    for iUser = 1:nUsers
+                        cUser = currentUsers(iUser,1);
+                        for iSB = 1:nSB
+                            cCH = cH{iBase,iSB}(:,:,cUser);
+                            xx = cCH * M_k_n(:,iUser,iSB);
+                            r_M_k_n_o(iUser,iSB) = real(xx);i_M_k_n_o(iUser,iSB) = imag(xx);
+                        end
+                    end
+                    
+                    if abs(cvx_optval - cvx_hist) <= 1e-4
                         re_iterate = 0;
                     else
                         cvx_hist = cvx_optval;
