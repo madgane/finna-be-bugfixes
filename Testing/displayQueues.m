@@ -11,5 +11,5 @@ servedPkts = sum(txPkts,2);
 Qdeviation = sum(max((Queues - servedPkts),0));
 
 display(Qdeviation);
-[Queues servedPkts txPkts]
+[txPkts Queues servedPkts]
 

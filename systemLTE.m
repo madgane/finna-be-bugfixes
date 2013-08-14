@@ -10,7 +10,7 @@ SimParams.version = version;
 SimParams.outFile = 'outFile_x1.mat';
 SimParams.plotMode = 'SEA';
 
-% pathAddition;
+preConfiguration;
 SimParams.DebugMode = 'false';
 SimParams.precoderWithIdealChn = 'false';
 
