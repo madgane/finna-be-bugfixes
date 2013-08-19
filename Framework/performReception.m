@@ -194,15 +194,13 @@ for iBand = 1:SimParams.nBands
             if sign(xThrpt)
                 SimStructs.userStruct{iUser,1}.tAllocation = SimStructs.userStruct{iUser,1}.tAllocation + 1;
             end
-        end
-        
-    end
-    
+        end        
+    end    
 end
 
 for iBand = 1:SimParams.nBands
     for iBase = 1:SimParams.nBases
-        SimParams.txPower(SimParams.iPkt,SimParams.iSNR,iBase) = SimParams.txPower(SimParams.iPkt,SimParams.iSNR,iBase) + trace(SimStructs.baseStruct{iBase,1}.P{iBand,1}' * SimStructs.baseStruct{iBase,1}.P{iBand,1});
+        SimParams.txPower(SimParams.iPkt,SimParams.iSNR,iBase,iBand) = trace(SimStructs.baseStruct{iBase,1}.P{iBand,1}' * SimStructs.baseStruct{iBase,1}.P{iBand,1});
     end
 end
 

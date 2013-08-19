@@ -8,7 +8,7 @@ clc;clear all;
 SimParams.maxDebugCells = 4;
 SimParams.version = version;
 SimParams.outFile = 'outFile_x1.mat';
-SimParams.plotMode = 'SRA';
+SimParams.plotMode = 'QInfo';
 
 preConfiguration;
 SimParams.sysMode = 'false';
@@ -26,7 +26,7 @@ SimParams.robustNoise = 0;
 SimParams.weighingEqual = 'false';
 SimParams.SchedType = 'SkipScheduling';
 SimParams.PrecodingMethod = 'Best_QwtWSRM_Method';
-SimParams.weightedSumRateMethod = 'JointApproach';
+SimParams.weightedSumRateMethod = 'BandAlloc';
 
 SimParams.nDrops = 1;
 SimParams.snrIndex = [10];
@@ -37,18 +37,18 @@ SimParams.sampTime = 1e-3;
 SimParams.estError = 0.00;
 SimParams.fbFraction = 0.0;
 
-SimParams.nBands = 5;
+SimParams.nBands = 3;
 SimParams.nBases = 1;
-SimParams.nUsers = 4;
+SimParams.nUsers = 3;
 
-SimParams.nTxAntenna = 4;
+SimParams.nTxAntenna = 1;
 SimParams.nRxAntenna = 1;
 SimParams.ffrProfile_dB = zeros(1,SimParams.nBands);
 
 SimParams.gracePeriod = 0;
 SimParams.arrivalDist = 'ConstFixed';
 
-SimParams.maxArrival = 15;
+SimParams.maxArrival = 5;
 SimParams.FixedPacketArrivals = [2,2,2,2,2];
 SimParams.PL_Profile = [5 -inf 5 -inf 5 -inf 1e-20 0; -inf 5 -inf 5 -inf 5 0 1e-20];
 
@@ -59,23 +59,7 @@ if strcmp(SimParams.sysMode,'true')
     SimParams.nUsers = 570;
 end
 
-nSINRSamples = length(SimParams.snrIndex);
-nPacketSamples = length(SimParams.maxArrival);
-SimStructs.userStruct = cell(SimParams.nUsers,1);
-SimStructs.baseStruct = cell(SimParams.nBases,1);
-
-SimParams.maxRank = min(SimParams.nRxAntenna,SimParams.nTxAntenna);
-SimParams.muxRank = min(SimParams.nTxAntenna,(SimParams.nRxAntenna * SimParams.nUsers));
-
-SimParams.Thrpt = zeros(nSINRSamples,SimParams.nUsers,nPacketSamples);
-utilityScale = SimParams.nDrops * SimParams.muxRank * SimParams.nBands;
-SimParams.fairness = zeros(nSINRSamples,SimParams.nUsers,nPacketSamples);
-
-queueBacklogs = zeros(nSINRSamples,SimParams.nUsers,nPacketSamples);
-sumRateInstant = zeros(nSINRSamples,SimParams.nDrops,nPacketSamples);
-queueBacklogsOverTime = zeros(nSINRSamples,SimParams.nUsers,nPacketSamples,SimParams.nDrops);
-SimParams.txPower = zeros(length(SimParams.maxArrival),length(SimParams.snrIndex),SimParams.nBases);
-
+bufferInitializations;
 if strcmp(SimParams.DebugMode,'true')
     keyboard;
 end
@@ -152,14 +136,14 @@ switch SimParams.plotMode
         JainMean = mean(SimParams.Thrpt,2).^2;JainVar = var(SimParams.Thrpt,0,2);
         JainIndex_capacity = JainMean ./ (JainMean + JainVar);
         
-%         plotFigure(SimParams.snrIndex,JainIndex_capacity,2,'plot');
-%         xlabel('SNR in dB');ylabel('Rate Deviation across Users in bits/sec/Hz');
+        plotFigure(SimParams.snrIndex,JainIndex_capacity,2,'plot');
+        xlabel('SNR in dB');ylabel('Rate Deviation across Users in bits/sec/Hz');
         
         JainMean = mean(SimParams.fairness,2).^2;JainVar = var(SimParams.fairness,0,2);
         JainIndex_utility = JainMean ./ (JainMean + JainVar);
         
-%         plotFigure(SimParams.snrIndex,JainIndex_utility,3,'plot');
-%         xlabel('SNR in dB');ylabel('Network Utility Deviation across Users');
+        plotFigure(SimParams.snrIndex,JainIndex_utility,3,'plot');
+        xlabel('SNR in dB');ylabel('Network Utility Deviation across Users');
 
         
     case 'QA'
@@ -170,13 +154,11 @@ switch SimParams.plotMode
         plotFigure(1:SimParams.nDrops,sum(squeeze(SimResults.queueBackLogsOverTime(end,:,end,:)),1),4,'plot');
         xlabel('Slot Index');ylabel('Queue Backlogs (pkts) over Time');grid on;
         
-%         plotFigure(1:SimParams.nDrops,std(squeeze(SimResults.queueBackLogsOverTime(end,:,end,:)),1),5,'plot');
-%         xlabel('Slot Index');ylabel('{\sigma_Q} Queue Backlogs (pkts) over Time');grid on;
+        plotFigure(1:SimParams.nDrops,std(squeeze(SimResults.queueBackLogsOverTime(end,:,end,:)),1),5,'plot');
+        xlabel('Slot Index');ylabel('{\sigma_Q} Queue Backlogs (pkts) over Time');grid on;
         
-%         plotFigure(SimParams.maxArrival,sum(squeeze(SimResults.queueBackLogs(end,:,:)),1),6,'plot');
-%         xlabel('Average Arrival Rate');ylabel('Average Queue Size (pkts)');grid on;
-%         hold all;
-
+        plotFigure(SimParams.maxArrival,sum(squeeze(SimResults.queueBackLogs(end,:,:)),1),6,'plot');
+        xlabel('Average Arrival Rate');ylabel('Average Queue Size (pkts)');grid on;
         
     case 'STA'
         
@@ -190,5 +172,15 @@ switch SimParams.plotMode
     case 'NRA'
         
         plotFigure(1:SimParams.nDrops,sumRateInstant,1,'plot');
+        
+    case 'QInfo'
+        
+        clc;
+        display('Displaying Channel and Queues');
+        displayChannel;displayQueues;
+        
+    otherwise
+        
+        display('Unknown print options !');        
 
 end

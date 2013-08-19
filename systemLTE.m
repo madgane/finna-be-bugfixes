@@ -54,23 +54,7 @@ SimParams.arrivalDist = 'Constant_10';
 SimParams.maxArrival = 20;
 SimParams.FixedPacketArrivals = [10,10,10,10,10,10,1,1,1,1];
 
-nSINRSamples = length(SimParams.snrIndex);
-nPacketSamples = length(SimParams.maxArrival);
-SimStructs.userStruct = cell(SimParams.nUsers,1);
-SimStructs.baseStruct = cell(SimParams.nBases,1);
-
-SimParams.maxRank = min(SimParams.nRxAntenna,SimParams.nTxAntenna);
-SimParams.muxRank = min(SimParams.nTxAntenna,(SimParams.nRxAntenna * SimParams.nUsers));
-
-SimParams.Thrpt = zeros(nSINRSamples,SimParams.nUsers,nPacketSamples);
-utilityScale = SimParams.nDrops * SimParams.muxRank * SimParams.nBands;
-SimParams.fairness = zeros(nSINRSamples,SimParams.nUsers,nPacketSamples);
-
-queueBacklogs = zeros(nSINRSamples,SimParams.nUsers,nPacketSamples);
-sumRateInstant = zeros(nSINRSamples,SimParams.nDrops,nPacketSamples);
-queueBacklogsOverTime = zeros(nSINRSamples,SimParams.nUsers,nPacketSamples,SimParams.nDrops);
-SimParams.txPower = zeros(length(SimParams.maxArrival),length(SimParams.snrIndex),SimParams.nBases);
-
+bufferInitializations;
 if strcmp(SimParams.DebugMode,'true')
     keyboard;
 end
@@ -153,23 +137,19 @@ switch SimParams.plotMode
         
         
     case 'QA'
-        
+                        
         SimResults.queueBackLogs = queueBacklogs;
         SimResults.queueBackLogsOverTime = queueBacklogsOverTime;
         
-        figure(4);hold all;
-        plot(1:SimParams.nDrops,sum(squeeze(SimResults.queueBackLogsOverTime(end,:,end,:)),1));
+        plotFigure(1:SimParams.nDrops,sum(squeeze(SimResults.queueBackLogsOverTime(end,:,end,:)),1),4,'plot');
         xlabel('Slot Index');ylabel('Queue Backlogs (pkts) over Time');grid on;
         
-        figure(5);hold all;
-        plot(1:SimParams.nDrops,std(squeeze(SimResults.queueBackLogsOverTime(end,:,end,:)),1));
+        plotFigure(1:SimParams.nDrops,std(squeeze(SimResults.queueBackLogsOverTime(end,:,end,:)),1),5,'plot');
         xlabel('Slot Index');ylabel('{\sigma_Q} Queue Backlogs (pkts) over Time');grid on;
         
-        figure(6);hold all;
-        plot(SimParams.maxArrival,sum(squeeze(SimResults.queueBackLogs(end,:,:)),1));
+        plotFigure(SimParams.maxArrival,sum(squeeze(SimResults.queueBackLogs(end,:,:)),1),6,'plot');
         xlabel('Average Arrival Rate');ylabel('Average Queue Size (pkts)');grid on;
-        hold all;
-        
+
         
     case 'STA'
         
@@ -195,5 +175,10 @@ switch SimParams.plotMode
         
         SimParams.Reports.cellSpectralEfficiency = sum(SimParams.Thrpt) / (SimParams.nBases * SimParams.sysConfig.subChnlBWHz);
         SimParams.Reports.cellSpectralEfficiency = usableFraction * SimParams.Reports.cellSpectralEfficiency / (SimParams.sampTime / SimParams.SFSymbols);
+        
+    otherwise
+        
+        display('Unknown print options !');        
+
         
 end

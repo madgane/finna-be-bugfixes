@@ -10,6 +10,8 @@ end
 servedPkts = sum(txPkts,2);
 Qdeviation = sum(max((Queues - servedPkts),0));
 
+QueueMatrix = [txPkts Queues servedPkts];
+
 display(Qdeviation);
-[txPkts Queues servedPkts]
+display(QueueMatrix);
 

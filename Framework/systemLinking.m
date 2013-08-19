@@ -41,7 +41,7 @@ end
 
 if exist('SimParams.ffrProfile_dB','var')
     ffrProfile = 10.^(0.1 * SimParams.ffrProfile_dB);
-    SimParams.sPower = SimParams.nBands * SimParams.sPower * ffrProfile ./ sum(ffrProfile);
+    SimParams.sPower = SimParams.nBands * SimParams.sPower * ffrProfile;
 else
     SimParams.sPower = ones(1,SimParams.nBands) * SimParams.sPower;
 end
