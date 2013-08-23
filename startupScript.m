@@ -26,7 +26,7 @@ SimParams.robustNoise = 0;
 SimParams.weighingEqual = 'false';
 SimParams.SchedType = 'SkipScheduling';
 SimParams.PrecodingMethod = 'Best_QwtWSRM_Method';
-SimParams.weightedSumRateMethod = 'GenAlloc';
+SimParams.weightedSumRateMethod = 'JointAlloc';
 
 SimParams.nDrops = 1;
 SimParams.snrIndex = [10];
@@ -37,12 +37,12 @@ SimParams.sampTime = 1e-3;
 SimParams.estError = 0.00;
 SimParams.fbFraction = 0.0;
 
-SimParams.nBands = 3;
+SimParams.nBands = 5;
 SimParams.nBases = 1;
-SimParams.nUsers = 4;
+SimParams.nUsers = 8;
 
 SimParams.nTxAntenna = 4;
-SimParams.nRxAntenna = 2;
+SimParams.nRxAntenna = 1;
 SimParams.ffrProfile_dB = zeros(1,SimParams.nBands);
 
 SimParams.gracePeriod = 0;
