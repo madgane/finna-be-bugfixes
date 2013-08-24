@@ -1,4 +1,8 @@
 
+fprintf('\n');
+display('Displaying System Channel');
+display('-------------------------');
+
 ChannelMatrix = zeros(SimParams.nUsers,SimParams.nBands);
 
 for iUser = 1:SimParams.nUsers    

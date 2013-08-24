@@ -26,7 +26,7 @@ SimParams.robustNoise = 0;
 SimParams.weighingEqual = 'false';
 SimParams.SchedType = 'SkipScheduling';
 SimParams.PrecodingMethod = 'Best_QwtWSRM_Method';
-SimParams.weightedSumRateMethod = 'GenAlloc';
+SimParams.weightedSumRateMethod = 'GenBandAlloc';
 
 SimParams.nDrops = 1;
 SimParams.snrIndex = [10];
@@ -38,17 +38,17 @@ SimParams.estError = 0.00;
 SimParams.fbFraction = 0.0;
 
 SimParams.nBands = 3;
-SimParams.nBases = 1;
-SimParams.nUsers = 4;
+SimParams.nBases = 2;
+SimParams.nUsers = 2;
 
-SimParams.nTxAntenna = 4;
-SimParams.nRxAntenna = 2;
+SimParams.nTxAntenna = 2;
+SimParams.nRxAntenna = 1;
 SimParams.ffrProfile_dB = zeros(1,SimParams.nBands);
 
 SimParams.gracePeriod = 0;
 SimParams.arrivalDist = 'Constant';
 
-SimParams.maxArrival = 20;
+SimParams.maxArrival = 10;
 SimParams.FixedPacketArrivals = [2,2,2,2,2];
 SimParams.PL_Profile = [5 -inf 5 -inf 5 -inf 1e-20 0; -inf 5 -inf 5 -inf 5 0 1e-20];
 
@@ -176,8 +176,7 @@ switch SimParams.plotMode
     case 'QInfo'
         
         clc;
-        display('Displaying Channel and Queues');
-        displayChannel;displayQueues;
+        displaySystemDetails;displayChannel;displayQueues;
         
     otherwise
         

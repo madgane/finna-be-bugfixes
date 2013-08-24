@@ -1,4 +1,8 @@
 
+fprintf('\n');
+display('Displaying User Queue status');
+display('----------------------------');
+
 Queues = zeros(SimParams.nUsers,1);
 txPkts = zeros(SimParams.nUsers,SimParams.nBands);
 
@@ -12,6 +16,5 @@ Qdeviation = sum(max((Queues - servedPkts),0));
 
 QueueMatrix = [txPkts Queues servedPkts];
 
-display(Qdeviation);
 display(QueueMatrix);
-
+fprintf('Queue Deviation - %f \n',Qdeviation);
