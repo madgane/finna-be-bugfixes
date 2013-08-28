@@ -45,6 +45,24 @@ switch pathLossModel
         
         [SimParams] = getRandomPathLoss(SimParams);
         
+    case 'Perturbed'
+        
+        if ~isempty(uscore_index)
+            randGain = str2double(plModel(uscore_index(1,1) + 1:end));
+        else
+            randGain = 1;
+        end
+        
+        userVector = 1:SimParams.nUsers;
+        shareUserCnt = SimParams.nUsers / SimParams.nBases;
+        SimParams.PL_Profile = zeros(SimParams.nBases,SimParams.nUsers);
+        
+        for iBase = 1:SimParams.nBases
+            userIndices = (1 + (iBase - 1) * shareUserCnt):(iBase * shareUserCnt);oBaseIndices = setxor(userIndices,userVector);
+            SimParams.PL_Profile(iBase,userIndices) = SimParams.PL_Profile(iBase,userIndices) + rand(1,length(userIndices)) * randGain;
+            SimParams.PL_Profile(iBase,oBaseIndices) = SimParams.PL_Profile(iBase,oBaseIndices) - rand(1,length(oBaseIndices)) * randGain;
+        end
+        
     case 'Fixed'
         
         SimParams.PL_Profile = SimParams.PL_Profile;

@@ -49,4 +49,8 @@ SimParams.Debug.activeStatus = zeros(SimParams.nUsers,SimParams.nBands);
 SimParams.Debug.receivedRSSI = zeros(SimParams.nRxAntenna,SimParams.nRxAntenna,SimParams.nUsers,SimParams.nBands);
 SimParams.Debug.tempResource = cell(SimParams.maxDebugCells,1);
 
+% 1 used for per-antenna-power-constraint work
+% 2 used for queue-weighted-precoding-scheme
+% 3 used for queue-deviation procedure
+
 end

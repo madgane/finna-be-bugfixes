@@ -8,6 +8,8 @@ nBands = SimParams.nBands;
 updatePrecoders = 'true';
 usersPerCell = zeros(nBases,1);
 cellUserIndices = cell(nBases,1);
+SimParams.Debug.tempResource{2,1} = cell(SimParams.nUsers,1);
+SimParams.Debug.tempResource{3,1} = cell(SimParams.nUsers,1);
 
 for iBase = 1:nBases
     for iBand = 1:nBands
@@ -19,6 +21,7 @@ end
 
 nUsers = sum(usersPerCell);
 QueuedPkts = zeros(nUsers,1);
+bandRateMax = zeros(SimParams.nUsers,nBands);
 
 for iBase = 1:nBases
     for iUser = 1:usersPerCell(iBase,1)
@@ -41,7 +44,7 @@ switch SimParams.weightedSumRateMethod
             for iBase = 1:nBases
                 for iUser = 1:usersPerCell(iBase,1)
                     cUser = cellUserIndices{iBase,1}(iUser,1);
-                    SimStructs.userStruct{cUser,1}.weighingFactor = QueuedPkts(iUser,1);
+                    SimStructs.userStruct{cUser,1}.weighingFactor = QueuedPkts(cUser,1);
                 end
             end
             
@@ -49,6 +52,16 @@ switch SimParams.weightedSumRateMethod
             [SimParams, SimStructs] = getWeightedMMSEDesign(SimParams,SimStructs);
             
             [SimParams,SimStructs] = performDummyReception(SimParams,SimStructs,iBand);
+            
+            for iBase = 1:nBases
+                for iUser = 1:usersPerCell(iBase,1)
+                    cUser = cellUserIndices{iBase,1}(iUser,1);
+                    qDeviation = max(QueuedPkts(cUser,1) - SimParams.Debug.privateExchanges.resAllocation(iBand,cUser),0);
+                    SimParams.Debug.tempResource{2,1}{cUser,1} = [SimParams.Debug.tempResource{2,1}{cUser,1} max(SimParams.Debug.tempResource{2,1}{cUser,1}) + SimParams.Debug.privateExchanges.resAllocation(iBand,cUser)];
+                    SimParams.Debug.tempResource{3,1}{cUser,1} = [SimParams.Debug.tempResource{3,1}{cUser,1} qDeviation];
+                end
+            end
+            
             QueuedPkts = max(QueuedPkts - SimParams.Debug.privateExchanges.resAllocation(iBand,:)',0);
             
         end
@@ -144,6 +157,10 @@ switch SimParams.weightedSumRateMethod
                             currentH = cH{iBase,iBand}(:,:,cUser);
                             p_o(cUser,iBand) = real(currentH * M(:,cUser,iBand));
                             q_o(cUser,iBand) = imag(currentH * M(:,cUser,iBand));
+                            
+                            qDeviation = max(QueuedPkts(cUser,1) - sum(vec(t(cUser,:))) * log2(exp(1)),0);
+                            SimParams.Debug.tempResource{2,1}{cUser,1} = [SimParams.Debug.tempResource{2,1}{cUser,1} sum(vec(t(cUser,:)))];
+                            SimParams.Debug.tempResource{3,1}{cUser,1} = [SimParams.Debug.tempResource{3,1}{cUser,1} qDeviation];
                         end
                     end
                 end
@@ -244,6 +261,10 @@ switch SimParams.weightedSumRateMethod
                             currentH = cH{iBase,iBand}(:,:,cUser);
                             p_o(cUser,iBand) = real(currentH * M(:,cUser,iBand));
                             q_o(cUser,iBand) = imag(currentH * M(:,cUser,iBand));
+                            
+                            qDeviation = max(QueuedPkts(cUser,1) - sum(vec(t(cUser,:))) * log2(exp(1)),0);
+                            SimParams.Debug.tempResource{2,1}{cUser,1} = [SimParams.Debug.tempResource{2,1}{cUser,1} sum(vec(t(cUser,:)))];
+                            SimParams.Debug.tempResource{3,1}{cUser,1} = [SimParams.Debug.tempResource{3,1}{cUser,1} qDeviation];
                         end
                     end
                 end
@@ -263,12 +284,6 @@ switch SimParams.weightedSumRateMethod
     case 'JointBandAlloc'
         
         for iBand = 1:nBands
-            for iBase = 1:nBases
-                for iUser = 1:usersPerCell(iBase,1)
-                    cUser = cellUserIndices{iBase,1}(iUser,1);
-                    SimStructs.userStruct{cUser,1}.weighingFactor = QueuedPkts(iUser,1);
-                end
-            end
             
             reIterate = 1;
             cvx_hist = -500 * ones(2,1);
@@ -331,7 +346,6 @@ switch SimParams.weightedSumRateMethod
                     
                     norm(vec(M(:,cellUserIndices{iBase,1})),2) <= sqrt(SimStructs.baseStruct{iBase,1}.sPower(1,iBand));
                     
-                    
                     for iUser = 1:usersPerCell(iBase,1)
                         cUser = cellUserIndices{iBase,1}(iUser,1);
                         norm(t(cUser,1),1) <= QueuedPkts(cUser,1) * log(2);
@@ -350,6 +364,10 @@ switch SimParams.weightedSumRateMethod
                             currentH = cH{iBase,iBand}(:,:,cUser);
                             p_o(cUser,1) = real(currentH * M(:,cUser));
                             q_o(cUser,1) = imag(currentH * M(:,cUser));
+                            
+                            qDeviation = max(QueuedPkts(cUser,1) - sum(vec(t(cUser,:))) * log2(exp(1)),0);
+                            SimParams.Debug.tempResource{2,1}{cUser,1} = [SimParams.Debug.tempResource{2,1}{cUser,1} sum(vec(t(cUser,:))) + sum(bandRateMax(cUser,1:(iBand-1)))];
+                            SimParams.Debug.tempResource{3,1}{cUser,1} = [SimParams.Debug.tempResource{3,1}{cUser,1} qDeviation];
                         end
                     end
                     
@@ -375,7 +393,7 @@ switch SimParams.weightedSumRateMethod
             
             [SimParams,SimStructs] = performDummyReception(SimParams,SimStructs,iBand);
             QueuedPkts = max(QueuedPkts - SimParams.Debug.privateExchanges.resAllocation(iBand,:)',0);
-            
+            bandRateMax(:,iBand) = log(2) * SimParams.Debug.privateExchanges.resAllocation(iBand,:)';
         end
         
         updatePrecoders = 'false';
@@ -386,33 +404,119 @@ switch SimParams.weightedSumRateMethod
         maxRank = SimParams.maxRank;
         rankUsers = nUsers * maxRank;
         
-        globalReIterate = 1;
-        yIndex = 0;firstRun = 1;
-        g_history = -500 * ones(2,1);
+        xIndex = 0;
+        reIterate = 1;
+        cvx_hist = -500 * ones(2,1);
         
-        while globalReIterate
+        for iBase = 1:nBases
+            for iBand = 1:nBands
+                for iUser = 1:usersPerCell(iBase,1)
+                    cUser = cellUserIndices{iBase,1}(iUser,1);
+                    vW{cUser,iBand} = ones(SimParams.nRxAntenna,maxRank) / sqrt(SimParams.nRxAntenna);
+                end
+            end
+        end
+        
+        p_o = ones(maxRank,nUsers,nBands) / rankUsers;
+        q_o = ones(maxRank,nUsers,nBands) / rankUsers;
+        b_o = ones(maxRank,nUsers,nBands) * 10 + rand(maxRank,nUsers,nBands);
+        
+        while reIterate
             
-            xIndex = 0;
-            reIterate = 1;
-            cvx_hist = -500 * ones(2,1);
+            cvx_begin
             
-            if firstRun
+            expressions p(maxRank,nUsers,nBands) q(maxRank,nUsers,nBands)
+            variable M(SimParams.nTxAntenna,maxRank,nUsers,nBands) complex
+            variables t(maxRank,nUsers,nBands) b(maxRank,nUsers,nBands) g(maxRank,nUsers,nBands)
+            variables userObjective(nUsers,1) epiObjective
+            
+            minimize(epiObjective)
+            
+            subject to
+            
+            for iUser = 1:nUsers
+                abs(QueuedPkts(iUser,1) - sum(vec(t(:,iUser,:)))) <= userObjective(iUser,1);
+            end
+            
+            epiObjective >= norm(userObjective,1);
+            
+            for iBase = 1:nBases
+                for iBand = 1:nBands
+                    for iUser = 1:usersPerCell(iBase,1)
+                        
+                        cUser = cellUserIndices{iBase,1}(iUser,1);
+                        for iLayer = 1:maxRank
+                            intVector = sqrt(SimParams.N);
+                            
+                            for jBase = 1:nBases
+                                currentH = cH{jBase,iBand}(:,:,cUser);
+                                for jUser = 1:usersPerCell(jBase,1)
+                                    rUser = cellUserIndices{jBase,1}(jUser,1);
+                                    if rUser ~= cUser
+                                        for jLayer = 1:maxRank
+                                            intVector = [intVector ; vW{cUser,iBand}(:,iLayer)' * currentH * M(:,jLayer,rUser,iBand)];
+                                        end
+                                    else
+                                        for jLayer = 1:maxRank
+                                            if jLayer ~= iLayer
+                                                intVector = [intVector ; vW{cUser,iBand}(:,iLayer)' * currentH * M(:,jLayer,rUser,iBand)];
+                                            end
+                                        end
+                                    end
+                                end
+                            end
+                            
+                            norm(intVector,2) <= sqrt(b(iLayer,cUser,iBand));
+                            log(1 + g(iLayer,cUser,iBand)) >= t(iLayer,cUser,iBand);
+                            
+                            currentH = cH{iBase,iBand}(:,:,cUser);
+                            p(iLayer,cUser,iBand) = real(vW{cUser,iBand}(:,iLayer)' * currentH * M(:,iLayer,cUser,iBand));
+                            q(iLayer,cUser,iBand) = imag(vW{cUser,iBand}(:,iLayer)' * currentH * M(:,iLayer,cUser,iBand));
+                            
+                            q(iLayer,cUser,iBand) == 0;
+                            
+                            (p_o(iLayer,cUser,iBand)^2 + q_o(iLayer,cUser,iBand)^2) / (b_o(iLayer,cUser,iBand)) + ...
+                                (2 / b_o(iLayer,cUser,iBand)) * (p_o(iLayer,cUser,iBand) * (p(iLayer,cUser,iBand) - p_o(iLayer,cUser,iBand))) + ...
+                                (2 / b_o(iLayer,cUser,iBand)) * (q_o(iLayer,cUser,iBand) * (q(iLayer,cUser,iBand) - q_o(iLayer,cUser,iBand))) - ...
+                                (p_o(iLayer,cUser,iBand)^2 + q_o(iLayer,cUser,iBand)^2) / (2 * b_o(iLayer,cUser,iBand)^2) * ...
+                                (b(iLayer,cUser,iBand) - b_o(iLayer,cUser,iBand)) >= g(iLayer,cUser,iBand);
+                            
+                        end
+                        
+                    end
+                    
+                    norm(vec(M(:,:,cellUserIndices{iBase,1},iBand)),2) <= sqrt(SimStructs.baseStruct{iBase,1}.sPower(1,iBand));
+                    
+                end
                 
-                firstRun = 0;
-                for iBase = 1:nBases
-                    for iBand = 1:nBands
+                for iUser = 1:usersPerCell(iBase,1)
+                    cUser = cellUserIndices{iBase,1}(iUser,1);
+                    norm(vec(t(:,cUser,:)),1) <= QueuedPkts(cUser,1) * log(2);
+                end
+                
+            end
+            
+            cvx_end
+            
+            if strfind(cvx_status,'Solved')
+                
+                b_o = b;
+                for iBand = 1:nBands
+                    for iBase = 1:nBases
                         for iUser = 1:usersPerCell(iBase,1)
                             cUser = cellUserIndices{iBase,1}(iUser,1);
-                            vW{cUser,iBand} = ones(SimParams.nRxAntenna,maxRank) / sqrt(SimParams.nRxAntenna);
+                            currentH = cH{iBase,iBand}(:,:,cUser);
+                            for iLayer = 1:maxRank
+                                p_o(iLayer,cUser,iBand) = real(vW{cUser,iBand}(:,iLayer)' * currentH * M(:,iLayer,cUser,iBand));
+                                q_o(iLayer,cUser,iBand) = imag(vW{cUser,iBand}(:,iLayer)' * currentH * M(:,iLayer,cUser,iBand));
+                            end
+                            
+                            qDeviation = max(QueuedPkts(cUser,1) - sum(vec(t(:,cUser,:))) * log2(exp(1)),0);
+                            SimParams.Debug.tempResource{2,1}{cUser,1} = [SimParams.Debug.tempResource{2,1}{cUser,1} sum(vec(t(:,cUser,:)))];
+                            SimParams.Debug.tempResource{3,1}{cUser,1} = [SimParams.Debug.tempResource{3,1}{cUser,1} qDeviation];
                         end
                     end
                 end
-                
-                p_o = ones(maxRank,nUsers,nBands) / rankUsers;
-                q_o = ones(maxRank,nUsers,nBands) / rankUsers;
-                b_o = ones(maxRank,nUsers,nBands) * 10 + rand(maxRank,nUsers,nBands);
-                
-            else
                 
                 for iBand = 1:nBands
                     for iBase = 1:nBases
@@ -435,122 +539,14 @@ switch SimParams.weightedSumRateMethod
                     end
                 end
                 
-                p_o = ones(maxRank,nUsers,nBands) / rankUsers;
-                q_o = ones(maxRank,nUsers,nBands) / rankUsers;
-                b_o = ones(maxRank,nUsers,nBands) * 10 + rand(maxRank,nUsers,nBands);
-                
-            end
-            
-            while reIterate
-                
-                cvx_begin
-                
-                expressions p(maxRank,nUsers,nBands) q(maxRank,nUsers,nBands)
-                variable M(SimParams.nTxAntenna,maxRank,nUsers,nBands) complex
-                variables t(maxRank,nUsers,nBands) b(maxRank,nUsers,nBands) g(maxRank,nUsers,nBands)
-                variables userObjective(nUsers,1) epiObjective
-                
-                minimize(epiObjective)
-                
-                subject to
-                
-                for iUser = 1:nUsers
-                    abs(QueuedPkts(iUser,1) - sum(vec(t(:,iUser,:)))) <= userObjective(iUser,1);
-                end
-                
-                epiObjective >= norm(userObjective,1);
-                
-                for iBase = 1:nBases
-                    for iBand = 1:nBands
-                        for iUser = 1:usersPerCell(iBase,1)
-                            
-                            cUser = cellUserIndices{iBase,1}(iUser,1);
-                            for iLayer = 1:maxRank
-                                intVector = sqrt(SimParams.N);
-                                
-                                for jBase = 1:nBases
-                                    currentH = cH{jBase,iBand}(:,:,cUser);
-                                    for jUser = 1:usersPerCell(jBase,1)
-                                        rUser = cellUserIndices{jBase,1}(jUser,1);
-                                        if rUser ~= cUser
-                                            for jLayer = 1:maxRank
-                                                intVector = [intVector ; vW{cUser,iBand}(:,iLayer)' * currentH * M(:,jLayer,rUser,iBand)];
-                                            end
-                                        else
-                                            for jLayer = 1:maxRank
-                                                if jLayer ~= iLayer
-                                                    intVector = [intVector ; vW{cUser,iBand}(:,iLayer)' * currentH * M(:,jLayer,rUser,iBand)];
-                                                end
-                                            end
-                                        end
-                                    end
-                                end
-                                
-                                norm(intVector,2) <= sqrt(b(iLayer,cUser,iBand));
-                                log(1 + g(iLayer,cUser,iBand)) >= t(iLayer,cUser,iBand);
-                                
-                                currentH = cH{iBase,iBand}(:,:,cUser);
-                                p(iLayer,cUser,iBand) = real(vW{cUser,iBand}(:,iLayer)' * currentH * M(:,iLayer,cUser,iBand));
-                                q(iLayer,cUser,iBand) = imag(vW{cUser,iBand}(:,iLayer)' * currentH * M(:,iLayer,cUser,iBand));
-                                
-                                q(iLayer,cUser,iBand) == 0;
-                                
-                                (p_o(iLayer,cUser,iBand)^2 + q_o(iLayer,cUser,iBand)^2) / (b_o(iLayer,cUser,iBand)) + ...
-                                    (2 / b_o(iLayer,cUser,iBand)) * (p_o(iLayer,cUser,iBand) * (p(iLayer,cUser,iBand) - p_o(iLayer,cUser,iBand))) + ...
-                                    (2 / b_o(iLayer,cUser,iBand)) * (q_o(iLayer,cUser,iBand) * (q(iLayer,cUser,iBand) - q_o(iLayer,cUser,iBand))) - ...
-                                    (p_o(iLayer,cUser,iBand)^2 + q_o(iLayer,cUser,iBand)^2) / (2 * b_o(iLayer,cUser,iBand)^2) * ...
-                                    (b(iLayer,cUser,iBand) - b_o(iLayer,cUser,iBand)) >= g(iLayer,cUser,iBand);
-                                
-                            end
-                            
-                        end
-                        
-                        norm(vec(M(:,:,cellUserIndices{iBase,1},iBand)),2) <= sqrt(SimStructs.baseStruct{iBase,1}.sPower(1,iBand));
-                        
-                    end
-                    
-                    for iUser = 1:usersPerCell(iBase,1)
-                        cUser = cellUserIndices{iBase,1}(iUser,1);
-                        norm(vec(t(:,cUser,:)),1) <= QueuedPkts(cUser,1) * log(2);
-                    end
-                    
-                end
-                
-                cvx_end
-                
-                if strfind(cvx_status,'Solved')
-                    
-                    b_o = b;
-                    for iBand = 1:nBands
-                        for iBase = 1:nBases
-                            for iUser = 1:usersPerCell(iBase,1)
-                                cUser = cellUserIndices{iBase,1}(iUser,1);
-                                currentH = cH{iBase,iBand}(:,:,cUser);
-                                for iLayer = 1:maxRank
-                                    p_o(iLayer,cUser,iBand) = real(vW{cUser,iBand}(:,iLayer)' * currentH * M(:,iLayer,cUser,iBand));
-                                    q_o(iLayer,cUser,iBand) = imag(vW{cUser,iBand}(:,iLayer)' * currentH * M(:,iLayer,cUser,iBand));
-                                end
-                            end
-                        end
-                    end
-                    
-                    if min(abs(cvx_optval - cvx_hist)) <= 1e-4
-                        reIterate = 0;
-                    else
-                        xIndex = xIndex + 1;
-                        cvx_hist(mod(xIndex,2) + 1,1) = cvx_optval;
-                    end
+                if min(abs(cvx_optval - cvx_hist)) <= 1e-4
+                    reIterate = 0;
                 else
-                    b_o = b_o * 2;
+                    xIndex = xIndex + 1;
+                    cvx_hist(mod(xIndex,2) + 1,1) = cvx_optval;
                 end
-                
-            end
-            
-            if min(abs(cvx_optval - g_history)) <= 1e-3
-                globalReIterate = 0;
             else
-                yIndex = yIndex + 1;
-                g_history(mod(yIndex,2) + 1,1) = cvx_optval;
+                b_o = b_o * 2;
             end
             
         end
@@ -571,32 +567,118 @@ switch SimParams.weightedSumRateMethod
     case 'GenBandAlloc'
         
         for iBand = 1:nBands
-
+            
             vW = cell(nUsers,1);
             maxRank = SimParams.maxRank;
             rankUsers = nUsers * maxRank;
             
-            globalReIterate = 1;
-            yIndex = 0;firstRun = 1;
-            g_history = -500 * ones(2,1);
+            xIndex = 0;
+            reIterate = 1;
+            cvx_hist = -500 * ones(2,1);
             
-            while globalReIterate
+            for iBase = 1:nBases
+                for iUser = 1:usersPerCell(iBase,1)
+                    cUser = cellUserIndices{iBase,1}(iUser,1);
+                    vW{cUser,1} = ones(SimParams.nRxAntenna,maxRank) / sqrt(SimParams.nRxAntenna);
+                end
+            end
+            
+            
+            p_o = ones(maxRank,nUsers) / rankUsers;
+            q_o = ones(maxRank,nUsers) / rankUsers;
+            b_o = ones(maxRank,nUsers) * 10 + rand(maxRank,nUsers);
+            
+            while reIterate
                 
-                xIndex = 0;
-                reIterate = 1;
-                cvx_hist = -500 * ones(2,1);
+                cvx_begin
                 
-                if firstRun
+                expressions p(maxRank,nUsers) q(maxRank,nUsers)
+                variable M(SimParams.nTxAntenna,maxRank,nUsers) complex
+                variables t(maxRank,nUsers) b(maxRank,nUsers) g(maxRank,nUsers)
+                variables userObjective(nUsers,1) epiObjective
+                
+                maximize(epiObjective)
+                
+                subject to
+                
+                for iUser = 1:nUsers
+                    QueuedPkts(iUser,1) * sum(vec(t(:,iUser))) >= userObjective(iUser,1);
+                end
+                
+                epiObjective <= sum(userObjective);
+                
+                for iBase = 1:nBases
+                    for iUser = 1:usersPerCell(iBase,1)
+                        
+                        cUser = cellUserIndices{iBase,1}(iUser,1);
+                        for iLayer = 1:maxRank
+                            intVector = sqrt(SimParams.N);
+                            
+                            for jBase = 1:nBases
+                                currentH = cH{jBase,iBand}(:,:,cUser);
+                                for jUser = 1:usersPerCell(jBase,1)
+                                    rUser = cellUserIndices{jBase,1}(jUser,1);
+                                    if rUser ~= cUser
+                                        for jLayer = 1:maxRank
+                                            intVector = [intVector ; vW{cUser,1}(:,iLayer)' * currentH * M(:,jLayer,rUser)];
+                                        end
+                                    else
+                                        for jLayer = 1:maxRank
+                                            if jLayer ~= iLayer
+                                                intVector = [intVector ; vW{cUser,1}(:,iLayer)' * currentH * M(:,jLayer,rUser)];
+                                            end
+                                        end
+                                    end
+                                end
+                            end
+                            
+                            norm(intVector,2) <= sqrt(b(iLayer,cUser));
+                            log(1 + g(iLayer,cUser)) >= t(iLayer,cUser);
+                            
+                            currentH = cH{iBase,iBand}(:,:,cUser);
+                            p(iLayer,cUser) = real(vW{cUser,1}(:,iLayer)' * currentH * M(:,iLayer,cUser));
+                            q(iLayer,cUser) = imag(vW{cUser,1}(:,iLayer)' * currentH * M(:,iLayer,cUser));
+                            
+                            q(iLayer,cUser) == 0;
+                            
+                            (p_o(iLayer,cUser)^2 + q_o(iLayer,cUser)^2) / (b_o(iLayer,cUser)) + ...
+                                (2 / b_o(iLayer,cUser)) * (p_o(iLayer,cUser) * (p(iLayer,cUser) - p_o(iLayer,cUser))) + ...
+                                (2 / b_o(iLayer,cUser)) * (q_o(iLayer,cUser) * (q(iLayer,cUser) - q_o(iLayer,cUser))) - ...
+                                (p_o(iLayer,cUser)^2 + q_o(iLayer,cUser)^2) / (2 * b_o(iLayer,cUser)^2) * ...
+                                (b(iLayer,cUser) - b_o(iLayer,cUser)) >= g(iLayer,cUser);
+                            
+                        end
+                        
+                    end
                     
-                    firstRun = 0;
+                    norm(vec(M(:,:,cellUserIndices{iBase,1})),2) <= sqrt(SimStructs.baseStruct{iBase,1}.sPower(1,iBand));
+                    
+                    for iUser = 1:usersPerCell(iBase,1)
+                        cUser = cellUserIndices{iBase,1}(iUser,1);
+                        norm(vec(t(:,cUser)),1) <= QueuedPkts(cUser,1) * log(2);
+                    end
+                    
+                end
+                
+                cvx_end
+                
+                if strfind(cvx_status,'Solved')
+                    
+                    b_o = b;
                     for iBase = 1:nBases
                         for iUser = 1:usersPerCell(iBase,1)
                             cUser = cellUserIndices{iBase,1}(iUser,1);
-                            vW{cUser,1} = ones(SimParams.nRxAntenna,maxRank) / sqrt(SimParams.nRxAntenna);
+                            currentH = cH{iBase,iBand}(:,:,cUser);
+                            for iLayer = 1:maxRank
+                                p_o(iLayer,cUser) = real(vW{cUser,1}(:,iLayer)' * currentH * M(:,iLayer,cUser));
+                                q_o(iLayer,cUser) = imag(vW{cUser,1}(:,iLayer)' * currentH * M(:,iLayer,cUser));
+                            end
+                            
+                            qDeviation = max(QueuedPkts(cUser,1) - sum(vec(t(:,cUser,:))) * log2(exp(1)),0);
+                            SimParams.Debug.tempResource{2,1}{cUser,1} = [SimParams.Debug.tempResource{2,1}{cUser,1} sum(vec(t(:,cUser,:))) + sum(bandRateMax(cUser,1:(iBand - 1)))];
+                            SimParams.Debug.tempResource{3,1}{cUser,1} = [SimParams.Debug.tempResource{3,1}{cUser,1} qDeviation];
                         end
                     end
-                    
-                else
                     
                     for iBase = 1:nBases
                         for iUser = 1:usersPerCell(iBase,1)
@@ -617,117 +699,14 @@ switch SimParams.weightedSumRateMethod
                         end
                     end
                     
-                end
-                
-                p_o = ones(maxRank,nUsers) / rankUsers;
-                q_o = ones(maxRank,nUsers) / rankUsers;
-                b_o = ones(maxRank,nUsers) * 10 + rand(maxRank,nUsers);
-                                
-                while reIterate
-                    
-                    cvx_begin
-                    
-                    expressions p(maxRank,nUsers) q(maxRank,nUsers)
-                    variable M(SimParams.nTxAntenna,maxRank,nUsers) complex
-                    variables t(maxRank,nUsers) b(maxRank,nUsers) g(maxRank,nUsers)
-                    variables userObjective(nUsers,1) epiObjective
-                    
-                    maximize(epiObjective)
-                    
-                    subject to
-                    
-                    for iUser = 1:nUsers
-                        QueuedPkts(iUser,1) * sum(vec(t(:,iUser))) >= userObjective(iUser,1);
-                    end
-                    
-                    epiObjective <= sum(userObjective);
-                    
-                    for iBase = 1:nBases
-                        for iUser = 1:usersPerCell(iBase,1)
-                            
-                            cUser = cellUserIndices{iBase,1}(iUser,1);
-                            for iLayer = 1:maxRank
-                                intVector = sqrt(SimParams.N);
-                                
-                                for jBase = 1:nBases
-                                    currentH = cH{jBase,iBand}(:,:,cUser);
-                                    for jUser = 1:usersPerCell(jBase,1)
-                                        rUser = cellUserIndices{jBase,1}(jUser,1);
-                                        if rUser ~= cUser
-                                            for jLayer = 1:maxRank
-                                                intVector = [intVector ; vW{cUser,1}(:,iLayer)' * currentH * M(:,jLayer,rUser)];
-                                            end
-                                        else
-                                            for jLayer = 1:maxRank
-                                                if jLayer ~= iLayer
-                                                    intVector = [intVector ; vW{cUser,1}(:,iLayer)' * currentH * M(:,jLayer,rUser)];
-                                                end
-                                            end
-                                        end
-                                    end
-                                end
-                                
-                                norm(intVector,2) <= sqrt(b(iLayer,cUser));
-                                log(1 + g(iLayer,cUser)) >= t(iLayer,cUser);
-                                
-                                currentH = cH{iBase,iBand}(:,:,cUser);
-                                p(iLayer,cUser) = real(vW{cUser,1}(:,iLayer)' * currentH * M(:,iLayer,cUser));
-                                q(iLayer,cUser) = imag(vW{cUser,1}(:,iLayer)' * currentH * M(:,iLayer,cUser));
-                                
-                                q(iLayer,cUser) == 0;
-                                
-                                (p_o(iLayer,cUser)^2 + q_o(iLayer,cUser)^2) / (b_o(iLayer,cUser)) + ...
-                                    (2 / b_o(iLayer,cUser)) * (p_o(iLayer,cUser) * (p(iLayer,cUser) - p_o(iLayer,cUser))) + ...
-                                    (2 / b_o(iLayer,cUser)) * (q_o(iLayer,cUser) * (q(iLayer,cUser) - q_o(iLayer,cUser))) - ...
-                                    (p_o(iLayer,cUser)^2 + q_o(iLayer,cUser)^2) / (2 * b_o(iLayer,cUser)^2) * ...
-                                    (b(iLayer,cUser) - b_o(iLayer,cUser)) >= g(iLayer,cUser);
-                                
-                            end
-                            
-                        end
-                        
-                        norm(vec(M(:,:,cellUserIndices{iBase,1})),2) <= sqrt(SimStructs.baseStruct{iBase,1}.sPower(1,iBand));
-                        
-                        for iUser = 1:usersPerCell(iBase,1)
-                            cUser = cellUserIndices{iBase,1}(iUser,1);
-                            norm(vec(t(:,cUser)),1) <= QueuedPkts(cUser,1) * log(2);
-                        end
-                        
-                    end
-                    
-                    cvx_end
-                    
-                    if strfind(cvx_status,'Solved')
-                        
-                        b_o = b;
-                        for iBase = 1:nBases
-                            for iUser = 1:usersPerCell(iBase,1)
-                                cUser = cellUserIndices{iBase,1}(iUser,1);
-                                currentH = cH{iBase,iBand}(:,:,cUser);
-                                for iLayer = 1:maxRank
-                                    p_o(iLayer,cUser) = real(vW{cUser,1}(:,iLayer)' * currentH * M(:,iLayer,cUser));
-                                    q_o(iLayer,cUser) = imag(vW{cUser,1}(:,iLayer)' * currentH * M(:,iLayer,cUser));
-                                end
-                            end
-                        end
-                        
-                        if min(abs(cvx_optval - cvx_hist)) <= 1e-4
-                            reIterate = 0;
-                        else
-                            xIndex = xIndex + 1;
-                            cvx_hist(mod(xIndex,2) + 1,1) = cvx_optval;
-                        end
+                    if min(abs(cvx_optval - cvx_hist)) <= 1e-4
+                        reIterate = 0;
                     else
-                        b_o = b_o * 2;
+                        xIndex = xIndex + 1;
+                        cvx_hist(mod(xIndex,2) + 1,1) = cvx_optval;
                     end
-                    
-                end
-                
-                if min(abs(cvx_optval - g_history)) <= 1e-3
-                    globalReIterate = 0;
                 else
-                    yIndex = yIndex + 1;
-                    g_history(mod(yIndex,2) + 1,1) = cvx_optval;
+                    b_o = b_o * 2;
                 end
                 
             end
@@ -741,13 +720,179 @@ switch SimParams.weightedSumRateMethod
                     P = [P M(:,:,cUser)];
                 end
                 SimStructs.baseStruct{iBase,1}.P{iBand,1} = P;
-            end            
+            end
             
             [SimParams,SimStructs] = performDummyReception(SimParams,SimStructs,iBand);
             QueuedPkts = max(QueuedPkts - SimParams.Debug.privateExchanges.resAllocation(iBand,:)',0);
+            bandRateMax(:,iBand) = log(2) * SimParams.Debug.privateExchanges.resAllocation(iBand,:)';
             
         end
         
+    case 'GlobalAlloc'
+        
+        vW = cell(nUsers,nBands);
+        maxRank = SimParams.maxRank;
+        rankUsers = nUsers * maxRank;
+        
+        xIndex = 0;
+        reIterate = 1;
+        cvx_hist = -500 * ones(2,1);
+        
+        for iBase = 1:nBases
+            for iBand = 1:nBands
+                for iUser = 1:usersPerCell(iBase,1)
+                    cUser = cellUserIndices{iBase,1}(iUser,1);
+                    vW{cUser,iBand} = ones(SimParams.nRxAntenna,maxRank) / sqrt(SimParams.nRxAntenna);
+                end
+            end
+        end
+        
+        p_o = ones(maxRank,nUsers,nBands) / rankUsers;
+        q_o = ones(maxRank,nUsers,nBands) / rankUsers;
+        b_o = ones(maxRank,nUsers,nBands) * 10 + rand(maxRank,nUsers,nBands);
+        
+        while reIterate
+            
+            cvx_begin
+            
+            expressions p(maxRank,nUsers,nBands) q(maxRank,nUsers,nBands)
+            variable M(SimParams.nTxAntenna,maxRank,nUsers,nBands) complex
+            variables t(maxRank,nUsers,nBands) b(maxRank,nUsers,nBands) g(maxRank,nUsers,nBands)
+            variables userObjective(nUsers,1) epiObjective
+            
+            minimize(epiObjective)
+            
+            subject to
+            
+            for iUser = 1:nUsers
+                abs(QueuedPkts(iUser,1) - sum(vec(t(:,iUser,:)))) <= userObjective(iUser,1);
+            end
+            
+            epiObjective >= norm(userObjective,1);
+            
+            for iBase = 1:nBases
+                for iBand = 1:nBands
+                    for iUser = 1:usersPerCell(iBase,1)
+                        
+                        cUser = cellUserIndices{iBase,1}(iUser,1);
+                        for iLayer = 1:maxRank
+                            intVector = sqrt(SimParams.N);
+                            
+                            for jBase = 1:nBases
+                                currentH = cH{jBase,iBand}(:,:,cUser);
+                                for jUser = 1:usersPerCell(jBase,1)
+                                    rUser = cellUserIndices{jBase,1}(jUser,1);
+                                    if rUser ~= cUser
+                                        for jLayer = 1:maxRank
+                                            intVector = [intVector ; vW{cUser,iBand}(:,iLayer)' * currentH * M(:,jLayer,rUser,iBand)];
+                                        end
+                                    else
+                                        for jLayer = 1:maxRank
+                                            if jLayer ~= iLayer
+                                                intVector = [intVector ; vW{cUser,iBand}(:,iLayer)' * currentH * M(:,jLayer,rUser,iBand)];
+                                            end
+                                        end
+                                    end
+                                end
+                            end
+                            
+                            norm(intVector,2) <= sqrt(b(iLayer,cUser,iBand));
+                            log(1 + g(iLayer,cUser,iBand)) >= t(iLayer,cUser,iBand);
+                            
+                            currentH = cH{iBase,iBand}(:,:,cUser);
+                            p(iLayer,cUser,iBand) = real(vW{cUser,iBand}(:,iLayer)' * currentH * M(:,iLayer,cUser,iBand));
+                            q(iLayer,cUser,iBand) = imag(vW{cUser,iBand}(:,iLayer)' * currentH * M(:,iLayer,cUser,iBand));
+                            
+                            q(iLayer,cUser,iBand) == 0;
+                            
+                            (p_o(iLayer,cUser,iBand)^2 + q_o(iLayer,cUser,iBand)^2) / (b_o(iLayer,cUser,iBand)) + ...
+                                (2 / b_o(iLayer,cUser,iBand)) * (p_o(iLayer,cUser,iBand) * (p(iLayer,cUser,iBand) - p_o(iLayer,cUser,iBand))) + ...
+                                (2 / b_o(iLayer,cUser,iBand)) * (q_o(iLayer,cUser,iBand) * (q(iLayer,cUser,iBand) - q_o(iLayer,cUser,iBand))) - ...
+                                (p_o(iLayer,cUser,iBand)^2 + q_o(iLayer,cUser,iBand)^2) / (2 * b_o(iLayer,cUser,iBand)^2) * ...
+                                (b(iLayer,cUser,iBand) - b_o(iLayer,cUser,iBand)) >= g(iLayer,cUser,iBand);
+                            
+                        end
+                        
+                    end
+                    
+                end
+                
+                for iUser = 1:usersPerCell(iBase,1)
+                    cUser = cellUserIndices{iBase,1}(iUser,1);
+                    norm(vec(t(:,cUser,:)),1) <= QueuedPkts(cUser,1) * log(2);
+                end
+                
+                norm(vec(M(:,:,cellUserIndices{iBase,1},:)),2) <= sqrt(sum(SimStructs.baseStruct{iBase,1}.sPower));
+                
+            end
+            
+            cvx_end
+            
+            if strfind(cvx_status,'Solved')
+                
+                b_o = b;
+                for iBand = 1:nBands
+                    for iBase = 1:nBases
+                        for iUser = 1:usersPerCell(iBase,1)
+                            cUser = cellUserIndices{iBase,1}(iUser,1);
+                            currentH = cH{iBase,iBand}(:,:,cUser);
+                            for iLayer = 1:maxRank
+                                p_o(iLayer,cUser,iBand) = real(vW{cUser,iBand}(:,iLayer)' * currentH * M(:,iLayer,cUser,iBand));
+                                q_o(iLayer,cUser,iBand) = imag(vW{cUser,iBand}(:,iLayer)' * currentH * M(:,iLayer,cUser,iBand));
+                            end
+                            
+                            qDeviation = max(QueuedPkts(cUser,1) - sum(vec(t(:,cUser,:))) * log2(exp(1)),0);
+                            SimParams.Debug.tempResource{2,1}{cUser,1} = [SimParams.Debug.tempResource{2,1}{cUser,1} sum(vec(t(:,cUser,:)))];
+                            SimParams.Debug.tempResource{3,1}{cUser,1} = [SimParams.Debug.tempResource{3,1}{cUser,1} qDeviation];
+                        end
+                    end
+                end
+                
+                for iBand = 1:nBands
+                    for iBase = 1:nBases
+                        for iUser = 1:usersPerCell(iBase,1)
+                            cUser = cellUserIndices{iBase,1}(iUser,1);
+                            for iLayer = 1:maxRank
+                                R = SimParams.N * eye(SimParams.nRxAntenna);
+                                for jBase = 1:nBases
+                                    for jUser = 1:usersPerCell(jBase,1)
+                                        rUser = cellUserIndices{jBase,1}(jUser,1);
+                                        H = cH{jBase,iBand}(:,:,cUser);
+                                        R = R + H * M(:,:,rUser,iBand) * M(:,:,rUser,iBand)' * H';
+                                    end
+                                end
+                                H = cH{iBase,iBand}(:,:,cUser);
+                                vW{cUser,iBand}(:,iLayer) = R \ (H * M(:,iLayer,cUser,iBand));
+                                vW{cUser,iBand}(:,iLayer) = vW{cUser,iBand}(:,iLayer) / norm(vW{cUser,iBand}(:,iLayer),2);
+                            end
+                        end
+                    end
+                end
+                
+                if min(abs(cvx_optval - cvx_hist)) <= 1e-4
+                    reIterate = 0;
+                else
+                    xIndex = xIndex + 1;
+                    cvx_hist(mod(xIndex,2) + 1,1) = cvx_optval;
+                end
+            else
+                b_o = b_o * 2;
+            end
+            
+        end
+        
+        updatePrecoders = 'false';
+        for iBase = 1:nBases
+            for iBand = 1:nBands
+                P = [];
+                SimStructs.baseStruct{iBase,1}.P{iBand,1} = zeros(SimParams.nTxAntenna,usersPerCell(iBase,1));
+                for iUser = 1:usersPerCell(iBase,1)
+                    cUser = cellUserIndices{iBase,1}(iUser,1);
+                    P = [P M(:,:,cUser,iBand)];
+                end
+                SimStructs.baseStruct{iBase,1}.P{iBand,1} = P;
+            end
+        end        
         
 end
 
@@ -761,6 +906,10 @@ if strcmp(updatePrecoders,'true')
             end
         end
     end
+end
+
+for iUser = 1:SimParams.nUsers
+    SimParams.Debug.tempResource{2,1}{iUser,1} = SimParams.Debug.tempResource{2,1}{iUser,1} * log2(exp(1));
 end
 
 end

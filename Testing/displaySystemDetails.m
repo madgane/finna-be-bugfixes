@@ -1,6 +1,4 @@
 
-
-
 fprintf('\n');
 display('Displaying System Configuration');
 display('-------------------------------');
@@ -9,6 +7,7 @@ fprintf('\n');
 fprintf('Number of BS - %d \n',SimParams.nBases);
 fprintf('Number of Users - %d \n',SimParams.nUsers);
 fprintf('Number of Bands - %d \n',SimParams.nBands);
+fprintf('Max Pkt Arrivals - %d \n',SimParams.maxArrival);
 
 fprintf('\n');
 fprintf('Total Receive Antennas - %d \n',SimParams.nRxAntenna);
