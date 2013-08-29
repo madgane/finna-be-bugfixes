@@ -63,7 +63,7 @@ switch SimParams.weightedSumRateMethod
                     qDeviation = max(QueuedPkts(cUser,1) - SimParams.Debug.privateExchanges.resAllocation(iBand,cUser),0);
                     SimParams.Debug.tempResource{2,1}{cUser,1} = [SimParams.Debug.tempResource{2,1}{cUser,1} max(SimParams.Debug.tempResource{2,1}{cUser,1}) + SimParams.Debug.privateExchanges.resAllocation(iBand,cUser)];
                     SimParams.Debug.tempResource{3,1}{cUser,1} = [SimParams.Debug.tempResource{3,1}{cUser,1} qDeviation];
-                    SimParams.Debug.tempResource{4,1}{cUser,iBand} = [SimParams.Debug.tempResource{3,1}{cUser,iBand} SimParams.Debug.privateExchanges.resAllocation(iBand,cUser)];
+                    SimParams.Debug.tempResource{4,1}{cUser,iBand} = [SimParams.Debug.tempResource{4,1}{cUser,iBand} SimParams.Debug.privateExchanges.resAllocation(iBand,cUser)];
                 end
             end
             
@@ -315,15 +315,15 @@ switch SimParams.weightedSumRateMethod
                 variables t(nUsers,1) b(nUsers,1) g(nUsers,1)
                 variables userObjective(nUsers,1) epiObjective
                 
-                maximize(epiObjective)
+                minimize(epiObjective)
                 
                 subject to
                 
                 for iUser = 1:nUsers
-                    QueuedPkts(iUser,1) * t(iUser,1) >= userObjective(iUser,1);
+                    abs(QueuedPkts(iUser,1) - t(iUser,1)) <= userObjective(iUser,1);
                 end
                 
-                epiObjective <= sum(userObjective,1);
+                epiObjective >= norm(userObjective,1);
                 
                 for iBase = 1:nBases
                     for iUser = 1:usersPerCell(iBase,1)
@@ -616,15 +616,15 @@ switch SimParams.weightedSumRateMethod
                 variables t(maxRank,nUsers) b(maxRank,nUsers) g(maxRank,nUsers)
                 variables userObjective(nUsers,1) epiObjective
                 
-                maximize(epiObjective)
+                minimize(epiObjective)
                 
                 subject to
                 
                 for iUser = 1:nUsers
-                    QueuedPkts(iUser,1) * sum(vec(t(:,iUser))) >= userObjective(iUser,1);
+                    abs(QueuedPkts(iUser,1) - sum(vec(t(:,iUser)))) <= userObjective(iUser,1);
                 end
                 
-                epiObjective <= sum(userObjective);
+                epiObjective >= norm(userObjective,1);
                 
                 for iBase = 1:nBases
                     for iUser = 1:usersPerCell(iBase,1)
