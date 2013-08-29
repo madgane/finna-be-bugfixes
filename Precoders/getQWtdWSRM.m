@@ -8,8 +8,12 @@ nBands = SimParams.nBands;
 updatePrecoders = 'true';
 usersPerCell = zeros(nBases,1);
 cellUserIndices = cell(nBases,1);
+
+% Debug Buffers initialization
+
 SimParams.Debug.tempResource{2,1} = cell(SimParams.nUsers,1);
 SimParams.Debug.tempResource{3,1} = cell(SimParams.nUsers,1);
+SimParams.Debug.tempResource{4,1} = cell(SimParams.nUsers,SimParams.nBands);
 
 for iBase = 1:nBases
     for iBand = 1:nBands
@@ -59,6 +63,7 @@ switch SimParams.weightedSumRateMethod
                     qDeviation = max(QueuedPkts(cUser,1) - SimParams.Debug.privateExchanges.resAllocation(iBand,cUser),0);
                     SimParams.Debug.tempResource{2,1}{cUser,1} = [SimParams.Debug.tempResource{2,1}{cUser,1} max(SimParams.Debug.tempResource{2,1}{cUser,1}) + SimParams.Debug.privateExchanges.resAllocation(iBand,cUser)];
                     SimParams.Debug.tempResource{3,1}{cUser,1} = [SimParams.Debug.tempResource{3,1}{cUser,1} qDeviation];
+                    SimParams.Debug.tempResource{4,1}{cUser,iBand} = [SimParams.Debug.tempResource{3,1}{cUser,iBand} SimParams.Debug.privateExchanges.resAllocation(iBand,cUser)];
                 end
             end
             
@@ -158,9 +163,12 @@ switch SimParams.weightedSumRateMethod
                             p_o(cUser,iBand) = real(currentH * M(:,cUser,iBand));
                             q_o(cUser,iBand) = imag(currentH * M(:,cUser,iBand));
                             
-                            qDeviation = max(QueuedPkts(cUser,1) - sum(vec(t(cUser,:))) * log2(exp(1)),0);
-                            SimParams.Debug.tempResource{2,1}{cUser,1} = [SimParams.Debug.tempResource{2,1}{cUser,1} sum(vec(t(cUser,:)))];
-                            SimParams.Debug.tempResource{3,1}{cUser,1} = [SimParams.Debug.tempResource{3,1}{cUser,1} qDeviation];
+                            if iBand == 1
+                                qDeviation = max(QueuedPkts(cUser,1) - sum(vec(t(cUser,:))) * log2(exp(1)),0);
+                                SimParams.Debug.tempResource{2,1}{cUser,1} = [SimParams.Debug.tempResource{2,1}{cUser,1} sum(vec(t(cUser,:)))];
+                                SimParams.Debug.tempResource{3,1}{cUser,1} = [SimParams.Debug.tempResource{3,1}{cUser,1} qDeviation];
+                            end
+                            SimParams.Debug.tempResource{4,1}{cUser,iBand} = [SimParams.Debug.tempResource{4,1}{cUser,iBand} t(cUser,iBand)];
                         end
                     end
                 end
@@ -262,9 +270,14 @@ switch SimParams.weightedSumRateMethod
                             p_o(cUser,iBand) = real(currentH * M(:,cUser,iBand));
                             q_o(cUser,iBand) = imag(currentH * M(:,cUser,iBand));
                             
-                            qDeviation = max(QueuedPkts(cUser,1) - sum(vec(t(cUser,:))) * log2(exp(1)),0);
-                            SimParams.Debug.tempResource{2,1}{cUser,1} = [SimParams.Debug.tempResource{2,1}{cUser,1} sum(vec(t(cUser,:)))];
-                            SimParams.Debug.tempResource{3,1}{cUser,1} = [SimParams.Debug.tempResource{3,1}{cUser,1} qDeviation];
+                            if iBand == 1
+                                qDeviation = max(QueuedPkts(cUser,1) - sum(vec(t(cUser,:))) * log2(exp(1)),0);
+                                SimParams.Debug.tempResource{2,1}{cUser,1} = [SimParams.Debug.tempResource{2,1}{cUser,1} sum(vec(t(cUser,:)))];
+                                SimParams.Debug.tempResource{3,1}{cUser,1} = [SimParams.Debug.tempResource{3,1}{cUser,1} qDeviation];
+                            end
+                            
+                            SimParams.Debug.tempResource{4,1}{cUser,iBand} = [SimParams.Debug.tempResource{4,1}{cUser,iBand} t(cUser,iBand)];
+                            
                         end
                     end
                 end
@@ -368,6 +381,7 @@ switch SimParams.weightedSumRateMethod
                             qDeviation = max(QueuedPkts(cUser,1) - sum(vec(t(cUser,:))) * log2(exp(1)),0);
                             SimParams.Debug.tempResource{2,1}{cUser,1} = [SimParams.Debug.tempResource{2,1}{cUser,1} sum(vec(t(cUser,:))) + sum(bandRateMax(cUser,1:(iBand-1)))];
                             SimParams.Debug.tempResource{3,1}{cUser,1} = [SimParams.Debug.tempResource{3,1}{cUser,1} qDeviation];
+                            SimParams.Debug.tempResource{4,1}{cUser,iBand} = [SimParams.Debug.tempResource{4,1}{cUser,iBand} t(cUser,1)];
                         end
                     end
                     
@@ -511,9 +525,14 @@ switch SimParams.weightedSumRateMethod
                                 q_o(iLayer,cUser,iBand) = imag(vW{cUser,iBand}(:,iLayer)' * currentH * M(:,iLayer,cUser,iBand));
                             end
                             
-                            qDeviation = max(QueuedPkts(cUser,1) - sum(vec(t(:,cUser,:))) * log2(exp(1)),0);
-                            SimParams.Debug.tempResource{2,1}{cUser,1} = [SimParams.Debug.tempResource{2,1}{cUser,1} sum(vec(t(:,cUser,:)))];
-                            SimParams.Debug.tempResource{3,1}{cUser,1} = [SimParams.Debug.tempResource{3,1}{cUser,1} qDeviation];
+                            if iBand == 1
+                                qDeviation = max(QueuedPkts(cUser,1) - sum(vec(t(:,cUser,:))) * log2(exp(1)),0);
+                                SimParams.Debug.tempResource{2,1}{cUser,1} = [SimParams.Debug.tempResource{2,1}{cUser,1} sum(vec(t(:,cUser,:)))];
+                                SimParams.Debug.tempResource{3,1}{cUser,1} = [SimParams.Debug.tempResource{3,1}{cUser,1} qDeviation];
+                            end
+                            
+                            SimParams.Debug.tempResource{4,1}{cUser,iBand} = [SimParams.Debug.tempResource{4,1}{cUser,iBand} sum(vec(t(:,cUser,iBand)))];
+                            
                         end
                     end
                 end
@@ -677,6 +696,7 @@ switch SimParams.weightedSumRateMethod
                             qDeviation = max(QueuedPkts(cUser,1) - sum(vec(t(:,cUser,:))) * log2(exp(1)),0);
                             SimParams.Debug.tempResource{2,1}{cUser,1} = [SimParams.Debug.tempResource{2,1}{cUser,1} sum(vec(t(:,cUser,:))) + sum(bandRateMax(cUser,1:(iBand - 1)))];
                             SimParams.Debug.tempResource{3,1}{cUser,1} = [SimParams.Debug.tempResource{3,1}{cUser,1} qDeviation];
+                            SimParams.Debug.tempResource{4,1}{cUser,iBand} = [SimParams.Debug.tempResource{4,1}{cUser,iBand} sum(vec(t(:,cUser,1)))];
                         end
                     end
                     
@@ -841,9 +861,12 @@ switch SimParams.weightedSumRateMethod
                                 q_o(iLayer,cUser,iBand) = imag(vW{cUser,iBand}(:,iLayer)' * currentH * M(:,iLayer,cUser,iBand));
                             end
                             
-                            qDeviation = max(QueuedPkts(cUser,1) - sum(vec(t(:,cUser,:))) * log2(exp(1)),0);
-                            SimParams.Debug.tempResource{2,1}{cUser,1} = [SimParams.Debug.tempResource{2,1}{cUser,1} sum(vec(t(:,cUser,:)))];
-                            SimParams.Debug.tempResource{3,1}{cUser,1} = [SimParams.Debug.tempResource{3,1}{cUser,1} qDeviation];
+                            if iBand == 1
+                                qDeviation = max(QueuedPkts(cUser,1) - sum(vec(t(:,cUser,:))) * log2(exp(1)),0);
+                                SimParams.Debug.tempResource{2,1}{cUser,1} = [SimParams.Debug.tempResource{2,1}{cUser,1} sum(vec(t(:,cUser,:)))];
+                                SimParams.Debug.tempResource{3,1}{cUser,1} = [SimParams.Debug.tempResource{3,1}{cUser,1} qDeviation];
+                            end
+                            SimParams.Debug.tempResource{4,1}{cUser,iBand} = [SimParams.Debug.tempResource{4,1}{cUser,iBand} sum(vec(t(:,cUser,iBand)))];
                         end
                     end
                 end

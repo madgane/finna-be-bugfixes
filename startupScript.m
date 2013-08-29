@@ -40,11 +40,11 @@ SimParams.sampTime = 1e-3;
 SimParams.estError = 0.00;
 SimParams.fbFraction = 0.0;
 
-SimParams.nBands = 3;
+SimParams.nBands = 5;
 SimParams.nBases = 2;
-SimParams.nUsers = 6;
+SimParams.nUsers = 10;
 
-SimParams.nTxAntenna = 2;
+SimParams.nTxAntenna = 4;
 SimParams.nRxAntenna = 2;
 SimParams.ffrProfile_dB = zeros(1,SimParams.nBands);
 

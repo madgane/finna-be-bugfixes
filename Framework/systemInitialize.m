@@ -50,7 +50,8 @@ SimParams.Debug.receivedRSSI = zeros(SimParams.nRxAntenna,SimParams.nRxAntenna,S
 SimParams.Debug.tempResource = cell(SimParams.maxDebugCells,1);
 
 % 1 used for per-antenna-power-constraint work
-% 2 used for queue-weighted-precoding-scheme
+% 2 used for queue-weighted precoding scheme
 % 3 used for queue-deviation procedure
+% 4 used for queue-weighted precoding scheme
 
 end
