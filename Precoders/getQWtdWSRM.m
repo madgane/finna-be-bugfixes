@@ -931,8 +931,11 @@ if strcmp(updatePrecoders,'true')
     end
 end
 
-for iUser = 1:SimParams.nUsers
+for iUser = 1:nUsers
     SimParams.Debug.tempResource{2,1}{iUser,1} = SimParams.Debug.tempResource{2,1}{iUser,1} * log2(exp(1));
+    for iBand = 1:nBands
+        SimParams.Debug.tempResource{4,1}{iUser,iBand} = SimParams.Debug.tempResource{4,1}{iUser,iBand} * log2(exp(1));
+    end
 end
 
 end
