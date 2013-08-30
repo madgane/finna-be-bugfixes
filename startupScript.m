@@ -29,7 +29,7 @@ SimParams.robustNoise = 0;
 SimParams.weighingEqual = 'false';
 SimParams.SchedType = 'SkipScheduling';
 SimParams.PrecodingMethod = 'Best_QwtWSRM_Method';
-SimParams.weightedSumRateMethod = 'GenBandAlloc';
+SimParams.weightedSumRateMethod = 'BandAlloc';
 
 SimParams.nDrops = 1;
 SimParams.snrIndex = [10];
@@ -189,6 +189,7 @@ end
 
 if strcmp(saveContents,'true')
     
+    cd Results;
     if exist(sprintf('%s.mat',SimParams.outFile),'file')
         load(SimParams.outFile);
         globalCount = globalCount + 1;
@@ -200,7 +201,8 @@ if strcmp(saveContents,'true')
     
     SimParamsCell{globalCount,1} = SimParams;
     SimStructsCell{globalCount,1} = SimStructs;
-    save(SimParams.outFile,'globalCount','SimParamsCell','SimStructsCell');
+    save(SimParams.outFile,'globalCount','SimParamsCell','SimStructsCell');    
+    cd ../
     
 end
 

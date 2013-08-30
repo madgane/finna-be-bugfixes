@@ -56,20 +56,22 @@ switch SimParams.weightedSumRateMethod
             [SimParams, SimStructs] = getWeightedMMSEDesign(SimParams,SimStructs);
             
             [SimParams,SimStructs] = performDummyReception(SimParams,SimStructs,iBand);
-            
-            for iBase = 1:nBases
-                for iUser = 1:usersPerCell(iBase,1)
-                    cUser = cellUserIndices{iBase,1}(iUser,1);
-                    qDeviation = max(QueuedPkts(cUser,1) - SimParams.Debug.privateExchanges.resAllocation(iBand,cUser),0);
-                    SimParams.Debug.tempResource{2,1}{cUser,1} = [SimParams.Debug.tempResource{2,1}{cUser,1} max(SimParams.Debug.tempResource{2,1}{cUser,1}) + SimParams.Debug.privateExchanges.resAllocation(iBand,cUser)];
-                    SimParams.Debug.tempResource{3,1}{cUser,1} = [SimParams.Debug.tempResource{3,1}{cUser,1} qDeviation];
-                    SimParams.Debug.tempResource{4,1}{cUser,iBand} = [SimParams.Debug.tempResource{4,1}{cUser,iBand} SimParams.Debug.privateExchanges.resAllocation(iBand,cUser)];
-                end
-            end
-            
             QueuedPkts = max(QueuedPkts - SimParams.Debug.privateExchanges.resAllocation(iBand,:)',0);
             
         end
+        
+        for iBase = 1:nBases
+            for iUser = 1:usersPerCell(iBase,1)
+                cUser = cellUserIndices{iBase,1}(iUser,1);
+                sumRateOverBand = [];bandMaxRate = 0;
+                for iBand = 1:nBands
+                    sumRateOverBand = [sumRateOverBand (SimParams.Debug.tempResource{4,1}{cUser,iBand} + bandMaxRate)];
+                    bandMaxRate = max(sumRateOverBand);
+                end
+                SimParams.Debug.tempResource{2,1}{cUser,1} = sumRateOverBand;
+            end
+        end
+
         
         SimParams.PrecodingMethod = currentDesign;
         SimParams.weightedSumRateMethod = currentApproach;

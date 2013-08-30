@@ -3,6 +3,7 @@ fprintf('\n');
 display('Displaying User Queue status');
 display('----------------------------');
 
+printLatexScript = 'false';
 Queues = zeros(SimParams.nUsers,1);
 txPkts = zeros(SimParams.nUsers,SimParams.nBands);
 
@@ -18,3 +19,19 @@ QueueMatrix = [txPkts Queues servedPkts];
 
 display(QueueMatrix);
 fprintf('Queue Deviation - %f \n',Qdeviation);
+
+% Displaying in Latex import format
+
+if strcmp(printLatexScript,'true')
+    
+    [nRows,nCols] = size(QueueMatrix);
+
+    for iRow = 1:nRows
+        for iCol = 1:nCols
+            fprintf('& %3.2f \t',QueueMatrix(iRow,iCol));
+        end
+        fprintf('\n');
+    end
+    
+end
+

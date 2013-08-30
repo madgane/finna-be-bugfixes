@@ -104,18 +104,17 @@ for iBand = bandRange
                 display('Lack of Convergence !');
             end
             
-%            if strcmp(SimParams.plotMode,'NRA')
-%                if iIter >= SimParams.iDrop
-%                    continueAgain = 0;
-%                end
-%            end
-
-            
         end
         
         W_prev = W;
         iIter = iIter + 1;
-        SumCapacity{iBand,1} = [SumCapacity{iBand,1} ; performMockReception(SimParams,SimStructs,V,iBand)];
+        [sumCap,qDev,rVec] = performMockReception(SimParams,SimStructs,V,iBand);
+        
+        SumCapacity{iBand,1} = [SumCapacity{iBand,1} ; sumCap];
+        for iUser = 1:SimParams.nUsers
+            SimParams.Debug.tempResource{3,1}{iUser,1} = [SimParams.Debug.tempResource{3,1}{iUser,1} qDev(iUser,1)];
+            SimParams.Debug.tempResource{4,1}{iUser,iBand} = [SimParams.Debug.tempResource{4,1}{iUser,iBand} (rVec(iUser,1) * log(2))];
+        end
         
     end
     

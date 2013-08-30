@@ -1,6 +1,6 @@
 
 clc;clear all;close all;
-load('defaultOutFile.mat');
+load('Results\defaultOutFile_x42.mat');
 
 maxIterations = 700;
 allocatedBuffer = 2;
@@ -27,14 +27,14 @@ for iBase = 1:SimParamsCell{1,1}.nBases
     end
 end
 
-figure(1);
+figure(1);box on;
 xlabel('Iteration index');ylabel('Rate achieved by users independently (in bits)');
 legend('User - {1} Queue','User - {2} Queue','User - {3} Queue','User - {4} Queue');
 
-figure(2);
+figure(2);box on;
 xlabel('Iteration index');ylabel('Rate achieved by users independently (in bits)');
 legend('User - {5} Queue','User - {6} Queue','User - {7} Queue','User - {8} Queue');
-for iCount = 9:globalCount
+for iCount = 1:globalCount
     
     SimParams = SimParamsCell{iCount,1};
     SimStructs = SimStructsCell{iCount,1};
@@ -42,7 +42,7 @@ for iCount = 9:globalCount
     
     if ~strcmp(SimParams.weightedSumRateMethod,'BandAlloc')
         figLineWidth = 2;
-        figLineType = linePalette{1,iCount - 7};
+        figLineType = linePalette{1,iCount};
         maxIterations = max(length(SimParams.Debug.tempResource{allocatedBuffer,1}{1,1}),maxIterations);
         for iBase = 1:SimParams.nBases
             figure(iBase);
@@ -60,17 +60,19 @@ end
 
 figLineWidth = 2;
 figLineType = linePalette{1,4};
-figure(SimParams.nBases + 1);hold on;
-for iCount = 9:globalCount
+figure(SimParamsCell{1,1}.nBases + 1);hold on;
 
-    figColor = colorPalette{1,iCount-8};
+for iCount = 1:globalCount
+
+    figColor = colorPalette{1,iCount};
     SimParams = SimParamsCell{iCount,1};
     SimStructs = SimStructsCell{iCount,1};
-
+    
     QdevMatrix = cell2mat(SimParams.Debug.tempResource{3,1});
     plot(sum(QdevMatrix),'Color',figColor,'LineWidth',figLineWidth,...
         'LineStyle',figLineType);
+    
 end
 
+box on;
 xlabel('Iteration index');ylabel('Queue deviation (in bits)');
-
