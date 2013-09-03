@@ -917,8 +917,8 @@ switch SimParams.weightedSumRateMethod
                 end
                 SimStructs.baseStruct{iBase,1}.P{iBand,1} = P;
             end
-        end        
-        
+        end                
+       
 end
 
 if strcmp(updatePrecoders,'true')
