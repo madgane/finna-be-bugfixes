@@ -33,17 +33,14 @@ for iBase = 1:nBases
     end
 end
 
+
+
+
+
 switch SimParams.weightedSumRateMethod
     
     case 'DistJointAlloc'
-        
-        cY = cell(nBases,1);
-        cM = cell(nBases,1);
-        
-        masterIterate = 1;
-        fixedLambda = zeros(nUsers,nBands);
-        fixedIF = ones(nUsers,nBases,nBands) * 100;
-        
+       
         while masterIterate
             
             for iBase = 1:nBases
@@ -59,9 +56,11 @@ switch SimParams.weightedSumRateMethod
                     
                     cvx_begin
                     
+                    dual varaibles dTO{nUsers,nBands} dFR{nUsers,nBands}
+                    
                     expressions p(nUsers,nBands) q(nUsers,nBands)
                     variable M(SimParams.nTxAntenna,nUsers,nBands) complex
-                    variables t(nUsers,nBands) b(nUsers,nBands) g(nUsers,nBands) y(nUsers,nBands)
+                    variables t(nUsers,nBands) b(nUsers,nBands) g(nUsers,nBands)
                     variables userObjective(nUsers,1) epiObjective
                     
                     minimize(epiObjective)
@@ -72,8 +71,8 @@ switch SimParams.weightedSumRateMethod
                         cUser = cellUserIndices{iBase,1}(iUser,1);
                         abs(QueuedPkts(cUser,1) - sum(t(cUser,:))) <= userObjective(cUser,1);
                     end
-                    
-                    epiObjective >= norm(userObjective,1) + sum(vec(y.*fixedLambda));
+                                        
+                    epiObjective >= norm(userObjective,1);
                     
                     for iBand = 1:nBands
                         
@@ -95,7 +94,7 @@ switch SimParams.weightedSumRateMethod
                                 end
                             end
                             
-                            norm(intVector,2) <= sqrt(b(cUser,iBand));
+                            dFR{cUser,iBand} : norm(intVector,2) <= sqrt(b(cUser,iBand));
                             log(1 + g(cUser,iBand)) >= t(cUser,iBand);
                             
                             currentH = cH{iBase,iBand}(:,:,cUser);
@@ -123,24 +122,12 @@ switch SimParams.weightedSumRateMethod
                                     intVector = [intVector ; interH * M(:,cUser,iBand)];
                                 end
                                 
-                                norm(intVector,2) <= sqrt(y(jUser,iBand));
-                                y(jUser,iBand) <= fixedIF(jUser,iBand);
-                            else
-                                y(jUser,iBand) == 0;
+                                dTO{jUser,iBand} : norm(intVector,2) <= sqrt(fixedIF(jUser,iBase,iBand));
                             end
                         end
                     end
                     
                     norm(vec(M(:,cellUserIndices{iBase,1},iBand)),2) <= sqrt(SimStructs.baseStruct{iBase,1}.sPower(1,iBand));
-                    
-                    vectorM = [];
-                    for jBase = 1:nBases
-                        if jBase ~= iBase
-                            vectorM = [vectorM ; M(:,cellUserIndices{jBase,1},iBand)];
-                        end
-                    end
-                    
-                    real(vectorM) == 1e-6;imag(vectorM) == 1e-6;
                     
                     for iUser = 1:usersPerCell(iBase,1)
                         cUser = cellUserIndices{iBase,1}(iUser,1);
@@ -149,10 +136,10 @@ switch SimParams.weightedSumRateMethod
                     
                     cvx_end
                     
-                    display([y fixedIF]);                    
                     if strfind(cvx_status,'Solved')
                         
                         b_o = b;
+                        M = full(M);
                         for iBand = 1:nBands
                             for iUser = 1:usersPerCell(iBase,1)
                                 cUser = cellUserIndices{iBase,1}(iUser,1);
@@ -182,23 +169,32 @@ switch SimParams.weightedSumRateMethod
                 end                
                 
                 cM{iBase,1} = M;
-                cY{iBase,1} = y;
-                
+                cTO{iBase,1} = dTO;
+                cFR{iBase,1} = dFR;
+                                
             end
             
-            fixedLambda_hist = fixedLambda;
-            fixedLambda = fixedLambda_hist;
+            fixedIFH = fixedIF;
+            fixedIF = zeros(nUsers,nBases,nBands);
             
-            for iBase = 1:nBases
-               fixedLambda = fixedLambda + (cY{iBase,1} - fixedLambda_hist) * 0.5;
+            for iBand = 1:nBands
+                for iUser = 1:nUsers
+                    baseNode = SimStructs.userStruct{iUser,1}.baseNode;
+                    for iBase = 1:nBases
+                        if baseNode ~= iBase
+                            fixedIF(iUser,iBase,iBand) = fixedIFH(iUser,iBase,iBand) + (cFR{baseNode,1}{iUser,iBand} - cTO{iBase,1}{iUser,iBand});
+                        end
+                    end                    
+                end                
             end
             
-            norm(vec(fixedLambda_hist - fixedLambda))
-            if norm(vec(fixedLambda_hist - fixedLambda)) <= 1e-3
+            fixedIF = max(fixedIF,0);
+            if norm(vec(fixedIF - fixedIFH),1) <= 1e-1
                 masterIterate = 0;
             end
             
-            fixedIF = mean(mean(fixedIF)) * ones(nUsers,nBands);
+            norm(vec(fixedIF - fixedIFH),1)
+            
         end
         
         updatePrecoders = 'false';
