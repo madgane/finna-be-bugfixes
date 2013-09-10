@@ -200,7 +200,12 @@ end
 
 for iBand = 1:SimParams.nBands
     for iBase = 1:SimParams.nBases
-        SimParams.txPower(SimParams.iPkt,SimParams.iSNR,iBase,iBand) = trace(SimStructs.baseStruct{iBase,1}.P{iBand,1}' * SimStructs.baseStruct{iBase,1}.P{iBand,1});
+        totPower = 0;
+        [~,~,nMatrices] = size(SimStructs.baseStruct{iBase,1}.P{iBand,1});
+        for iMatrix = 1:nMatrices
+            totPower = totPower + trace(SimStructs.baseStruct{iBase,1}.P{iBand,1}(:,:,iMatrix)' * SimStructs.baseStruct{iBase,1}.P{iBand,1}(:,:,iMatrix));
+        end
+        SimParams.txPower(SimParams.iPkt,SimParams.iSNR,iBase,iBand) = totPower;
     end
 end
 

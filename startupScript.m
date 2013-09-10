@@ -19,7 +19,7 @@ SimParams.DebugMode = 'false';
 SimParams.precoderWithIdealChn = 'false';
 
 SimParams.ChannelModel = 'IID';
-SimParams.pathLossModel = 'Perturbed';
+SimParams.pathLossModel = 'CellEdge';
 SimParams.DopplerType = 'Uniform_10';
 
 SimParams.queueWt = 1;
@@ -29,7 +29,7 @@ SimParams.robustNoise = 0;
 SimParams.weighingEqual = 'false';
 SimParams.SchedType = 'SkipScheduling';
 SimParams.PrecodingMethod = 'Best_QwtWSRMD_Method';
-SimParams.weightedSumRateMethod = 'PrimalDecomposition';
+SimParams.weightedSumRateMethod = 'PrimalMethod';
 
 SimParams.nDrops = 1;
 SimParams.snrIndex = [10];
@@ -40,7 +40,7 @@ SimParams.sampTime = 1e-3;
 SimParams.estError = 0.00;
 SimParams.fbFraction = 0.0;
 
-SimParams.nBands = 2;
+SimParams.nBands = 1;
 SimParams.nBases = 4;
 SimParams.nUsers = 8;
 
