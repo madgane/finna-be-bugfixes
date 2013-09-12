@@ -9,6 +9,8 @@ usersPerCell = zeros(nBases,1);
 cellUserIndices = cell(nBases,1);
 cellNeighbourIndices = cell(nBases,1);
 
+mIterationsSCA = 20;mIterationsSG = 20;sumDeviationH = -50;
+
 % Debug Buffers initialization
 
 SimParams.Debug.tempResource{2,1} = cell(SimParams.nUsers,1);
@@ -45,15 +47,15 @@ switch SimParams.weightedSumRateMethod
     
     case 'PrimalMethod'
         
-        alpha = 0.5;
+        alpha = 1;
         nLayers = SimParams.maxRank;
-        mIterationsSCA = 50;mIterationsSG = 20;sumDeviationH = -50;
         cellP = cell(nBases,1);cellQ = cell(nBases,1);cellB = cell(nBases,1);
         cellM = cell(nBases,1);cellD = cell(nBases,1);cellBH = cell(nBases,1);W = cell(nUsers,1);
         
         xIteration = 0;
         scaContinue = 1;
-                
+        currentIF = ones(nLayers,nUsers,nBases,nBands) * SimParams.sPower;
+        
         while scaContinue
             
             yIteration = 0;
@@ -109,8 +111,6 @@ switch SimParams.weightedSumRateMethod
             end
             
             xIteration = xIteration + 1;
-            currentIF = ones(nLayers,nUsers,nBases,nBands) * SimParams.sPower;
-            
             if xIteration > mIterationsSCA
                 scaContinue = 0;
             end
@@ -218,6 +218,14 @@ switch SimParams.weightedSumRateMethod
                     
                     cvx_end
                     
+                    display(t);
+                    
+                    if iBase == 1
+                        status = strcat(cvx_status,'-');                    
+                    else
+                        status = strcat(status,cvx_status);                    
+                    end
+                    
                     if strfind(cvx_status,'Solved')
                         
                         cellM{iBase,1} = M;
@@ -234,7 +242,17 @@ switch SimParams.weightedSumRateMethod
                             end
                         end
                         
+                    else
+                        for iUser = 1:kUsers
+                            cUser = cellUserIndices{iBase,1}(iUser,1);
+                            SimParams.Debug.tempResource{2,1}{cUser,1} = [SimParams.Debug.tempResource{2,1}{cUser,1} SimParams.Debug.tempResource{2,1}{cUser,1}(1,end)];
+                            SimParams.Debug.tempResource{3,1}{cUser,1} = [SimParams.Debug.tempResource{3,1}{cUser,1} SimParams.Debug.tempResource{3,1}{cUser,1}(1,end)];
+                            for iBand = 1:nBands
+                                SimParams.Debug.tempResource{4,1}{cUser,iBand} = [SimParams.Debug.tempResource{4,1}{cUser,iBand} SimParams.Debug.tempResource{3,1}{cUser,iBand}(1,end)];
+                            end
+                        end
                     end
+
                     
                 end
                 
@@ -247,14 +265,16 @@ switch SimParams.weightedSumRateMethod
                             for iLayer = 1:nLayers
                                 cUser = cellNeighbourIndices{iBase,1}(iUser,1);
                                 baseNode = SimStructs.userStruct{cUser,1}.baseNode;
-                                currentIF(iLayer,cUser,iBase,iBand) = currentIFH(iLayer,cUser,iBase,iBand) - alpha * (cellD{baseNode,1}{iLayer,cUser,iBand} - cellD{iBase,1}{iLayer,cUser,iBand});
+                                currentIF(iLayer,cUser,iBase,iBand) = currentIFH(iLayer,cUser,iBase,iBand) - (alpha / sqrt(yIteration)) * (cellD{baseNode,1}{iLayer,cUser,iBand} - cellD{iBase,1}{iLayer,cUser,iBand});
                             end
                         end
                     end
                 end
                 
+                display(status);
+                display(currentIF);
                 currentIF = max(currentIF,0);
-                if norm(vec(currentIF - currentIFH),2) <= 1e-3
+                if norm(vec(currentIF - currentIFH),2) <= 1e-4
                     masterContinue = 0;
                 end
                 
@@ -277,15 +297,15 @@ switch SimParams.weightedSumRateMethod
         
     case 'DualMethod'
         
-        alpha = 0.5;
+        alpha = 0.0005;
         nLayers = SimParams.maxRank;
-        mIterationsSCA = 50;mIterationsSG = 5;sumDeviationH = -50;
         cellP = cell(nBases,1);cellQ = cell(nBases,1);cellB = cell(nBases,1);
         cellM = cell(nBases,1);cellX = cell(nBases,1);cellBH = cell(nBases,1);W = cell(nUsers,1);
         
         xIteration = 0;
         scaContinue = 1;
-                
+        currentDual = zeros(nLayers,nUsers,nBases,nBands);
+        
         while scaContinue
             
             yIteration = 0;
@@ -340,8 +360,6 @@ switch SimParams.weightedSumRateMethod
             end
             
             xIteration = xIteration + 1;
-            currentDual = zeros(nLayers,nUsers,nBases,nBands);
-            
             if xIteration > mIterationsSCA
                 scaContinue = 0;
             end
@@ -381,9 +399,9 @@ switch SimParams.weightedSumRateMethod
                                 if jBase ~= iBase
                                     tempFirst = tempFirst + sum(currentDual(:,cUser,jBase,iBand) .* x(:,cUser,jBase,iBand));
                                 end
-                            end                            
-                        end 
-                                      
+                            end
+                        end
+                        
                         tempSecond = 0;
                         for iUser = 1:length(cellNeighbourIndices{iBase,1})
                             cUser = cellNeighbourIndices{iBase,1}(iUser,1);
@@ -391,7 +409,7 @@ switch SimParams.weightedSumRateMethod
                         end
                     end
                     
-                    epiObjective >= norm(userObjective,1) + tempFirst + tempSecond;
+                    epiObjective >= norm(userObjective,1) + tempFirst - tempSecond;
                     
                     for iBand = 1:nBands
                         
@@ -466,6 +484,12 @@ switch SimParams.weightedSumRateMethod
                     
                     cvx_end
                     
+                    if iBase == 1
+                        status = strcat(cvx_status,'-');
+                    else
+                        status = strcat(status,cvx_status);
+                    end
+
                     if strfind(cvx_status,'Solved')
                         
                         cellM{iBase,1} = M;
@@ -482,8 +506,16 @@ switch SimParams.weightedSumRateMethod
                             end
                         end
                         
-                    end
-                    
+                    else
+                        for iUser = 1:kUsers
+                            cUser = cellUserIndices{iBase,1}(iUser,1);
+                            SimParams.Debug.tempResource{2,1}{cUser,1} = [SimParams.Debug.tempResource{2,1}{cUser,1} SimParams.Debug.tempResource{2,1}{cUser,1}(1,end)];
+                            SimParams.Debug.tempResource{3,1}{cUser,1} = [SimParams.Debug.tempResource{3,1}{cUser,1} SimParams.Debug.tempResource{3,1}{cUser,1}(1,end)];
+                            for iBand = 1:nBands
+                                SimParams.Debug.tempResource{4,1}{cUser,iBand} = [SimParams.Debug.tempResource{4,1}{cUser,iBand} SimParams.Debug.tempResource{3,1}{cUser,iBand}(1,end)];
+                            end
+                        end
+                    end                    
                 end
                 
                 currentDualH = currentDual;
@@ -495,7 +527,7 @@ switch SimParams.weightedSumRateMethod
                             for iLayer = 1:nLayers
                                 for jBase = 1:nBases
                                     if jBase ~= iBase
-                                        currentDual(iLayer,cUser,jBase,iBand) = currentDualH(iLayer,cUser,jBase,iBand) - alpha * ...
+                                        currentDual(iLayer,cUser,jBase,iBand) = currentDualH(iLayer,cUser,jBase,iBand) + alpha * ...
                                             (cellX{iBase,1}(iLayer,cUser,jBase,iBand) - cellX{jBase,1}(iLayer,cUser,jBase,iBand));
                                     end
                                 end
@@ -503,8 +535,11 @@ switch SimParams.weightedSumRateMethod
                         end
                     end
                 end
-                                            
-                if norm(vec(currentDual - currentDualH),2) <= 1e-3
+                
+                display(status);
+                display(currentDual);
+                display([squeeze(cellX{1}) squeeze(cellX{2})]);
+                if norm(vec(currentDual - currentDualH),2) <= 1e-4
                     masterContinue = 0;
                 end
                 
@@ -524,7 +559,6 @@ switch SimParams.weightedSumRateMethod
                 SimStructs.baseStruct{iBase,1}.P{iBand,1} = cellM{iBase,1}(:,:,:,iBand);
             end
         end
-        
         
 end
 

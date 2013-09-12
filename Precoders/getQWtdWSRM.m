@@ -937,7 +937,7 @@ switch SimParams.weightedSumRateMethod
             end
         end
         
-        e_o = rand(maxRank,nUsers,nBands) + 1;
+        t_o = ones(maxRank,nUsers,nBands);
         
         while reIterate
             
@@ -981,10 +981,8 @@ switch SimParams.weightedSumRateMethod
                             
                             H = cH{iBase,iBand}(:,:,cUser);
                             intVector = [intVector ; (1 - vW{cUser,iBand}(:,iLayer)' * H * M(:,iLayer,cUser,iBand))];
-                            norm(intVector,2) <= sqrt(e(iLayer,cUser,iBand));
-                            
-                            -log(e_o(iLayer,cUser,iBand)) - e_o(iLayer,cUser,iBand)^(-1) * ...
-                                (e(iLayer,cUser,iBand) - e_o(iLayer,cUser,iBand)) >= t(iLayer,cUser,iBand);
+                            norm(intVector,2) <= sqrt(exp(-t_o(iLayer,cUser,iBand)) - exp(-t_o(iLayer,cUser,iBand)) ...
+                                * (t(iLayer,cUser,iBand) - t_o(iLayer,cUser,iBand)));
                             
                             imag(vW{cUser,iBand}(:,iLayer)' * H * M(:,iLayer,cUser,iBand)) == 0;
                         end
@@ -998,14 +996,12 @@ switch SimParams.weightedSumRateMethod
                     sum(vec(t(:,cUser,:))) <= QueuedPkts(cUser,1) * log(2);
                 end
             end  
-  
-            e >= 0;
             
             cvx_end
             
             if strfind(cvx_status,'Solved')
                 
-                e_o = e;
+                t_o = t;
                 for iBand = 1:nBands
                     for iBase = 1:nBases
                         for iUser = 1:usersPerCell(iBase,1)
@@ -1049,8 +1045,6 @@ switch SimParams.weightedSumRateMethod
                     xIndex = xIndex + 1;
                     cvx_hist(mod(xIndex,2) + 1,1) = cvx_optval;
                 end
-            else
-                e_o = e_o * 2;
             end
             
         end
