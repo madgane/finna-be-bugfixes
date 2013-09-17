@@ -220,9 +220,9 @@ switch SimParams.weightedSumRateMethod
                     cvx_end
                     
                     if iBase == 1
-                        status = strcat(cvx_status,'-');
+                        status = cvx_status;
                     else
-                        status = strcat(status,cvx_status);
+                        status = strcat(status,'-',cvx_status);
                     end
                     
                     if strfind(cvx_status,'Solved')
@@ -296,7 +296,7 @@ switch SimParams.weightedSumRateMethod
         
     case 'ADMMMethod'
         
-        alpha = 0.01;
+        alpha = 0.5;
         nLayers = SimParams.maxRank;
         cellP = cell(nBases,1);cellQ = cell(nBases,1);cellB = cell(nBases,1);
         cellM = cell(nBases,1);cellX = cell(nBases,1);cellBH = cell(nBases,1);W = cell(nUsers,1);
@@ -494,9 +494,9 @@ switch SimParams.weightedSumRateMethod
                     cvx_end
                     
                     if iBase == 1
-                        status = strcat(cvx_status,'-');
+                        status = cvx_status;
                     else
-                        status = strcat(status,cvx_status);
+                        status = strcat(status,'-',cvx_status);
                     end
                     
                     if strfind(cvx_status,'Solved')
