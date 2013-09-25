@@ -5,7 +5,7 @@
 
 clc;clear all;
 
-saveContents = 'false';
+saveContents = 'true';
 SimParams.outFile = 'defaultOutFile';
 
 SimParams.maxDebugCells = 4;
@@ -28,8 +28,8 @@ SimParams.robustNoise = 0;
 
 SimParams.weighingEqual = 'false';
 SimParams.SchedType = 'SkipScheduling';
-SimParams.PrecodingMethod = 'Best_QwtWSRM_Method';
-SimParams.weightedSumRateMethod = 'JointAlloc';
+SimParams.PrecodingMethod = 'Best_QwtWSRMD_Method';
+SimParams.weightedSumRateMethod = 'ADMMMethod';
 
 SimParams.nDrops = 1;
 SimParams.snrIndex = [10];
@@ -40,12 +40,12 @@ SimParams.sampTime = 1e-3;
 SimParams.estError = 0.00;
 SimParams.fbFraction = 0.0;
 
-SimParams.nBands = 1;
-SimParams.nBases = 4;
-SimParams.nUsers = 4;
+SimParams.nBands = 5;
+SimParams.nBases = 3;
+SimParams.nUsers = 18;
 
 SimParams.nTxAntenna = 4;
-SimParams.nRxAntenna = 1;
+SimParams.nRxAntenna = 2;
 SimParams.ffrProfile_dB = zeros(1,SimParams.nBands);
 
 SimParams.gracePeriod = 0;

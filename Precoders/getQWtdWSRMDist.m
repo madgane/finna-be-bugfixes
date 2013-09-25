@@ -10,7 +10,7 @@ cellUserIndices = cell(nBases,1);
 cellNeighbourIndices = cell(nBases,1);
 
 dualEvaluateAgain = 'false';
-mIterationsSCA = 20;mIterationsSG = 100;sumDeviationH = -50;
+mIterationsSCA = 50;mIterationsSG = 100;sumDeviationH = -50;
 
 % Debug Buffers initialization
 
@@ -82,8 +82,8 @@ switch SimParams.weightedSumRateMethod
                                 end
                             end
                             H = cH{baseNode,iBand}(:,:,iUser);
-                            xUser = iUser == cellUserIndices{baseNode,1};
-                            W{iUser,iBand}(:,iLayer) = R \ (H * cellM{baseNode,iBand}(:,iLayer,xUser,iBand));
+                            xUser = (iUser == cellUserIndices{baseNode,1});
+                            W{iUser,iBand}(:,iLayer) = R \ (H * cellM{baseNode,1}(:,iLayer,xUser,iBand));
                             W{iUser,iBand}(:,iLayer) = W{iUser,iBand}(:,iLayer) / norm(W{iUser,iBand}(:,iLayer),2);
                         end
                     end
@@ -308,26 +308,6 @@ switch SimParams.weightedSumRateMethod
             
             yIteration = 0;
             masterContinue = 1;
-            if xIteration == 0
-                for iBase = 1:nBases
-                    cellP{iBase,1} = ones(nLayers,usersPerCell(iBase,1),nBands) / usersPerCell(iBase,1);
-                    cellQ{iBase,1} = ones(nLayers,usersPerCell(iBase,1),nBands) / usersPerCell(iBase,1);
-                    cellB{iBase,1} = ones(nLayers,usersPerCell(iBase,1),nBands) * 10 + rand(nLayers,usersPerCell(iBase,1),nBands);
-                end
-            else
-                for iBase = 1:nBases
-                    cellB{iBase,1} = cellBH{iBase,1};
-                    for iBand = 1:nBands
-                        for iUser = 1:usersPerCell(iBase,1)
-                            cUser = cellUserIndices{iBase,1}(iUser,1);
-                            for iLayer = 1:nLayers
-                                cellP{iBase,1}(iLayer,iUser,iBand) = real(cH{iBase,iBand}(:,:,cUser) * cellM{iBase,1}(:,iLayer,iUser,iBand));
-                                cellQ{iBase,1}(iLayer,iUser,iBand) = imag(cH{iBase,iBand}(:,:,cUser) * cellM{iBase,1}(:,iLayer,iUser,iBand));
-                            end
-                        end
-                    end
-                end
-            end
             
             if xIteration == 0
                 for iBand = 1:nBands
@@ -349,14 +329,35 @@ switch SimParams.weightedSumRateMethod
                                 end
                             end
                             H = cH{baseNode,iBand}(:,:,iUser);
-                            xUser = iUser == cellUserIndices{baseNode,1};
-                            W{iUser,iBand}(:,iLayer) = R \ (H * cellM{baseNode,iBand}(:,iLayer,xUser,iBand));
+                            xUser = (iUser == cellUserIndices{baseNode,1});
+                            W{iUser,iBand}(:,iLayer) = R \ (H * cellM{baseNode,1}(:,iLayer,xUser,iBand));
                             W{iUser,iBand}(:,iLayer) = W{iUser,iBand}(:,iLayer) / norm(W{iUser,iBand}(:,iLayer),2);
                         end
                     end
                 end
             end
             
+            if xIteration == 0
+                for iBase = 1:nBases
+                    cellP{iBase,1} = ones(nLayers,usersPerCell(iBase,1),nBands) / usersPerCell(iBase,1);
+                    cellQ{iBase,1} = ones(nLayers,usersPerCell(iBase,1),nBands) / usersPerCell(iBase,1);
+                    cellB{iBase,1} = ones(nLayers,usersPerCell(iBase,1),nBands) * 10 + rand(nLayers,usersPerCell(iBase,1),nBands);
+                end
+            else
+                for iBase = 1:nBases
+                    cellB{iBase,1} = cellBH{iBase,1};
+                    for iBand = 1:nBands
+                        for iUser = 1:usersPerCell(iBase,1)
+                            cUser = cellUserIndices{iBase,1}(iUser,1);
+                            for iLayer = 1:nLayers
+                                cellP{iBase,1}(iLayer,iUser,iBand) = real(W{cUser,iBand}(:,iLayer)' * cH{iBase,iBand}(:,:,cUser) * cellM{iBase,1}(:,iLayer,iUser,iBand));
+                                cellQ{iBase,1}(iLayer,iUser,iBand) = imag(W{cUser,iBand}(:,iLayer)' * cH{iBase,iBand}(:,:,cUser) * cellM{iBase,1}(:,iLayer,iUser,iBand));
+                            end
+                        end
+                    end
+                end
+            end
+                        
             for iBase = 1:nBases
                 cellX{iBase,1} = zeros(nLayers,nUsers,nBases,nBands);
             end
@@ -404,7 +405,7 @@ switch SimParams.weightedSumRateMethod
                             for jBase = 1:nBases
                                 if jBase ~= iBase
                                     tempFirst = tempFirst + sum(currentDual(:,cUser,jBase,iBand) .* x(:,cUser,jBase,iBand));
-                                    tempADMM = tempADMM + (x(:,cUser,jBase,iBand) - cellX{jBase,1}(:,cUser,jBase,iBand))^2;
+                                    tempADMM = tempADMM + vec(x(:,cUser,jBase,iBand) - cellX{jBase,1}(:,cUser,jBase,iBand)).^2;
                                 end
                             end
                         end
@@ -413,7 +414,7 @@ switch SimParams.weightedSumRateMethod
                             cUser = cellNeighbourIndices{iBase,1}(iUser,1);
                             baseNode = SimStructs.userStruct{cUser,1}.baseNode;
                             tempSecond = tempSecond + sum(currentDual(:,cUser,iBase,iBand) .* x(:,cUser,iBase,iBand));
-                            tempADMM = tempADMM + (x(:,cUser,iBase,iBand) - cellX{baseNode,1}(:,cUser,iBase,iBand))^2;
+                            tempADMM = tempADMM + vec(x(:,cUser,iBase,iBand) - cellX{baseNode,1}(:,cUser,iBase,iBand)).^2;
                         end
                         
                     end
