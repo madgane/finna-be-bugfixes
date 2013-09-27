@@ -1,4 +1,4 @@
-function [Qmatrix, Rmatrix] = qr_givens_rotation(X)
+function [Qmatrix, Rmatrix] = getGivensRotation(X)
 
 [nRows,nCols] = size(X);
 

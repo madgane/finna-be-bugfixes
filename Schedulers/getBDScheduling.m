@@ -187,7 +187,7 @@ for iBase = 1:SimParams.nBases
                     
                     cUser = uIndices(iUser,1);
                     [U,~,~] = svd(eH(:,:,iUser));
-
+                    
                     if SimParams.queueWt
                         M = U' * eH(:,:,iUser) * (SimStructs.userStruct{cUser,1}.weighingFactor);
                     else
@@ -205,6 +205,36 @@ for iBase = 1:SimParams.nBases
                 
                 [~,~,sortA] = qr(augE,0);
                 for iRank = 1:min(nUsersToSelect,kUsers)
+                    schedUsers(iRank,1) = xLocs(sortA(1,iRank),1);
+                    schedStreams(iRank,1) = xLocs(sortA(1,iRank),2);
+                end
+                
+                SimStructs.baseStruct{iBase,1}.assignedUsers{iBand,1} = schedUsers;
+                SimStructs.baseStruct{iBase,1}.assignedStreams{iBand,1} = schedStreams;
+                
+            case 'SPFP'
+                
+                iIndex = 0;
+                xLocs = zeros(kUsers * SimParams.maxRank,2);
+                augE = [];
+                
+                for iUser = 1:kUsers
+                    cUser = uIndices(iUser,1);
+                    [U,~,~] = iterative_svd_fp(eH(:,:,iUser),3,16,4);
+                    if SimParams.queueWt
+                        M = U' * eH(:,:,iUser) * (SimStructs.userStruct{cUser,1}.weighingFactor);
+                    else
+                        M = U' * eH(:,:,iUser) * sign(SimStructs.userStruct{cUser,1}.weighingFactor);
+                    end
+                    for iRank = 1:SimParams.maxRank
+                        iIndex = iIndex + 1;
+                        augE = [augE M(iRank,:).'];
+                        xLocs(iIndex,:) = [cUser iRank];
+                    end
+                end
+                
+                [~,~,sortA] = qr(augE,0);
+                for iRank = 1:min(SimParams.muxRank,kUsers)
                     schedUsers(iRank,1) = xLocs(sortA(1,iRank),1);
                     schedStreams(iRank,1) = xLocs(sortA(1,iRank),2);
                 end

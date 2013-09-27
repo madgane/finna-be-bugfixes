@@ -1,4 +1,4 @@
-function [Qmatrix, Rmatrix, varargout] = qr_givens_rotation_fp(X,wordlength,fraclength)
+function [Qmatrix, Rmatrix, varargout] = getGivensRotationFP(X,wordlength,fraclength)
 
 [nRows,nCols] = size(X);
 Xr = sfi(X,wordlength,fraclength);

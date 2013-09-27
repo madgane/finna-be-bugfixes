@@ -6,6 +6,7 @@
 
 clc;clear all;
 
+SimParams.maxDebugCells = 4;
 SimParams.version = version;
 SimParams.outFile = 'outFile_x1.mat';
 SimParams.plotMode = 'SEA';
@@ -22,26 +23,26 @@ SimParams.mdpFactor = 2;
 SimParams.robustNoise = 0;
 
 SimParams.weighingEqual = 'true';
-SimParams.SchedType = 'PFScheduling_BF';
-SimParams.PrecodingMethod = 'Best_ZF_Method';
-SimParams.weightedSumRateMethod = 'StreamScheduling';
+SimParams.SchedType = 'SkipScheduling';
+SimParams.PrecodingMethod = 'Best_QwtWSRM_Method';
+SimParams.weightedSumRateMethod = 'JointAlloc';
 
-SimParams.nDrops = 100;
+SimParams.nDrops = 1;
 SimParams.snrIndex = [0];
 
 SimParams.PF_dur = 40;
 SimParams.SFSymbols = 14;
 SimParams.sampTime = 1e-3;
 SimParams.estError = 0.00;
-SimParams.fbFraction = 0.50;
+SimParams.fbFraction = 0.00;
 
 SimParams.nBands = 1;
-SimParams.nTiers = 2;
+SimParams.nTiers = 0;
 SimParams.nSectors = 3;
 SimParams.nNeighbors = 2; % Number of neighbors to realize
-SimParams.perCiteUsers = 10;
+SimParams.perCiteUsers = 4;
 
-SimParams.nTxAntenna = 1;
+SimParams.nTxAntenna = 4;
 SimParams.nRxAntenna = 1;
 SimParams.ffrProfile_dB = zeros(1,SimParams.nBands);
 

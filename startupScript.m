@@ -5,12 +5,12 @@
 
 clc;clear all;
 
-saveContents = 'true';
+saveContents = 'false';
 SimParams.outFile = 'defaultOutFile';
 
 SimParams.maxDebugCells = 4;
 SimParams.version = version;
-SimParams.plotMode = 'QInfo';
+SimParams.plotMode = 'SRA';
 
 prelimCheck;
 preConfiguration;
@@ -19,7 +19,7 @@ SimParams.DebugMode = 'false';
 SimParams.precoderWithIdealChn = 'false';
 
 SimParams.ChannelModel = 'IID';
-SimParams.pathLossModel = 'Perturbed';
+SimParams.pathLossModel = 'Random';
 SimParams.DopplerType = 'Uniform_10';
 
 SimParams.queueWt = 1;
@@ -28,8 +28,8 @@ SimParams.robustNoise = 0;
 
 SimParams.weighingEqual = 'false';
 SimParams.SchedType = 'SkipScheduling';
-SimParams.PrecodingMethod = 'Best_QwtWSRMD_Method';
-SimParams.weightedSumRateMethod = 'ADMMMethod';
+SimParams.PrecodingMethod = 'Best_QWtdWSRMD_Method';
+SimParams.weightedSumRateMethod = 'PrimalMethod';
 
 SimParams.nDrops = 1;
 SimParams.snrIndex = [10];
@@ -51,7 +51,7 @@ SimParams.ffrProfile_dB = zeros(1,SimParams.nBands);
 SimParams.gracePeriod = 0;
 SimParams.arrivalDist = 'Constant';
 
-SimParams.maxArrival = 12;
+SimParams.maxArrival = 5;
 SimParams.FixedPacketArrivals = [2,2,2,2,2];
 SimParams.PL_Profile = [5 -inf 5 -inf 5 -inf 1e-20 0; -inf 5 -inf 5 -inf 5 0 1e-20];
 
@@ -139,14 +139,14 @@ switch SimParams.plotMode
         JainMean = mean(SimParams.Thrpt,2).^2;JainVar = var(SimParams.Thrpt,0,2);
         JainIndex_capacity = JainMean ./ (JainMean + JainVar);
         
-        plotFigure(SimParams.snrIndex,JainIndex_capacity,2,'plot');
-        xlabel('SNR in dB');ylabel('Rate Deviation across Users in bits/sec/Hz');
+%         plotFigure(SimParams.snrIndex,JainIndex_capacity,2,'plot');
+%         xlabel('SNR in dB');ylabel('Rate Deviation across Users in bits/sec/Hz');
         
         JainMean = mean(SimParams.fairness,2).^2;JainVar = var(SimParams.fairness,0,2);
         JainIndex_utility = JainMean ./ (JainMean + JainVar);
         
-        plotFigure(SimParams.snrIndex,JainIndex_utility,3,'plot');
-        xlabel('SNR in dB');ylabel('Network Utility Deviation across Users');
+%         plotFigure(SimParams.snrIndex,JainIndex_utility,3,'plot');
+%         xlabel('SNR in dB');ylabel('Network Utility Deviation across Users');
 
         
     case 'QA'
