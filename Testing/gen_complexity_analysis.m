@@ -354,9 +354,9 @@ semilogy(usersOverSystem,sumPlot);
 box on;
 
 legendString = cell(7,1);
-legendString{1,1} = 'QR based search';legendString{2,1} = 'Reduced Null Space';
-legendString{3,1} = 'Reduced Nullspace (with memory)';legendString{4,1} = 'AHP';
-legendString{5,1} = 'M-AHP';legendString{6,1} = 'Exhaustive';legendString{7,1} = 'Greedy';
+legendString{1,1} = 'BD Scheduling';legendString{2,1} = 'PIP Selection';
+legendString{3,1} = 'PIP Selection (with memory)';legendString{4,1} = 'PWS Scheme-1';
+legendString{5,1} = 'PWS Scheme';legendString{6,1} = 'Exhaustive';legendString{7,1} = 'Greedy';
 legend(legendString);
 
 xlabel('Number of Users in the System');

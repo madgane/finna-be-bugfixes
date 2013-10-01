@@ -10,7 +10,7 @@ SimParams.outFile = 'defaultOutFile';
 
 SimParams.maxDebugCells = 4;
 SimParams.version = version;
-SimParams.plotMode = 'SRA';
+SimParams.plotMode = 'QA';
 
 prelimCheck;
 preConfiguration;
@@ -19,20 +19,20 @@ SimParams.DebugMode = 'false';
 SimParams.precoderWithIdealChn = 'false';
 
 SimParams.ChannelModel = 'IID';
-SimParams.pathLossModel = 'Random';
-SimParams.DopplerType = 'Uniform_10';
+SimParams.pathLossModel = 'Random_10';
+SimParams.DopplerType = 'Uniform_1000';
 
-SimParams.queueWt = 1;
+SimParams.queueWt = 2;
 SimParams.mdpFactor = 0;
 SimParams.robustNoise = 0;
 
 SimParams.weighingEqual = 'false';
-SimParams.SchedType = 'SkipScheduling';
-SimParams.PrecodingMethod = 'Best_QWtdWSRMD_Method';
-SimParams.weightedSumRateMethod = 'PrimalMethod';
+SimParams.SchedType = 'BDScheduling_SPTest';
+SimParams.PrecodingMethod = 'Best_WMMSE_Method';
+SimParams.weightedSumRateMethod = 'PreScheduling';
 
-SimParams.nDrops = 1;
-SimParams.snrIndex = [10];
+SimParams.nDrops = 100;
+SimParams.snrIndex = [15];
 
 SimParams.PF_dur = 40;
 SimParams.SFSymbols = 14;
@@ -40,18 +40,18 @@ SimParams.sampTime = 1e-3;
 SimParams.estError = 0.00;
 SimParams.fbFraction = 0.0;
 
-SimParams.nBands = 5;
-SimParams.nBases = 3;
-SimParams.nUsers = 18;
+SimParams.nBands = 1;
+SimParams.nBases = 1;
+SimParams.nUsers = 10;
 
 SimParams.nTxAntenna = 4;
-SimParams.nRxAntenna = 2;
+SimParams.nRxAntenna = 1;
 SimParams.ffrProfile_dB = zeros(1,SimParams.nBands);
 
 SimParams.gracePeriod = 0;
 SimParams.arrivalDist = 'Constant';
 
-SimParams.maxArrival = 5;
+SimParams.maxArrival = 1;
 SimParams.FixedPacketArrivals = [2,2,2,2,2];
 SimParams.PL_Profile = [5 -inf 5 -inf 5 -inf 1e-20 0; -inf 5 -inf 5 -inf 5 0 1e-20];
 
@@ -157,11 +157,11 @@ switch SimParams.plotMode
         plotFigure(1:SimParams.nDrops,sum(squeeze(SimResults.queueBackLogsOverTime(end,:,end,:)),1),4,'plot');
         xlabel('Slot Index');ylabel('Queue Backlogs (pkts) over Time');grid on;
         
-        plotFigure(1:SimParams.nDrops,std(squeeze(SimResults.queueBackLogsOverTime(end,:,end,:)),1),5,'plot');
-        xlabel('Slot Index');ylabel('{\sigma_Q} Queue Backlogs (pkts) over Time');grid on;
+%         plotFigure(1:SimParams.nDrops,std(squeeze(SimResults.queueBackLogsOverTime(end,:,end,:)),1),5,'plot');
+%         xlabel('Slot Index');ylabel('{\sigma_Q} Queue Backlogs (pkts) over Time');grid on;
         
-        plotFigure(SimParams.maxArrival,sum(squeeze(SimResults.queueBackLogs(end,:,:)),1),6,'plot');
-        xlabel('Average Arrival Rate');ylabel('Average Queue Size (pkts)');grid on;
+%         plotFigure(SimParams.maxArrival,sum(squeeze(SimResults.queueBackLogs(end,:,:)),1),6,'plot');
+%         xlabel('Average Arrival Rate');ylabel('Average Queue Size (pkts)');grid on;
         
     case 'STA'
         

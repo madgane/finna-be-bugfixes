@@ -933,14 +933,11 @@ switch SimParams.weightedSumRateMethod
                 cUser = cellUserIndices{iBase,1}(iUser,1);
                 for iBand = 1:nBands
                     vW{cUser,iBand} = ones(SimParams.nRxAntenna,maxRank) / sqrt(SimParams.nRxAntenna);
-                    for iLayer = 1:maxRank
-                        vW{cUser,iBand}(:,iLayer) = vW{cUser,iBand}(:,iLayer) / norm(vW{cUser,iBand}(:,iLayer),2);
-                    end
                 end
             end
         end
         
-        e_o = ones(maxRank,nUsers,nBands);
+        t_o = ones(maxRank,nUsers,nBands);
         
         while reIterate
             
@@ -965,7 +962,7 @@ switch SimParams.weightedSumRateMethod
                 for iUser = 1:nUsers
                     baseNode = SimStructs.userStruct{iUser,1}.baseNode;
                     for iLayer = 1:maxRank
-                        intVector = sqrt(SimParams.N);
+                        intVector = sqrt(SimParams.N) * vW{iUser,iBand}(:,iLayer)' * vW{iUser,iBand}(:,iLayer);
                         for jUser = 1:nUsers
                             ifNode = SimStructs.userStruct{jUser,1}.baseNode;
                             currentH = cH{ifNode,iBand}(:,:,iUser);
@@ -985,9 +982,8 @@ switch SimParams.weightedSumRateMethod
                         currentH = cH{baseNode,iBand}(:,:,iUser);
                         givenVector = (1 - vW{iUser,iBand}(:,iLayer)' * currentH * M(:,iLayer,iUser,iBand));
                         intVector = [intVector ; givenVector];
-                        norm(intVector,2) <= sqrt(e(iLayer,iUser,iBand));
-                        
-                        log(e_o(iLayer,iUser,iBand)) + (1 / e_o(iLayer,iUser,iBand)) * (e(iLayer,iUser,iBand) - e_o(iLayer,iUser,iBand)) <= -t;
+                        norm(intVector,2) <= sqrt(exp(-t_o(iLayer,iUser,iBand)) - exp(-t_o(iLayer,iUser,iBand)) * ...
+                            (t(iLayer,iUser,iBand) - t_o(iLayer,iUser,iBand)));   
                         
                     end
                 end
@@ -1002,12 +998,12 @@ switch SimParams.weightedSumRateMethod
                 cUser = cellUserIndices{iBase,1}(iUser,1);
                 sum(vec(t(:,cUser,:))) <= QueuedPkts(cUser,1) * log(2);
             end
-
-            cvx_end
             
+            cvx_end
+           
             if strfind(cvx_status,'Solved')
                 
-                e_o = e;
+                t_o = t;
                 for iBand = 1:nBands
                     for iBase = 1:nBases
                         for iUser = 1:usersPerCell(iBase,1)
@@ -1031,14 +1027,13 @@ switch SimParams.weightedSumRateMethod
                                 R = SimParams.N * eye(SimParams.nRxAntenna);
                                 for jBase = 1:nBases
                                     for jUser = 1:usersPerCell(jBase,1)
-                                        rUser = cellUserIndices{jBase,1}(jUser,1);
+                                        rUser = cellUserIndices{jBase,1}(jUser,1);                                      
                                         H = cH{jBase,iBand}(:,:,cUser);
                                         R = R + H * M(:,:,rUser,iBand) * M(:,:,rUser,iBand)' * H';
                                     end
                                 end
                                 H = cH{iBase,iBand}(:,:,cUser);
                                 vW{cUser,iBand}(:,iLayer) = R \ (H * M(:,iLayer,cUser,iBand));
-                                vW{cUser,iBand}(:,iLayer) = vW{cUser,iBand}(:,iLayer) / norm(vW{cUser,iBand}(:,iLayer),2);
                             end
                         end
                     end
@@ -1050,9 +1045,7 @@ switch SimParams.weightedSumRateMethod
                     xIndex = xIndex + 1;
                     cvx_hist(mod(xIndex,2) + 1,1) = cvx_optval;
                 end
-                
-            else
-                t_o = t_o / 2;
+                            
             end
             
         end

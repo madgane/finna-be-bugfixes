@@ -9,7 +9,7 @@ usersPerCell = zeros(nBases,1);
 cellUserIndices = cell(nBases,1);
 cellNeighbourIndices = cell(nBases,1);
 
-mIterationsSCA = 50;mIterationsSG = 100;sumDeviationH = -50;
+mIterationsSCA = 4;mIterationsSG = 2;sumDeviationH = -50;
 
 % Debug Buffers initialization
 
@@ -569,20 +569,6 @@ switch SimParams.weightedSumRateMethod
             end
         end
                 
-end
-
-for iBase = 1:nBases
-    for iBand = 1:nBands
-        P = [];
-        SimStructs.baseStruct{iBase,1}.P{iBand,1} = zeros(SimParams.nTxAntenna,usersPerCell(iBase,1));
-        for iUser = 1:usersPerCell(iBase,1)
-            cUser = cellUserIndices{iBase,1}(iUser,1);
-            P = [P M(:,:,cUser,iBand)];
-        end
-        SimStructs.baseStruct{iBase,1}.P{iBand,1} = P;
-    end
-end
-
 end
 
 for iUser = 1:nUsers

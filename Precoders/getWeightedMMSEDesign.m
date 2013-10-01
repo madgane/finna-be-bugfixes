@@ -12,6 +12,8 @@ if isfield(SimParams.Debug.privateExchanges,'takeOverBand')
     bandRange = SimParams.Debug.privateExchanges.takeOverBand;
 else
     bandRange = 1:SimParams.nBands;
+    SimParams.Debug.tempResource{3,1} = cell(SimParams.nUsers,1);
+    SimParams.Debug.tempResource{4,1} = cell(SimParams.nUsers,SimParams.nBands);
 end            
         
 for iBand = bandRange
