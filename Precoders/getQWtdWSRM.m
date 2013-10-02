@@ -962,7 +962,7 @@ switch SimParams.weightedSumRateMethod
                 for iUser = 1:nUsers
                     baseNode = SimStructs.userStruct{iUser,1}.baseNode;
                     for iLayer = 1:maxRank
-                        intVector = sqrt(SimParams.N) * vW{iUser,iBand}(:,iLayer)' * vW{iUser,iBand}(:,iLayer);
+                        intVector = sqrt(SimParams.N) * vW{iUser,iBand}(:,iLayer);
                         for jUser = 1:nUsers
                             ifNode = SimStructs.userStruct{jUser,1}.baseNode;
                             currentH = cH{ifNode,iBand}(:,:,iUser);

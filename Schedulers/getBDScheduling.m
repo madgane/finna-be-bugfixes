@@ -1,5 +1,9 @@
 function [SimParams,SimStructs] = getBDScheduling(SimParams,SimStructs)
 
+if strcmp(SimParams.DebugMode,'true')
+    SimParams.Debug.tempResource{1,1} = cell(SimParams.nTxAntenna,1);
+end
+
 for iBase = 1:SimParams.nBases
     
     uIndices = SimStructs.baseStruct{iBase,1}.linkedUsers;
@@ -51,6 +55,10 @@ for iBase = 1:SimParams.nBases
                             K = abs(G' * X(:,iUser));
                             ppVolume(iUser,1) = prod(V - K);
                         end
+                    end
+                    
+                    if strcmp(SimParams.DebugMode,'true')
+                        SimParams.Debug.tempResource{1,1}{iStream,1} = ppVolume;       
                     end
                     
                     [~,sortI] = sort(ppVolume,'descend');
@@ -219,7 +227,7 @@ for iBase = 1:SimParams.nBases
                 
                 for iUser = 1:kUsers
                     cUser = uIndices(iUser,1);
-                    [U,~,~] = iterative_svd_fp(eH(:,:,iUser),3,16,4);
+                    [U,~,~] = getIterateSVDFP(eH(:,:,iUser),6,32,16);
                     if SimParams.queueWt
                         M = U' * eH(:,:,iUser) * (SimStructs.userStruct{cUser,1}.weighingFactor);
                     else
@@ -241,7 +249,7 @@ for iBase = 1:SimParams.nBases
                 SimStructs.baseStruct{iBase,1}.assignedUsers{iBand,1} = schedUsers;
                 SimStructs.baseStruct{iBase,1}.assignedStreams{iBand,1} = schedStreams;
                 
-            case 'SPTest'
+            case 'SPT-SP'
                 
                 iIndex = 0;
                 xLocs = zeros(kUsers * SimParams.maxRank,2);
@@ -267,18 +275,23 @@ for iBase = 1:SimParams.nBases
                 xMetric = zeros(kUsers * SimParams.maxRank,1);
                 
                 for iLayer = 1:SimParams.muxRank
-
+                    
                     if iLayer == 1
                         N = eye(SimParams.nTxAntenna);
                     else
                         N = eye(SimParams.nTxAntenna) - G * inv(G' * G) * G';
                     end
-
+                    
                     for vUser = 1:kUsers * SimParams.maxRank
-                        xMetric(vUser,1) = augQ(1,vUser) * (norm(N * augE(:,vUser)));
+                        xMetric(vUser,1) = augQ(1,vUser) * log(SimParams.sPower / SimParams.nTxAntenna) + augQ(1,vUser) * log(norm(N * augE(:,vUser))^2);
+                        xMetric(vUser,1) = norm(N * augE(:,vUser));
                         if isnan(xMetric(vUser,1))
                             xMetric(vUser,1) = -Inf;
                         end
+                    end
+                    
+                    if strcmp(SimParams.DebugMode,'true')
+                        SimParams.Debug.tempResource{1,1}{iLayer,1} = xMetric;
                     end
                     
                     [~,maxIndex] = max(xMetric);
@@ -291,10 +304,60 @@ for iBase = 1:SimParams.nBases
                 SimStructs.baseStruct{iBase,1}.assignedUsers{iBand,1} = schedUsers;
                 SimStructs.baseStruct{iBase,1}.assignedStreams{iBand,1} = schedStreams;
                 
+            case 'SPT-RNS'
+                
+                iIndex = 0;
+                xLocs = zeros(kUsers * SimParams.maxRank,2);
+                augE = [];augQ = [];
+                
+                for iUser = 1:kUsers
+                    cUser = uIndices(iUser,1);
+                    [U,~,~] = svd(eH(:,:,iUser));
+                    if SimParams.queueWt
+                        M = U' * eH(:,:,iUser) * sign(SimStructs.userStruct{cUser,1}.weighingFactor);
+                    else
+                        M = U' * eH(:,:,iUser) * sign(SimStructs.userStruct{cUser,1}.weighingFactor);
+                    end
+                    for iRank = 1:SimParams.maxRank
+                        iIndex = iIndex + 1;
+                        augE = [augE M(iRank,:).'];
+                        augQ = [augQ SimStructs.userStruct{cUser,1}.weighingFactor];
+                        xLocs(iIndex,:) = [cUser iRank];
+                    end
+                end
+                
+                G = [];
+                xMetric = zeros(kUsers * SimParams.maxRank,1);
+                
+                for iLayer = 1:SimParams.muxRank
+                    
+                    for vUser = 1:kUsers * SimParams.maxRank
+                        
+                        if iLayer == 1
+                            x = norm(augE(:,vUser));
+                        else
+                            x = prod(repmat(norm(augE(:,vUser)),iLayer-1,1) - abs(G' * augE(:,vUser)));
+                        end
+                        
+                        xMetric(vUser,1) = augQ(1,vUser) * log(SimParams.sPower / SimParams.nTxAntenna) + augQ(1,vUser) * log(x^2);
+                        if isnan(xMetric(vUser,1))
+                            xMetric(vUser,1) = -Inf;
+                        end
+                    end
+                    
+                    [~,maxIndex] = max(xMetric);
+                    schedUsers(iLayer,1) = xLocs(maxIndex,1);
+                    schedStreams(iLayer,1) = xLocs(maxIndex,2);
+                    %                     G = [G augE(:,maxIndex)];
+                    G = [G  (augE(:,maxIndex) ./ norm(augE(:,maxIndex)))];
+                    
+                end
+                
+                SimStructs.baseStruct{iBase,1}.assignedUsers{iBand,1} = schedUsers;
+                SimStructs.baseStruct{iBase,1}.assignedStreams{iBand,1} = schedStreams;
+                
         end
         
     end
     
-end
-
 end

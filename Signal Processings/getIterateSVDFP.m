@@ -1,5 +1,5 @@
 
-function [U1, D1, V1] = iterative_svd_fp(X,nIter,wordlength,fraclength)
+function [U1, D1, V1] = getIterateSVDFP(X,nIter,wordlength,fraclength)
 
 X = sfi(X',wordlength,fraclength);
 
@@ -10,9 +10,9 @@ Q = cell(nIter,1);R = cell(nIter,1);
 while iIter <= nIter
     
     if iIter == 1
-        [~,~,Q{iIter,1}, R{iIter,1}] = qr_givens_rotation_fp(X,wordlength,fraclength);
+        [~,~,Q{iIter,1}, R{iIter,1}] = getGivensRotationFP(X,wordlength,fraclength);
     else
-        [~,~,Q{iIter,1}, R{iIter,1}] = qr_givens_rotation_fp(R{iIter - 1,1}',wordlength,fraclength);
+        [~,~,Q{iIter,1}, R{iIter,1}] = getGivensRotationFP(R{iIter - 1,1}',wordlength,fraclength);
     end
     iIter = iIter + 1;
 end
