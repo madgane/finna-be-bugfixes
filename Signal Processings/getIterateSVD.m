@@ -1,5 +1,5 @@
 
-function [U1, D1, V1] = iterative_svd(X,nIter)
+function [U1, D1, V1] = getIterateSVD(X,nIter)
 
 X = X';
 iIter = 1;

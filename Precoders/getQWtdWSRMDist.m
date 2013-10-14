@@ -9,7 +9,7 @@ usersPerCell = zeros(nBases,1);
 cellUserIndices = cell(nBases,1);
 cellNeighbourIndices = cell(nBases,1);
 
-mIterationsSCA = 4;mIterationsSG = 2;sumDeviationH = -50;
+mIterationsSCA = 50;mIterationsSG = 100;sumDeviationH = -50;
 
 % Debug Buffers initialization
 
