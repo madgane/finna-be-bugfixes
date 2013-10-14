@@ -34,6 +34,14 @@ for iBase = 1:nBases
     end
 end
 
+underscore_location = strfind(SimParams.weightedSumRateMethod,'_');
+if isempty(underscore_location)
+    qExponent = 1;
+else
+    qExponent = str2double(SimParams.weightedSumRateMethod(underscore_location + 1:end));
+    SimParams.weightedSumRateMethod = SimParams.weightedSumRateMethod(1:underscore_location-1);
+end   
+
 switch SimParams.weightedSumRateMethod
     
     case 'BandAlloc'
@@ -106,7 +114,7 @@ switch SimParams.weightedSumRateMethod
                 abs(QueuedPkts(iUser,1) - sum(t(iUser,:))) <= userObjective(iUser,1);
             end
             
-            epiObjective >= norm(userObjective,1);
+            epiObjective >= norm(userObjective,qExponent);
             
             for iBase = 1:nBases
                 for iBand = 1:nBands
@@ -214,7 +222,7 @@ switch SimParams.weightedSumRateMethod
                 abs(QueuedPkts(iUser,1) - sum(t(iUser,:))) <= userObjective(iUser,1);
             end
             
-            epiObjective >= norm(userObjective,1);
+            epiObjective >= norm(userObjective,qExponent);
             
             for iBase = 1:nBases
                 for iBand = 1:nBands
@@ -325,7 +333,7 @@ switch SimParams.weightedSumRateMethod
                     abs(QueuedPkts(iUser,1) - t(iUser,1)) <= userObjective(iUser,1);
                 end
                 
-                epiObjective >= norm(userObjective,1);
+                epiObjective >= norm(userObjective,qExponent);
                 
                 for iBase = 1:nBases
                     for iUser = 1:usersPerCell(iBase,1)
@@ -454,7 +462,7 @@ switch SimParams.weightedSumRateMethod
                 abs(QueuedPkts(iUser,1) - sum(vec(t(:,iUser,:)))) <= userObjective(iUser,1);
             end
             
-            epiObjective >= norm(userObjective,1);
+            epiObjective >= norm(userObjective,qExponent);
             
             for iBase = 1:nBases
                 for iBand = 1:nBands
@@ -626,7 +634,7 @@ switch SimParams.weightedSumRateMethod
                     abs(QueuedPkts(iUser,1) - sum(vec(t(:,iUser)))) <= userObjective(iUser,1);
                 end
                 
-                epiObjective >= norm(userObjective,1);
+                epiObjective >= norm(userObjective,qExponent);
                 
                 for iBase = 1:nBases
                     for iUser = 1:usersPerCell(iBase,1)
@@ -790,7 +798,7 @@ switch SimParams.weightedSumRateMethod
                 abs(QueuedPkts(iUser,1) - sum(vec(t(:,iUser,:)))) <= userObjective(iUser,1);
             end
             
-            epiObjective >= norm(userObjective,1);
+            epiObjective >= norm(userObjective,qExponent);
             
             for iBase = 1:nBases
                 for iBand = 1:nBands
@@ -956,7 +964,7 @@ switch SimParams.weightedSumRateMethod
                 abs(QueuedPkts(iUser,1) - sum(vec(t(:,iUser,:)))) <= userObjective(iUser,1);
             end
             
-            epiObjective >= norm(userObjective,1);
+            epiObjective >= norm(userObjective,qExponent);
             
             for iBand = 1:nBands
                 for iUser = 1:nUsers
