@@ -2,5 +2,5 @@
 processID = feature('GetPid');
 display(processID);
    
-cvx_quiet('true');
+cvx_quiet('false');
 cvx_solver('sedumi');

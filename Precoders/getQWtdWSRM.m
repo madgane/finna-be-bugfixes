@@ -37,12 +37,13 @@ end
 underscore_location = strfind(SimParams.weightedSumRateMethod,'_');
 if isempty(underscore_location)
     qExponent = 1;
+    selectionMethod = SimParams.weightedSumRateMethod;
 else
     qExponent = str2double(SimParams.weightedSumRateMethod(underscore_location + 1:end));
-    SimParams.weightedSumRateMethod = SimParams.weightedSumRateMethod(1:underscore_location-1);
+    selectionMethod = SimParams.weightedSumRateMethod(1:underscore_location-1);
 end   
 
-switch SimParams.weightedSumRateMethod
+switch selectionMethod
     
     case 'BandAlloc'
         
@@ -133,7 +134,7 @@ switch SimParams.weightedSumRateMethod
                         end
                         
                         norm(intVector,2) <= sqrt(b(cUser,iBand));
-                        log(1 + g(cUser,iBand)) >= t(cUser,iBand);
+                        log(1 + g(cUser,iBand)) >= t(cUser,iBand) * log(2);
                         
                         currentH = cH{iBase,iBand}(:,:,cUser);
                         p(cUser,iBand) = real(currentH * M(:,cUser,iBand));
@@ -151,11 +152,6 @@ switch SimParams.weightedSumRateMethod
                     
                     norm(vec(M(:,cellUserIndices{iBase,1},iBand)),2) <= sqrt(SimStructs.baseStruct{iBase,1}.sPower(1,iBand));
                     
-                end
-                
-                for iUser = 1:usersPerCell(iBase,1)
-                    cUser = cellUserIndices{iBase,1}(iUser,1);
-                    norm(t(cUser,:),1) <= QueuedPkts(cUser,1) * log(2);
                 end
                 
             end
@@ -241,7 +237,7 @@ switch SimParams.weightedSumRateMethod
                         end
                         
                         norm(intVector,2) <= sqrt(b(cUser,iBand));
-                        log(g(cUser,iBand)) >= t(cUser,iBand);
+                        log(g(cUser,iBand)) >= t(cUser,iBand) * log(2);
                         
                         currentH = cH{iBase,iBand}(:,:,cUser);
                         p(cUser,iBand) = real(currentH * M(:,cUser,iBand));
@@ -258,11 +254,6 @@ switch SimParams.weightedSumRateMethod
                     
                     norm(vec(M(:,cellUserIndices{iBase,1},iBand)),2) <= sqrt(SimStructs.baseStruct{iBase,1}.sPower(1,iBand));
                     
-                end
-                
-                for iUser = 1:usersPerCell(iBase,1)
-                    cUser = cellUserIndices{iBase,1}(iUser,1);
-                    norm(t(cUser,:),1) <= QueuedPkts(cUser,1) * log(2);
                 end
                 
             end
@@ -351,7 +342,7 @@ switch SimParams.weightedSumRateMethod
                         end
                         
                         norm(intVector,2) <= sqrt(b(cUser,1));
-                        log(1 + g(cUser,1)) >= t(cUser,1);
+                        log(1 + g(cUser,1)) >= t(cUser,1) * log(2);
                         
                         currentH = cH{iBase,iBand}(:,:,cUser);
                         p(cUser,1) = real(currentH * M(:,cUser));
@@ -368,11 +359,6 @@ switch SimParams.weightedSumRateMethod
                     end
                     
                     norm(vec(M(:,cellUserIndices{iBase,1})),2) <= sqrt(SimStructs.baseStruct{iBase,1}.sPower(1,iBand));
-                    
-                    for iUser = 1:usersPerCell(iBase,1)
-                        cUser = cellUserIndices{iBase,1}(iUser,1);
-                        norm(t(cUser,1),1) <= QueuedPkts(cUser,1) * log(2);
-                    end
                     
                 end
                 
@@ -491,7 +477,7 @@ switch SimParams.weightedSumRateMethod
                             end
                             
                             norm(intVector,2) <= sqrt(b(iLayer,cUser,iBand));
-                            log(1 + g(iLayer,cUser,iBand)) >= t(iLayer,cUser,iBand);
+                            log(1 + g(iLayer,cUser,iBand)) >= t(iLayer,cUser,iBand) * log(2);
                             
                             currentH = cH{iBase,iBand}(:,:,cUser);
                             p(iLayer,cUser,iBand) = real(vW{cUser,iBand}(:,iLayer)' * currentH * M(:,iLayer,cUser,iBand));
@@ -511,11 +497,6 @@ switch SimParams.weightedSumRateMethod
                     
                     norm(vec(M(:,:,cellUserIndices{iBase,1},iBand)),2) <= sqrt(SimStructs.baseStruct{iBase,1}.sPower(1,iBand));
                     
-                end
-                
-                for iUser = 1:usersPerCell(iBase,1)
-                    cUser = cellUserIndices{iBase,1}(iUser,1);
-                    norm(vec(t(:,cUser,:)),1) <= QueuedPkts(cUser,1) * log(2);
                 end
                 
             end
@@ -662,7 +643,7 @@ switch SimParams.weightedSumRateMethod
                             end
                             
                             norm(intVector,2) <= sqrt(b(iLayer,cUser));
-                            log(1 + g(iLayer,cUser)) >= t(iLayer,cUser);
+                            log(1 + g(iLayer,cUser)) >= t(iLayer,cUser) * log(2);
                             
                             currentH = cH{iBase,iBand}(:,:,cUser);
                             p(iLayer,cUser) = real(vW{cUser,1}(:,iLayer)' * currentH * M(:,iLayer,cUser));
@@ -681,11 +662,6 @@ switch SimParams.weightedSumRateMethod
                     end
                     
                     norm(vec(M(:,:,cellUserIndices{iBase,1})),2) <= sqrt(SimStructs.baseStruct{iBase,1}.sPower(1,iBand));
-                    
-                    for iUser = 1:usersPerCell(iBase,1)
-                        cUser = cellUserIndices{iBase,1}(iUser,1);
-                        norm(vec(t(:,cUser)),1) <= QueuedPkts(cUser,1) * log(2);
-                    end
                     
                 end
                 
@@ -827,7 +803,7 @@ switch SimParams.weightedSumRateMethod
                             end
                             
                             norm(intVector,2) <= sqrt(b(iLayer,cUser,iBand));
-                            log(1 + g(iLayer,cUser,iBand)) >= t(iLayer,cUser,iBand);
+                            log(1 + g(iLayer,cUser,iBand)) >= t(iLayer,cUser,iBand) * log(2);
                             
                             currentH = cH{iBase,iBand}(:,:,cUser);
                             p(iLayer,cUser,iBand) = real(vW{cUser,iBand}(:,iLayer)' * currentH * M(:,iLayer,cUser,iBand));
@@ -845,11 +821,6 @@ switch SimParams.weightedSumRateMethod
                         
                     end
                     
-                end
-                
-                for iUser = 1:usersPerCell(iBase,1)
-                    cUser = cellUserIndices{iBase,1}(iUser,1);
-                    norm(vec(t(:,cUser,:)),1) <= QueuedPkts(cUser,1) * log(2);
                 end
                 
                 norm(vec(M(:,:,cellUserIndices{iBase,1},:)),2) <= sqrt(sum(SimStructs.baseStruct{iBase,1}.sPower));
@@ -945,7 +916,7 @@ switch SimParams.weightedSumRateMethod
             end
         end
         
-        t_o = ones(maxRank,nUsers,nBands);
+        t_o = zeros(maxRank,nUsers,nBands);
         
         while reIterate
             
@@ -991,7 +962,7 @@ switch SimParams.weightedSumRateMethod
                         givenVector = (1 - vW{iUser,iBand}(:,iLayer)' * currentH * M(:,iLayer,iUser,iBand));
                         intVector = [intVector ; givenVector];
                         norm(intVector,2) <= sqrt(exp(-t_o(iLayer,iUser,iBand)) - exp(-t_o(iLayer,iUser,iBand)) * ...
-                            (t(iLayer,iUser,iBand) - t_o(iLayer,iUser,iBand)));   
+                            (t(iLayer,iUser,iBand) - t_o(iLayer,iUser,iBand))) * sqrt(log(2));   
                         
                     end
                 end
@@ -1000,11 +971,6 @@ switch SimParams.weightedSumRateMethod
                     norm(vec(M(:,:,cellUserIndices{iBase,1},iBand)),2) <= sqrt(SimStructs.baseStruct{iBase,1}.sPower(1,iBand));
                 end                
                 
-            end
-            
-            for iUser = 1:usersPerCell(iBase,1)
-                cUser = cellUserIndices{iBase,1}(iUser,1);
-                sum(vec(t(:,cUser,:))) <= QueuedPkts(cUser,1) * log(2);
             end
             
             cvx_end
