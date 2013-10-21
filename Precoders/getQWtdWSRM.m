@@ -916,7 +916,7 @@ switch selectionMethod
             end
         end
         
-        t_o = zeros(maxRank,nUsers,nBands);
+        mseError_o = ones(maxRank,nUsers,nBands);
         
         while reIterate
             
@@ -924,7 +924,7 @@ switch selectionMethod
             
             expression givenVector
             variable M(SimParams.nTxAntenna,maxRank,nUsers,nBands) complex
-            variables t(maxRank,nUsers,nBands) e(maxRank,nUsers,nBands)
+            variables t(maxRank,nUsers,nBands) e(maxRank,nUsers,nBands) mseError(maxRank,nUsers,nBands)
             variables userObjective(nUsers,1) epiObjective
             
             minimize(epiObjective)
@@ -961,8 +961,8 @@ switch selectionMethod
                         currentH = cH{baseNode,iBand}(:,:,iUser);
                         givenVector = (1 - vW{iUser,iBand}(:,iLayer)' * currentH * M(:,iLayer,iUser,iBand));
                         intVector = [intVector ; givenVector];
-                        norm(intVector,2) <= sqrt(exp(-t_o(iLayer,iUser,iBand)) - exp(-t_o(iLayer,iUser,iBand)) * ...
-                            (t(iLayer,iUser,iBand) - t_o(iLayer,iUser,iBand))) * sqrt(log(2));   
+                        norm(intVector,2) <= sqrt(mseError(iLayer,iUser,iBand));
+                        (mseError(iLayer,iUser,iBand) - mseError_o(iLayer,iUser,iBand)) / mseError_o(iLayer,iUser,iBand) + log(mseError_o(iLayer,iUser,iBand)) <= -t(iLayer,iUser,iBand) * log(2);
                         
                     end
                 end
@@ -977,7 +977,7 @@ switch selectionMethod
            
             if strfind(cvx_status,'Solved')
                 
-                t_o = t;
+                mseError_o = mseError;
                 for iBand = 1:nBands
                     for iBase = 1:nBases
                         for iUser = 1:usersPerCell(iBase,1)

@@ -28,8 +28,8 @@ SimParams.robustNoise = 0;
 
 SimParams.weighingEqual = 'true';
 SimParams.SchedType = 'SkipScheduling';
-SimParams.PrecodingMethod = 'Best_QwtWSRM_Method';
-SimParams.weightedSumRateMethod = 'JointAlloc';
+SimParams.PrecodingMethod = 'Best_QwtWSRMD_Method';
+SimParams.weightedSumRateMethod = 'PrimalMethod';
 
 SimParams.nDrops = 1;
 SimParams.snrIndex = [10];
@@ -51,7 +51,7 @@ SimParams.ffrProfile_dB = zeros(1,SimParams.nBands);
 SimParams.gracePeriod = 0;
 SimParams.arrivalDist = 'ConstFixed';
 
-SimParams.maxArrival = 12;
+SimParams.maxArrival = 8;
 SimParams.FixedPacketArrivals = [2,2,2,2,2];
 SimParams.PL_Profile = [5 -inf 5 -inf 5 -inf 1e-20 0; -inf 5 -inf 5 -inf 5 0 1e-20];
 
