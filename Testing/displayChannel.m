@@ -1,7 +1,8 @@
+function displayChannel(SimParams,SimStructs)
 
 fprintf('\n');
-display('Displaying System Channel');
-display('-------------------------');
+display('Displaying System Channel (last)');
+display('--------------------------------');
 
 ChannelMatrix = zeros(SimParams.nUsers,SimParams.nBands);
 

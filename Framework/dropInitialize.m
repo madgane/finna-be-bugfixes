@@ -94,11 +94,11 @@ end
 % Traffic Related Calculations !
 
 for iUser = 1:SimParams.nUsers
-    currentBacklogs = SimStructs.userStruct{iUser,1}.trafficStats.backLogPkt + SimStructs.userStruct{iUser,1}.trafficConfig.currentArrival;
-    currentResidual =  currentBacklogs - floor(SimStructs.userStruct{iUser,1}.lastThrpt);
+    currentArrival = SimStructs.userStruct{iUser,1}.trafficConfig.currentArrival;
+    currentResidual =  SimStructs.userStruct{iUser,1}.trafficStats.backLogPkt - SimStructs.userStruct{iUser,1}.lastThrpt;
     
-    SimStructs.userStruct{iUser,1}.trafficStats.backLogPkt = max(0,currentResidual);
-    SimStructs.userStruct{iUser,1}.trafficStats.backlogsOverTime(1,SimParams.iDrop) = max(0,currentResidual);
+    SimStructs.userStruct{iUser,1}.trafficStats.backLogPkt = max(0,currentResidual) + currentArrival;
+    SimStructs.userStruct{iUser,1}.trafficStats.backlogsOverTime(1,SimParams.iDrop) = max(0,currentResidual) + currentArrival;
     SimStructs.userStruct{iUser,1}.trafficHistory.pktService(SimParams.iPkt,SimParams.iDrop) = floor(SimStructs.userStruct{iUser,1}.lastThrpt);
     SimStructs.userStruct{iUser,1}.lastThrpt = 0;
 end
