@@ -1,6 +1,7 @@
 
 function [SimParams,SimStructs] = getQWtdWSRM(SimParams,SimStructs)
 
+epsilonT = 1e-4;
 cH = SimStructs.linkChan;
 nBases = SimParams.nBases;
 nBands = SimParams.nBands;
@@ -179,7 +180,7 @@ switch selectionMethod
                     end
                 end
                 
-                if min(abs(cvx_optval - cvx_hist)) <= 1e-4
+                if min(abs(cvx_optval - cvx_hist)) <= epsilonT
                     reIterate = 0;
                 else
                     xIndex = xIndex + 1;
@@ -283,7 +284,7 @@ switch selectionMethod
                     end
                 end
                 
-                if min(abs(cvx_optval - cvx_hist)) <= 1e-4
+                if min(abs(cvx_optval - cvx_hist)) <= epsilonT
                     reIterate = 0;
                 else
                     xIndex = xIndex + 1;
@@ -381,7 +382,7 @@ switch selectionMethod
                         end
                     end
                     
-                    if min(abs(cvx_optval - cvx_hist)) <= 1e-4
+                    if min(abs(cvx_optval - cvx_hist)) <= epsilonT
                         reIterate = 0;
                     else
                         xIndex = xIndex + 1;
@@ -549,7 +550,7 @@ switch selectionMethod
                     end
                 end
                 
-                if min(abs(cvx_optval - cvx_hist)) <= 1e-4
+                if min(abs(cvx_optval - cvx_hist)) <= epsilonT
                     reIterate = 0;
                 else
                     xIndex = xIndex + 1;
@@ -705,7 +706,7 @@ switch selectionMethod
                         end
                     end
                     
-                    if min(abs(cvx_optval - cvx_hist)) <= 1e-4
+                    if min(abs(cvx_optval - cvx_hist)) <= epsilonT
                         reIterate = 0;
                     else
                         xIndex = xIndex + 1;
@@ -873,7 +874,7 @@ switch selectionMethod
                     end
                 end
                 
-                if min(abs(cvx_optval - cvx_hist)) <= 1e-4
+                if min(abs(cvx_optval - cvx_hist)) <= epsilonT
                     reIterate = 0;
                 else
                     xIndex = xIndex + 1;
@@ -1013,7 +1014,7 @@ switch selectionMethod
                     end
                 end
                 
-                if min(abs(cvx_optval - cvx_hist)) <= 1e-4
+                if min(abs(cvx_optval - cvx_hist)) <= epsilonT
                     reIterate = 0;
                 else
                     xIndex = xIndex + 1;

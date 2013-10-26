@@ -6,11 +6,11 @@
 clc;clear all;
 
 saveContents = 'false';
-SimParams.outFile = 'defaultOutFile';
+SimParams.outFile = 'defaultTimeDomainFile';
 
 SimParams.maxDebugCells = 4;
 SimParams.version = version;
-SimParams.plotMode = 'QA';
+SimParams.plotMode = 'QInfo';
 
 prelimCheck;
 preConfiguration;
@@ -19,7 +19,7 @@ SimParams.DebugMode = 'false';
 SimParams.precoderWithIdealChn = 'false';
 
 SimParams.ChannelModel = 'IID';
-SimParams.pathLossModel = 'Perturbed_6';
+SimParams.pathLossModel = 'Perturbed_3';
 SimParams.DopplerType = 'Uniform_1000';
 
 SimParams.queueWt = 1;
@@ -29,9 +29,9 @@ SimParams.robustNoise = 0;
 SimParams.weighingEqual = 'false';
 SimParams.SchedType = 'SkipScheduling';
 SimParams.PrecodingMethod = 'Best_QwtWSRM_Method';
-SimParams.weightedSumRateMethod = 'JointAlloc_2';
+SimParams.weightedSumRateMethod = 'GlobalAlloc_2';
 
-SimParams.nDrops = 10;
+SimParams.nDrops = 2;
 SimParams.snrIndex = [10];
 
 SimParams.PF_dur = 40;
@@ -62,10 +62,11 @@ if strcmp(SimParams.sysMode,'true')
     SimParams.nUsers = 570;
 end
 
-bufferInitializations;
 if strcmp(SimParams.DebugMode,'true')
     keyboard;
 end
+
+[SimParams,SimStructs] = initializeBuffers(SimParams);
 
 for iPkt = 1:length(SimParams.maxArrival)
     
@@ -101,21 +102,14 @@ for iPkt = 1:length(SimParams.maxArrival)
             [SimParams,SimStructs] = performReception(SimParams,SimStructs);
             
             for iUser = 1:SimParams.nUsers
-                sumRateInstant(iSNR,iDrop,iPkt) = sumRateInstant(iSNR,iDrop,iPkt) + SimStructs.userStruct{iUser,1}.dropThrpt(iDrop,1);
+                SimParams.sumRateInstant(iSNR,iDrop,iPkt) = SimParams.sumRateInstant(iSNR,iDrop,iPkt) + SimStructs.userStruct{iUser,1}.dropThrpt(iDrop,1);
             end
             
         end
         
-        for iUser = 1:SimParams.nUsers
-            SimParams.PFmetric(iSNR,iUser,iPkt) = SimStructs.userStruct{iUser}.PFmetric;
-            SimParams.fairness(iSNR,iUser,iPkt) = SimStructs.userStruct{iUser}.tAllocation / utilityScale;
-            SimParams.Thrpt(iSNR,iUser,iPkt) = (SimStructs.userStruct{iUser}.crThrpt - 1) / (SimParams.nDrops * SimParams.nBands);
-            queueBacklogs(iSNR,iUser,iPkt) = SimStructs.userStruct{iUser,1}.trafficStats.backLogPkt;
-            queueBacklogsOverTime(iSNR,iUser,iPkt,:) = SimStructs.userStruct{iUser,1}.trafficStats.backlogsOverTime;
-        end
-        
+        finalSystemUpdate;        
         if strcmp(SimParams.DebugMode,'true')
-            display(squeeze(queueBacklogs(iSNR,:,iPkt)));
+            display(squeeze(SimParams.QueueInfo.queueBacklogs(iSNR,:,iPkt)));
         end
         
         cState = sprintf('SINR completed - %d',SimParams.snrIndex(iSNR));disp(cState);
@@ -123,75 +117,8 @@ for iPkt = 1:length(SimParams.maxArrival)
     
 end
 
-SimResults.avgTxPower = SimParams.txPower / SimParams.nDrops;
-    
-switch SimParams.plotMode
-    
-    case 'SRA'
-        
-        SimResults.sumThrpt = sum(SimParams.Thrpt(:,:,end),2);
-        SimResults.thrptFairness = sum(SimParams.fairness(:,:,end),2);
-        SimParams.sumThrpt = SimResults.sumThrpt;
-        
-        plotFigure(SimParams.snrIndex,SimParams.sumThrpt,1,'plot');
-        xlabel('SNR in dB');ylabel('sum rate in bits/sec/Hz');
-        
-        JainMean = mean(SimParams.Thrpt,2).^2;JainVar = var(SimParams.Thrpt,0,2);
-        JainIndex_capacity = JainMean ./ (JainMean + JainVar);
-        
-%         plotFigure(SimParams.snrIndex,JainIndex_capacity,2,'plot');
-%         xlabel('SNR in dB');ylabel('Rate Deviation across Users in bits/sec/Hz');
-        
-        JainMean = mean(SimParams.fairness,2).^2;JainVar = var(SimParams.fairness,0,2);
-        JainIndex_utility = JainMean ./ (JainMean + JainVar);
-        
-%         plotFigure(SimParams.snrIndex,JainIndex_utility,3,'plot');
-%         xlabel('SNR in dB');ylabel('Network Utility Deviation across Users');
-
-        
-    case 'QA'
-        
-        SimResults.queueBackLogs = queueBacklogs;
-        SimResults.queueBackLogsOverTime = queueBacklogsOverTime;
-        
-        plotFigure(1:SimParams.nDrops,sum(squeeze(SimResults.queueBackLogsOverTime(end,:,end,:)),1),4,'plot');
-        xlabel('Slot Index');ylabel('Queue Backlogs (pkts) over Time');grid on;
-        
-%         plotFigure(1:SimParams.nDrops,std(squeeze(SimResults.queueBackLogsOverTime(end,:,end,:)),1),5,'plot');
-%         xlabel('Slot Index');ylabel('{\sigma_Q} Queue Backlogs (pkts) over Time');grid on;
-        
-%         plotFigure(SimParams.maxArrival,sum(squeeze(SimResults.queueBackLogs(end,:,:)),1),6,'plot');
-%         xlabel('Average Arrival Rate');ylabel('Average Queue Size (pkts)');grid on;
-        
-    case 'STA'
-        
-        nT = 1e3;nPRB = 50;nREinPRB = 120;nTot = nT * nPRB * nREinPRB * 1e-6;
-        
-        hold all;
-        plotFigure(SimParams.Thrpt(1,:,1) * nTot,1,1,'cdfplot');
-        xlabel('Throughput in Mbps');
-        ylabel('CDF of Throughput in Mbps');
-
-    case 'NRA'
-        
-        plotFigure(1:SimParams.nDrops,sumRateInstant,1,'plot');
-        
-    case 'QInfo'
-        
-        clc;
-        
-        displaySystemDetails;
-        displayChannel(SimParams,SimStructs);
-        
-        for iDrop = 1:SimParams.nDrops
-            displayQueues(SimParams,SimStructs,iDrop);
-        end
-        
-    otherwise
-        
-        display('Unknown print options !');        
-
-end
+SimResults.avgTxPower = SimParams.txPower / SimParams.nDrops;    
+displayOutputs(SimParams,SimStructs);
 
 if strcmp(saveContents,'true')
     

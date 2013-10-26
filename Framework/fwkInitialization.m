@@ -103,16 +103,6 @@ switch pathLossModel
         end
 end
 
-% Queue Related code
-
-for iUser = 1:SimParams.nUsers
-    SimStructs.userStruct{iUser,1}.trafficStats.pktService = zeros(length(SimParams.maxArrival),SimParams.nDrops);
-end
-
-% Traffic Modeling
-
-[SimParams,SimStructs] = generateUserTrafficArrivals(SimParams,SimStructs);
-
 % Doppler / Small scale related code
 
 if strcmp(pathLossModel,'3GPP')

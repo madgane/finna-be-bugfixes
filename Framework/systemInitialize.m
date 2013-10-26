@@ -13,7 +13,8 @@ for iUser = 1:SimParams.nUsers
     
     SimStructs.userStruct{iUser,1}.trafficStats.backLogPkt = 0;
     SimStructs.userStruct{iUser,1}.trafficConfig.bufferLength = 'Inf';
-    SimStructs.userStruct{iUser,1}.trafficStats.backlogsOverTime = zeros(1,SimParams.nDrops);
+    SimStructs.userStruct{iUser,1}.trafficHistory.pktService = zeros(1,(SimParams.nDrops + 1));
+    SimStructs.userStruct{iUser,1}.trafficStats.backlogsOverTime = zeros(1,(SimParams.nDrops + 1));
 end
 
 for iBase = 1:SimParams.nBases
@@ -44,6 +45,10 @@ for iBase = 1:SimParams.nBases
         SimStructs.linkChan{iBase,iBand} = zeros(SimParams.nRxAntenna,SimParams.nTxAntenna,SimParams.nUsers);
     end
 end
+
+% Traffic Modeling
+
+[SimParams,SimStructs] = generateUserTrafficArrivals(SimParams,SimStructs);
 
 SimParams.Debug.activeStatus = zeros(SimParams.nUsers,SimParams.nBands);
 SimParams.Debug.receivedRSSI = zeros(SimParams.nRxAntenna,SimParams.nRxAntenna,SimParams.nUsers,SimParams.nBands);
