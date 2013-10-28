@@ -5,7 +5,7 @@
 
 clc;clear all;
 
-saveContents = 'false';
+saveContents = 'true';
 SimParams.outFile = 'defaultTimeDomainFile';
 
 SimParams.maxDebugCells = 4;
@@ -29,9 +29,9 @@ SimParams.robustNoise = 0;
 SimParams.weighingEqual = 'false';
 SimParams.SchedType = 'SkipScheduling';
 SimParams.PrecodingMethod = 'Best_QwtWSRM_Method';
-SimParams.weightedSumRateMethod = 'GlobalAlloc_2';
+SimParams.weightedSumRateMethod = 'JointAlloc_Inf';
 
-SimParams.nDrops = 2;
+SimParams.nDrops = 100;
 SimParams.snrIndex = [10];
 
 SimParams.PF_dur = 40;

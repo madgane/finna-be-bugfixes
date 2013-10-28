@@ -91,13 +91,11 @@ switch selectionMethod
         
     case 'JointAlloc'
         
+        xIndex = 0;
         reIterate = 1;
         cvx_hist = -500 * ones(2,1);
-        
-        xIndex = 0;
-        p_o = ones(nUsers,nBands) / nUsers;
-        q_o = ones(nUsers,nBands) / nUsers;
-        b_o = ones(nUsers,nBands) * 10 + rand(nUsers,nBands);
+        [p_o,q_o,b_o] = randomizeInitialSCApoint(SimParams,SimStructs);
+        p_o = squeeze(p_o);q_o = squeeze(q_o);b_o = squeeze(b_o);
         
         while reIterate
             
@@ -300,13 +298,11 @@ switch selectionMethod
         
         for iBand = 1:nBands
             
+            xIndex = 0;
             reIterate = 1;
             cvx_hist = -500 * ones(2,1);
-            
-            xIndex = 0;
-            p_o = ones(nUsers,1) / nUsers;
-            q_o = ones(nUsers,1) / nUsers;
-            b_o = ones(nUsers,1) * 10 + rand(nUsers,1);
+            [p_o,q_o,b_o] = randomizeInitialSCApoint(SimParams,SimStructs,iBand);
+            p_o = squeeze(p_o);q_o = squeeze(q_o);b_o = squeeze(b_o);
             
             while reIterate
                 
@@ -409,28 +405,13 @@ switch selectionMethod
         
         updatePrecoders = 'false';
         
-    case 'GenAlloc'
-        
-        vW = cell(nUsers,nBands);
-        maxRank = SimParams.maxRank;
-        rankUsers = nUsers * maxRank;
+    case 'GenAlloc'        
         
         xIndex = 0;
         reIterate = 1;
         cvx_hist = -500 * ones(2,1);
-        
-        for iBase = 1:nBases
-            for iBand = 1:nBands
-                for iUser = 1:usersPerCell(iBase,1)
-                    cUser = cellUserIndices{iBase,1}(iUser,1);
-                    vW{cUser,iBand} = ones(SimParams.nRxAntenna,maxRank) / sqrt(SimParams.nRxAntenna);
-                end
-            end
-        end
-        
-        p_o = ones(maxRank,nUsers,nBands) / rankUsers;
-        q_o = ones(maxRank,nUsers,nBands) / rankUsers;
-        b_o = ones(maxRank,nUsers,nBands) * 10 + rand(maxRank,nUsers,nBands);
+        maxRank = SimParams.maxRank;
+        [p_o,q_o,b_o,vW] = randomizeInitialSCApoint(SimParams,SimStructs);
         
         while reIterate
             
@@ -579,25 +560,11 @@ switch selectionMethod
         
         for iBand = 1:nBands
             
-            vW = cell(nUsers,1);
-            maxRank = SimParams.maxRank;
-            rankUsers = nUsers * maxRank;
-            
             xIndex = 0;
             reIterate = 1;
+            maxRank = SimParams.maxRank;
             cvx_hist = -500 * ones(2,1);
-            
-            for iBase = 1:nBases
-                for iUser = 1:usersPerCell(iBase,1)
-                    cUser = cellUserIndices{iBase,1}(iUser,1);
-                    vW{cUser,1} = ones(SimParams.nRxAntenna,maxRank) / sqrt(SimParams.nRxAntenna);
-                end
-            end
-            
-            
-            p_o = ones(maxRank,nUsers) / rankUsers;
-            q_o = ones(maxRank,nUsers) / rankUsers;
-            b_o = ones(maxRank,nUsers) * 10 + rand(maxRank,nUsers);
+            [p_o,q_o,b_o,vW] = randomizeInitialSCApoint(SimParams,SimStructs,iBand);
             
             while reIterate
                 
@@ -737,26 +704,11 @@ switch selectionMethod
         
     case 'GlobalAlloc'
         
-        vW = cell(nUsers,nBands);
-        maxRank = SimParams.maxRank;
-        rankUsers = nUsers * maxRank;
-        
         xIndex = 0;
         reIterate = 1;
         cvx_hist = -500 * ones(2,1);
-        
-        for iBase = 1:nBases
-            for iBand = 1:nBands
-                for iUser = 1:usersPerCell(iBase,1)
-                    cUser = cellUserIndices{iBase,1}(iUser,1);
-                    vW{cUser,iBand} = ones(SimParams.nRxAntenna,maxRank) / sqrt(SimParams.nRxAntenna);
-                end
-            end
-        end
-        
-        p_o = ones(maxRank,nUsers,nBands) / rankUsers;
-        q_o = ones(maxRank,nUsers,nBands) / rankUsers;
-        b_o = ones(maxRank,nUsers,nBands) * 10 + rand(maxRank,nUsers,nBands);
+        maxRank = SimParams.maxRank;
+        [p_o,q_o,b_o,vW] = randomizeInitialSCApoint(SimParams,SimStructs);
         
         while reIterate
             
