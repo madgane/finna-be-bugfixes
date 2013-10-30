@@ -1,15 +1,15 @@
 
 function plotFigure(varargin)
 
-figColor = 'm';
-figMarker = '+';
-figLineType = '-';
+figColor = 'r';
+figMarker = 'o';
+figLineType = '-.';
 figLineWidth = 1;
 
 switch nargin
     case 1
-        xValues = varargin{1,1};
-        yValues = 1:length(xValues);
+        yValues = varargin{1,1};
+        xValues = 1:length(yValues);
         figPage = 1;figType = 'plot';
         
     case 2

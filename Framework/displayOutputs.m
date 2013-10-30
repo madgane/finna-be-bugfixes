@@ -59,6 +59,10 @@ switch SimParams.plotMode
             displayQueues(SimParams,SimStructs,iDrop);
         end
         
+    case 'QTimePlot'
+        
+        plotFigure(sum(squeeze(SimParams.QueueInfo.queueResiduesOverTime(end,:,end,:))));
+        
     otherwise
         
         display('Simulation Completed without any display !');

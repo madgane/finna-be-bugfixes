@@ -1,7 +1,8 @@
 
 function [SimParams,SimStructs] = getQWtdWSRM(SimParams,SimStructs)
 
-epsilonT = 1e-4;
+epsilonT = 1e-5;
+maxIterations = 50;
 cH = SimStructs.linkChan;
 nBases = SimParams.nBases;
 nBands = SimParams.nBands;
@@ -93,6 +94,7 @@ switch selectionMethod
         
         xIndex = 0;
         reIterate = 1;
+        currentIteration = 0;
         cvx_hist = -500 * ones(2,1);
         [p_o,q_o,b_o] = randomizeInitialSCApoint(SimParams,SimStructs);
         p_o = squeeze(p_o);q_o = squeeze(q_o);b_o = squeeze(b_o);
@@ -169,7 +171,7 @@ switch selectionMethod
                             q_o(cUser,iBand) = imag(currentH * M(:,cUser,iBand));
                             
                             if iBand == 1
-                                qDeviation = max(QueuedPkts(cUser,1) - sum(vec(t(cUser,:))) * log2(exp(1)),0);
+                                qDeviation = max(QueuedPkts(cUser,1) - sum(vec(t(cUser,:))),0);
                                 SimParams.Debug.tempResource{2,SimParams.iDrop}{cUser,1} = [SimParams.Debug.tempResource{2,SimParams.iDrop}{cUser,1} sum(vec(t(cUser,:)))];
                                 SimParams.Debug.tempResource{3,SimParams.iDrop}{cUser,1} = [SimParams.Debug.tempResource{3,SimParams.iDrop}{cUser,1} qDeviation];
                             end
@@ -186,8 +188,14 @@ switch selectionMethod
                 end
             else
                 b_o = b_o * 2;
+                display('Failed CVX !');
             end
             
+            currentIteration = currentIteration + 1;
+            if currentIteration > maxIterations
+                reIterate = 0;
+            end
+
         end
         
     case 'GMApproxAlloc'
@@ -196,6 +204,7 @@ switch selectionMethod
         cvx_hist = -500 * ones(2,1);
         
         xIndex = 0;
+        currentIteration = 0;
         p_o = ones(nUsers,nBands) / nUsers;
         q_o = ones(nUsers,nBands) / nUsers;
         phi = ones(nUsers,nBands) * 10 + rand(nUsers,nBands);
@@ -271,7 +280,7 @@ switch selectionMethod
                             q_o(cUser,iBand) = imag(currentH * M(:,cUser,iBand));
                             
                             if iBand == 1
-                                qDeviation = max(QueuedPkts(cUser,1) - sum(vec(t(cUser,:))) * log2(exp(1)),0);
+                                qDeviation = max(QueuedPkts(cUser,1) - sum(vec(t(cUser,:))),0);
                                 SimParams.Debug.tempResource{2,SimParams.iDrop}{cUser,1} = [SimParams.Debug.tempResource{2,SimParams.iDrop}{cUser,1} sum(vec(t(cUser,:)))];
                                 SimParams.Debug.tempResource{3,SimParams.iDrop}{cUser,1} = [SimParams.Debug.tempResource{3,SimParams.iDrop}{cUser,1} qDeviation];
                             end
@@ -289,9 +298,15 @@ switch selectionMethod
                     cvx_hist(mod(xIndex,2) + 1,1) = cvx_optval;
                 end
             else
+                display('Failed CVX !');
                 phi = ones(nUsers,nBands) * 10 + rand(nUsers,nBands);
             end
             
+            currentIteration = currentIteration + 1;
+            if currentIteration > maxIterations
+                reIterate = 0;
+            end
+
         end
         
     case 'JointBandAlloc'
@@ -300,9 +315,10 @@ switch selectionMethod
             
             xIndex = 0;
             reIterate = 1;
+            currentIteration = 0;
             cvx_hist = -500 * ones(2,1);
             [p_o,q_o,b_o] = randomizeInitialSCApoint(SimParams,SimStructs,iBand);
-            p_o = squeeze(p_o);q_o = squeeze(q_o);b_o = squeeze(b_o);
+            p_o = squeeze(p_o)';q_o = squeeze(q_o)';b_o = squeeze(b_o)';
             
             while reIterate
                 
@@ -345,8 +361,7 @@ switch selectionMethod
                         p(cUser,1) = real(currentH * M(:,cUser));
                         q(cUser,1) = imag(currentH * M(:,cUser));
                         
-                        q(cUser,1) == 0;
-                        
+                        q(cUser,1) == 0;                        
                         (p_o(cUser,1)^2 + q_o(cUser,1)^2) / (b_o(cUser,1)) + ...
                             (2 / b_o(cUser,1)) * (p_o(cUser,1) * (p(cUser,1) - p_o(cUser,1))) + ...
                             (2 / b_o(cUser,1)) * (q_o(cUser,1) * (q(cUser,1) - q_o(cUser,1))) - ...
@@ -371,7 +386,7 @@ switch selectionMethod
                             p_o(cUser,1) = real(currentH * M(:,cUser));
                             q_o(cUser,1) = imag(currentH * M(:,cUser));
                             
-                            qDeviation = max(QueuedPkts(cUser,1) - sum(vec(t(cUser,:))) * log2(exp(1)),0);
+                            qDeviation = max(QueuedPkts(cUser,1) - sum(vec(t(cUser,:))),0);
                             SimParams.Debug.tempResource{2,SimParams.iDrop}{cUser,1} = [SimParams.Debug.tempResource{2,SimParams.iDrop}{cUser,1} sum(vec(t(cUser,:))) + sum(bandRateMax(cUser,1:(iBand-1)))];
                             SimParams.Debug.tempResource{3,SimParams.iDrop}{cUser,1} = [SimParams.Debug.tempResource{3,SimParams.iDrop}{cUser,1} qDeviation];
                             SimParams.Debug.tempResource{4,SimParams.iDrop}{cUser,iBand} = [SimParams.Debug.tempResource{4,SimParams.iDrop}{cUser,iBand} t(cUser,1)];
@@ -386,6 +401,12 @@ switch selectionMethod
                     end
                 else
                     b_o = b_o * 2;
+                    display('Failed CVX !');
+                end
+                
+                currentIteration = currentIteration + 1;
+                if currentIteration > maxIterations
+                    reIterate = 0;
                 end
                 
             end
@@ -409,6 +430,7 @@ switch selectionMethod
         
         xIndex = 0;
         reIterate = 1;
+        currentIteration = 0;
         cvx_hist = -500 * ones(2,1);
         maxRank = SimParams.maxRank;
         [p_o,q_o,b_o,vW] = randomizeInitialSCApoint(SimParams,SimStructs);
@@ -438,7 +460,7 @@ switch selectionMethod
                         
                         cUser = cellUserIndices{iBase,1}(iUser,1);
                         for iLayer = 1:maxRank
-                            intVector = sqrt(SimParams.N);
+                            intVector = sqrt(SimParams.N) * vW{cUser,iBand}(:,iLayer);
                             
                             for jBase = 1:nBases
                                 currentH = cH{jBase,iBand}(:,:,cUser);
@@ -473,14 +495,10 @@ switch selectionMethod
                                 (p_o(iLayer,cUser,iBand)^2 + q_o(iLayer,cUser,iBand)^2) / (2 * b_o(iLayer,cUser,iBand)^2) * ...
                                 (b(iLayer,cUser,iBand) - b_o(iLayer,cUser,iBand)) >= g(iLayer,cUser,iBand);
                             
-                        end
-                        
-                    end
-                    
-                    norm(vec(M(:,:,cellUserIndices{iBase,1},iBand)),2) <= sqrt(SimStructs.baseStruct{iBase,1}.sPower(1,iBand));
-                    
-                end
-                
+                        end                        
+                    end                    
+                    norm(vec(M(:,:,cellUserIndices{iBase,1},iBand)),2) <= sqrt(SimStructs.baseStruct{iBase,1}.sPower(1,iBand));                    
+                end                
             end
             
             cvx_end
@@ -499,7 +517,7 @@ switch selectionMethod
                             end
                             
                             if iBand == 1
-                                qDeviation = max(QueuedPkts(cUser,1) - sum(vec(t(:,cUser,:))) * log2(exp(1)),0);
+                                qDeviation = max(QueuedPkts(cUser,1) - sum(vec(t(:,cUser,:))),0);
                                 SimParams.Debug.tempResource{2,SimParams.iDrop}{cUser,1} = [SimParams.Debug.tempResource{2,SimParams.iDrop}{cUser,1} sum(vec(t(:,cUser,:)))];
                                 SimParams.Debug.tempResource{3,SimParams.iDrop}{cUser,1} = [SimParams.Debug.tempResource{3,SimParams.iDrop}{cUser,1} qDeviation];
                             end
@@ -537,10 +555,17 @@ switch selectionMethod
                     xIndex = xIndex + 1;
                     cvx_hist(mod(xIndex,2) + 1,1) = cvx_optval;
                 end
+                
             else
                 b_o = b_o * 2;
+                display('Failed CVX !');
             end
             
+            currentIteration = currentIteration + 1;
+            if currentIteration > maxIterations
+                reIterate = 0;
+            end
+
         end
         
         updatePrecoders = 'false';
@@ -562,6 +587,7 @@ switch selectionMethod
             
             xIndex = 0;
             reIterate = 1;
+            currentIteration = 0;
             maxRank = SimParams.maxRank;
             cvx_hist = -500 * ones(2,1);
             [p_o,q_o,b_o,vW] = randomizeInitialSCApoint(SimParams,SimStructs,iBand);
@@ -590,7 +616,7 @@ switch selectionMethod
                         
                         cUser = cellUserIndices{iBase,1}(iUser,1);
                         for iLayer = 1:maxRank
-                            intVector = sqrt(SimParams.N);
+                            intVector = sqrt(SimParams.N) * vW{cUser,iBand}(:,iLayer);
                             
                             for jBase = 1:nBases
                                 currentH = cH{jBase,iBand}(:,:,cUser);
@@ -647,7 +673,7 @@ switch selectionMethod
                                 q_o(iLayer,cUser) = imag(vW{cUser,1}(:,iLayer)' * currentH * M(:,iLayer,cUser));
                             end
                             
-                            qDeviation = max(QueuedPkts(cUser,1) - sum(vec(t(:,cUser,:))) * log2(exp(1)),0);
+                            qDeviation = max(QueuedPkts(cUser,1) - sum(vec(t(:,cUser,:))),0);
                             SimParams.Debug.tempResource{2,SimParams.iDrop}{cUser,1} = [SimParams.Debug.tempResource{2,SimParams.iDrop}{cUser,1} sum(vec(t(:,cUser,:))) + sum(bandRateMax(cUser,1:(iBand - 1)))];
                             SimParams.Debug.tempResource{3,SimParams.iDrop}{cUser,1} = [SimParams.Debug.tempResource{3,SimParams.iDrop}{cUser,1} qDeviation];
                             SimParams.Debug.tempResource{4,SimParams.iDrop}{cUser,iBand} = [SimParams.Debug.tempResource{4,SimParams.iDrop}{cUser,iBand} sum(vec(t(:,cUser,1)))];
@@ -681,8 +707,14 @@ switch selectionMethod
                     end
                 else
                     b_o = b_o * 2;
+                    display('Failed CVX !');
                 end
                 
+                currentIteration = currentIteration + 1;
+                if currentIteration > maxIterations
+                    reIterate = 0;
+                end
+
             end
             
             updatePrecoders = 'false';
@@ -706,6 +738,7 @@ switch selectionMethod
         
         xIndex = 0;
         reIterate = 1;
+        currentIteration = 0;
         cvx_hist = -500 * ones(2,1);
         maxRank = SimParams.maxRank;
         [p_o,q_o,b_o,vW] = randomizeInitialSCApoint(SimParams,SimStructs);
@@ -735,7 +768,7 @@ switch selectionMethod
                         
                         cUser = cellUserIndices{iBase,1}(iUser,1);
                         for iLayer = 1:maxRank
-                            intVector = sqrt(SimParams.N);
+                            intVector = sqrt(SimParams.N) * vW{cUser,iBand}(:,iLayer);
                             
                             for jBase = 1:nBases
                                 currentH = cH{jBase,iBand}(:,:,cUser);
@@ -796,7 +829,7 @@ switch selectionMethod
                             end
                             
                             if iBand == 1
-                                qDeviation = max(QueuedPkts(cUser,1) - sum(vec(t(:,cUser,:))) * log2(exp(1)),0);
+                                qDeviation = max(QueuedPkts(cUser,1) - sum(vec(t(:,cUser,:))),0);
                                 SimParams.Debug.tempResource{2,SimParams.iDrop}{cUser,1} = [SimParams.Debug.tempResource{2,SimParams.iDrop}{cUser,1} sum(vec(t(:,cUser,:)))];
                                 SimParams.Debug.tempResource{3,SimParams.iDrop}{cUser,1} = [SimParams.Debug.tempResource{3,SimParams.iDrop}{cUser,1} qDeviation];
                             end
@@ -834,8 +867,14 @@ switch selectionMethod
                 end
             else
                 b_o = b_o * 2;
+                display('Failed CVX !');
             end
             
+            currentIteration = currentIteration + 1;
+            if currentIteration > maxIterations
+                reIterate = 0;
+            end
+
         end
         
         updatePrecoders = 'false';
@@ -858,6 +897,7 @@ switch selectionMethod
         
         xIndex = 0;
         reIterate = 1;
+        currentIteration = 0;
         cvx_hist = -500 * ones(2,1);
         
         for iBase = 1:nBases
@@ -936,7 +976,7 @@ switch selectionMethod
                         for iUser = 1:usersPerCell(iBase,1)
                             cUser = cellUserIndices{iBase,1}(iUser,1);                            
                             if iBand == 1
-                                qDeviation = max(QueuedPkts(cUser,1) - sum(vec(t(:,cUser,:))) * log2(exp(1)),0);
+                                qDeviation = max(QueuedPkts(cUser,1) - sum(vec(t(:,cUser,:))),0);
                                 SimParams.Debug.tempResource{2,SimParams.iDrop}{cUser,1} = [SimParams.Debug.tempResource{2,SimParams.iDrop}{cUser,1} sum(vec(t(:,cUser,:)))];
                                 SimParams.Debug.tempResource{3,SimParams.iDrop}{cUser,1} = [SimParams.Debug.tempResource{3,SimParams.iDrop}{cUser,1} qDeviation];
                             end
@@ -973,8 +1013,15 @@ switch selectionMethod
                     cvx_hist(mod(xIndex,2) + 1,1) = cvx_optval;
                 end
                             
+            else
+                display('Failed CVX !');
             end
             
+            currentIteration = currentIteration + 1;
+            if currentIteration > maxIterations
+                reIterate = 0;
+            end
+
         end
         
         updatePrecoders = 'false';
@@ -1005,9 +1052,9 @@ if strcmp(updatePrecoders,'true')
 end
 
 for iUser = 1:nUsers
-    SimParams.Debug.tempResource{2,SimParams.iDrop}{iUser,1} = SimParams.Debug.tempResource{2,SimParams.iDrop}{iUser,1} * log2(exp(1));
+    SimParams.Debug.tempResource{2,SimParams.iDrop}{iUser,1} = SimParams.Debug.tempResource{2,SimParams.iDrop}{iUser,1};
     for iBand = 1:nBands
-        SimParams.Debug.tempResource{4,SimParams.iDrop}{iUser,iBand} = SimParams.Debug.tempResource{4,SimParams.iDrop}{iUser,iBand} * log2(exp(1));
+        SimParams.Debug.tempResource{4,SimParams.iDrop}{iUser,iBand} = SimParams.Debug.tempResource{4,SimParams.iDrop}{iUser,iBand};
     end
 end
 

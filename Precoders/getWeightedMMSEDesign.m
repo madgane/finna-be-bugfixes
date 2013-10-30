@@ -115,7 +115,7 @@ for iBand = bandRange
         SumCapacity{iBand,1} = [SumCapacity{iBand,1} ; sumCap];
         for iUser = 1:SimParams.nUsers
             SimParams.Debug.tempResource{3,SimParams.iDrop}{iUser,1} = [SimParams.Debug.tempResource{3,SimParams.iDrop}{iUser,1} qDev(iUser,1)];
-            SimParams.Debug.tempResource{4,SimParams.iDrop}{iUser,iBand} = [SimParams.Debug.tempResource{4,SimParams.iDrop}{iUser,iBand} (rVec(iUser,1) * log(2))];
+            SimParams.Debug.tempResource{4,SimParams.iDrop}{iUser,iBand} = [SimParams.Debug.tempResource{4,SimParams.iDrop}{iUser,iBand} (rVec(iUser,1))];
         end
         
     end

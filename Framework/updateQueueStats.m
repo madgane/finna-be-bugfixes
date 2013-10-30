@@ -11,9 +11,10 @@ if nargin == 2
         currentResidual =  SimStructs.userStruct{iUser,1}.trafficStats.backLogPkt - SimStructs.userStruct{iUser,1}.lastThrpt;
         
         SimStructs.userStruct{iUser,1}.trafficStats.backLogPkt = max(0,currentResidual) + currentArrival;
+        SimStructs.userStruct{iUser,1}.trafficStats.residuesOverTime(1,SimParams.iDrop) = max(0,currentResidual);
         SimStructs.userStruct{iUser,1}.trafficStats.backlogsOverTime(1,SimParams.iDrop) = max(0,currentResidual) + currentArrival;
         SimStructs.userStruct{iUser,1}.trafficHistory.pktService(1,SimParams.iDrop) = SimStructs.userStruct{iUser,1}.lastThrpt;
-        SimStructs.userStruct{iUser,1}.lastThrpt = 0;
+        SimStructs.userStruct{iUser,1}.lastThrpt = 0;        
     end
     
 else
@@ -23,6 +24,7 @@ else
         currentResidual =  SimStructs.userStruct{iUser,1}.trafficStats.backLogPkt - SimStructs.userStruct{iUser,1}.lastThrpt;
         
         SimStructs.userStruct{iUser,1}.trafficStats.backLogPkt = max(0,currentResidual) + currentArrival;
+        SimStructs.userStruct{iUser,1}.trafficStats.residuesOverTime(1,SimParams.iDrop) = max(0,currentResidual);
         SimStructs.userStruct{iUser,1}.trafficStats.backlogsOverTime(1,SimParams.iDrop + 1) = max(0,currentResidual) + currentArrival;
         SimStructs.userStruct{iUser,1}.trafficHistory.pktService(1,SimParams.iDrop + 1) = SimStructs.userStruct{iUser,1}.lastThrpt;
         SimStructs.userStruct{iUser,1}.lastThrpt = 0;

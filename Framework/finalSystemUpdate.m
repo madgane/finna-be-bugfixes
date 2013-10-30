@@ -8,6 +8,7 @@ for iUser = 1:SimParams.nUsers
     
     SimParams.QueueInfo.queueBacklogs(iSNR,iUser,iPkt) = SimStructs.userStruct{iUser,1}.trafficStats.backLogPkt;
     SimParams.QueueInfo.packetServiceOverTime(iSNR,iUser,iPkt,:) = SimStructs.userStruct{iUser,1}.trafficHistory.pktService;
-    SimParams.QueueInfo.queueBacklogsOverTime(iSNR,iUser,iPkt,:) = SimStructs.userStruct{iUser,1}.trafficStats.backlogsOverTime;
     SimParams.QueueInfo.packetArrivalsOverTime(iSNR,iUser,iPkt,:) = SimStructs.userStruct{iUser,1}.trafficHistory.pktArrival;
+    SimParams.QueueInfo.queueBacklogsOverTime(iSNR,iUser,iPkt,:) = SimStructs.userStruct{iUser,1}.trafficStats.backlogsOverTime;
+    SimParams.QueueInfo.queueResiduesOverTime(iSNR,iUser,iPkt,:) = SimStructs.userStruct{iUser,1}.trafficStats.residuesOverTime;        
 end

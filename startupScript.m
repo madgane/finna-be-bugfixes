@@ -5,12 +5,12 @@
 
 clc;clear all;
 
-saveContents = 'true';
+saveContents = 'false';
 SimParams.outFile = 'defaultTimeDomainFile';
 
 SimParams.maxDebugCells = 4;
 SimParams.version = version;
-SimParams.plotMode = 'QInfo';
+SimParams.plotMode = 'QTimePlot';
 
 prelimCheck;
 preConfiguration;
@@ -29,9 +29,9 @@ SimParams.robustNoise = 0;
 SimParams.weighingEqual = 'false';
 SimParams.SchedType = 'SkipScheduling';
 SimParams.PrecodingMethod = 'Best_QwtWSRM_Method';
-SimParams.weightedSumRateMethod = 'JointAlloc_Inf';
+SimParams.weightedSumRateMethod = 'BandAlloc';
 
-SimParams.nDrops = 100;
+SimParams.nDrops = 1;
 SimParams.snrIndex = [10];
 
 SimParams.PF_dur = 40;
@@ -93,6 +93,10 @@ for iPkt = 1:length(SimParams.maxArrival)
             
             [SimParams,SimStructs] = dropInitialize(SimParams,SimStructs);
             [SimParams,SimStructs] = getScheduledUsers(SimParams,SimStructs);
+            
+            if iDrop > 1
+                displayQueues(SimParams,SimStructs,iDrop - 1);
+            end
             
             if strcmp(SimParams.precoderWithIdealChn,'true')
                 SimStructs.linkChan = SimStructs.actualChannel;

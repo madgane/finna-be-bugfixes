@@ -52,6 +52,7 @@ for iBand = 1:nBands
                 end
                 H = cH{iBase,iBand}(:,:,cUser);
                 W{cUser,iBand}(:,iLayer) = R \ (H * M(:,iLayer,cUser,iBand));
+                W{cUser,iBand}(:,iLayer) = W{cUser,iBand}(:,iLayer) / norm(W{cUser,iBand}(:,iLayer));
             end
         end
     end

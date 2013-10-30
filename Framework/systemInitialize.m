@@ -15,6 +15,7 @@ for iUser = 1:SimParams.nUsers
     SimStructs.userStruct{iUser,1}.trafficConfig.bufferLength = 'Inf';
     SimStructs.userStruct{iUser,1}.trafficHistory.pktService = zeros(1,(SimParams.nDrops + 1));
     SimStructs.userStruct{iUser,1}.trafficStats.backlogsOverTime = zeros(1,(SimParams.nDrops + 1));
+    SimStructs.userStruct{iUser,1}.trafficStats.residuesOverTime = zeros(1,(SimParams.nDrops + 1));
 end
 
 for iBase = 1:SimParams.nBases
