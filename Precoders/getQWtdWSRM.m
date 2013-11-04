@@ -97,7 +97,7 @@ switch selectionMethod
         currentIteration = 0;
         cvx_hist = -500 * ones(2,1);
         [p_o,q_o,b_o] = randomizeInitialSCApoint(SimParams,SimStructs);
-        p_o = squeeze(p_o);q_o = squeeze(q_o);b_o = squeeze(b_o);
+        p_o = reshape(p_o,nUsers,nBands);q_o = reshape(q_o,nUsers,nBands);b_o = reshape(b_o,nUsers,nBands);
         
         while reIterate
             

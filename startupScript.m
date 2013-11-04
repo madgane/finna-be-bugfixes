@@ -6,11 +6,11 @@
 clc;clear all;
 
 saveContents = 'false';
-SimParams.outFile = 'defaultTimeDomainFile';
+SimParams.outFile = 'defaultFile';
 
 SimParams.maxDebugCells = 4;
 SimParams.version = version;
-SimParams.plotMode = 'QTimePlot';
+SimParams.plotMode = 'QInfo';
 
 prelimCheck;
 preConfiguration;
@@ -28,10 +28,10 @@ SimParams.robustNoise = 0;
 
 SimParams.weighingEqual = 'false';
 SimParams.SchedType = 'SkipScheduling';
-SimParams.PrecodingMethod = 'Best_QwtWSRM_Method';
-SimParams.weightedSumRateMethod = 'GenAlloc';
+SimParams.PrecodingMethod = 'Best_QwtWSRMD_Method';
+SimParams.weightedSumRateMethod = 'MSEKKTMethod';
 
-SimParams.nDrops = 10;
+SimParams.nDrops = 1;
 SimParams.snrIndex = [10];
 
 SimParams.PF_dur = 40;
@@ -51,7 +51,7 @@ SimParams.ffrProfile_dB = zeros(1,SimParams.nBands);
 SimParams.gracePeriod = 0;
 SimParams.arrivalDist = 'Constant';
 
-SimParams.maxArrival = 20;
+SimParams.maxArrival = 10;
 SimParams.FixedPacketArrivals = [2,2,2,2,2];
 SimParams.PL_Profile = [5 -inf 5 -inf 5 -inf 1e-20 0; -inf 5 -inf 5 -inf 5 0 1e-20];
 

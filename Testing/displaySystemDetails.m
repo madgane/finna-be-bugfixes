@@ -20,6 +20,8 @@ fprintf('Pathloss Model - %s \n',SimParams.pathLossModel);
 fprintf('\n');
 fprintf('Scheduling Type - %s \n',SimParams.SchedType);
 fprintf('Precoding Method - %s \n',SimParams.PrecodingMethod);
-fprintf('Precoding Sub Model - %s \n',SimParams.weightedSumRateMethod);
+fprintf('Precoding Sub Model - %s \n \n',SimParams.weightedSumRateMethod);
 
-display(SimParams.PL_Profile);
+fprintf('\n');
+fprintf('PL Profile - \n');
+disp(SimParams.PL_Profile);

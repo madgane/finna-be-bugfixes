@@ -49,7 +49,7 @@ end
 
 % Traffic Modeling
 
-[SimParams,SimStructs] = generateUserTrafficArrivals(SimParams,SimStructs);
+[SimParams,SimStructs] = generateTraffic(SimParams,SimStructs);
 
 SimParams.Debug.activeStatus = zeros(SimParams.nUsers,SimParams.nBands);
 SimParams.Debug.receivedRSSI = zeros(SimParams.nRxAntenna,SimParams.nRxAntenna,SimParams.nUsers,SimParams.nBands);
