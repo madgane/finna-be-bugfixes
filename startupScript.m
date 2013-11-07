@@ -10,7 +10,7 @@ SimParams.outFile = 'defaultFile';
 
 SimParams.maxDebugCells = 4;
 SimParams.version = version;
-SimParams.plotMode = 'QInfo';
+SimParams.plotMode = 'QTimePlot';
 
 prelimCheck;
 preConfiguration;
@@ -28,10 +28,10 @@ SimParams.robustNoise = 0;
 
 SimParams.weighingEqual = 'false';
 SimParams.SchedType = 'SkipScheduling';
-SimParams.PrecodingMethod = 'Best_QwtWSRMD_Method';
-SimParams.weightedSumRateMethod = 'MSEKKTMethod';
+SimParams.PrecodingMethod = 'Best_QwtWSRM_Method';
+SimParams.weightedSumRateMethod = 'GlobalMSEAlloc';
 
-SimParams.nDrops = 1;
+SimParams.nDrops = 25;
 SimParams.snrIndex = [10];
 
 SimParams.PF_dur = 40;
@@ -40,9 +40,9 @@ SimParams.sampTime = 1e-3;
 SimParams.estError = 0.00;
 SimParams.fbFraction = 0.0;
 
-SimParams.nBands = 1;
+SimParams.nBands = 5;
 SimParams.nBases = 2;
-SimParams.nUsers = 4;
+SimParams.nUsers = 12;
 
 SimParams.nTxAntenna = 4;
 SimParams.nRxAntenna = 1;

@@ -1,6 +1,8 @@
 
 function [varargout] = randomizeInitialSCApoint(varargin)
 
+initPrecPoint = 'Ones';
+
 switch nargin
     case 2
         SimParams = varargin{1};
@@ -35,7 +37,36 @@ W = cell(nUsers,nBands);
 p = zeros(maxRank,nUsers,nBands);
 q = zeros(maxRank,nUsers,nBands);
 b = zeros(maxRank,nUsers,nBands);
-M = ones(SimParams.nTxAntenna,maxRank,nUsers,nBands);
+
+switch initPrecPoint
+    
+    case 'Ones'
+        M = ones(SimParams.nTxAntenna,maxRank,nUsers,nBands);
+    case 'Random'
+        M = rand(SimParams.nTxAntenna,maxRank,nUsers,nBands);
+    case 'BF'
+        for iBand = 1:nBands
+            for iUser = 1:nUsers
+                [~,~,V] = svd(cH{SimStructs.userStruct{iUser,1}.baseNode,iBand}(:,:,iUser));
+                M(:,:,iUser,iBand) = V(:,1:maxRank);
+            end
+        end
+end
+
+for iBase = 1:nBases
+    for iBand = 1:nBands
+        totPower = 0;
+        for iUser = 1:usersPerCell(iBase,1)
+            cUser = cellUserIndices{iBase,1}(iUser,1);
+            totPower = totPower + real(trace(M(:,:,cUser,iBand) * M(:,:,cUser,iBand)'));
+        end   
+        totPower = SimStructs.baseStruct{iBase,1}.sPower(1,iBand) * totPower;
+        for iUser = 1:usersPerCell(iBase,1)
+            cUser = cellUserIndices{iBase,1}(iUser,1);
+            M(:,:,cUser,iBand) = M(:,:,cUser,iBand) / sqrt(totPower);
+        end   
+    end
+end
 
 for iBand = 1:nBands
     for iBase = 1:nBases

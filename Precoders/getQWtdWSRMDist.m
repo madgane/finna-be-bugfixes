@@ -1048,7 +1048,7 @@ switch selectionMethod
         t = ones(maxRank,nUsers,nBands);
         betaLKN = zeros(maxRank,nUsers,nBands);
         lambdaLKN = zeros(maxRank,nUsers,nBands);
-        mseError_o = ones(maxRank,nUsers,nBands);
+        mseError_o = ones(maxRank,nUsers,nBands) * 0.5;
         
         for iBand = 1:nBands
             for iUser = 1:nUsers
