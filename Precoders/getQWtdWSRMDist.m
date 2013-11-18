@@ -9,7 +9,7 @@ usersPerCell = zeros(nBases,1);
 cellUserIndices = cell(nBases,1);
 cellNeighbourIndices = cell(nBases,1);
 
-mIterationsSCA = 50;mIterationsSG = 10;sumDeviationH = -50;
+mIterationsSCA = 20;mIterationsSG = 10;sumDeviationH = -50;
 
 % Debug Buffers initialization
 
@@ -59,17 +59,12 @@ switch selectionMethod
         alpha = 0.25;
         nLayers = SimParams.maxRank;
         cellP = cell(nBases,1);cellQ = cell(nBases,1);cellB = cell(nBases,1);
-        cellM = cell(nBases,1);cellD = cell(nBases,1);cellBH = cell(nBases,1);W = cell(nUsers,1);
+        cellM = cell(nBases,1);cellD = cell(nBases,1);cellBH = cell(nBases,1);
         
         xIteration = 0;
         scaContinue = 1;
         currentIF = ones(nLayers,nUsers,nBases,nBands) * 10;
-        
-        for iBand = 1:nBands
-            for iUser = 1:nUsers
-                W{iUser,iBand} = ones(SimParams.nRxAntenna,nLayers) / sqrt(SimParams.nRxAntenna);
-            end
-        end
+        [p_o,q_o,b_o,W] = randomizeInitialSCApoint(SimParams,SimStructs);
         
         while scaContinue
             
@@ -78,9 +73,9 @@ switch selectionMethod
             
             if xIteration == 0
                 for iBase = 1:nBases
-                    cellP{iBase,1} = ones(nLayers,usersPerCell(iBase,1),nBands) / usersPerCell(iBase,1);
-                    cellQ{iBase,1} = ones(nLayers,usersPerCell(iBase,1),nBands) / usersPerCell(iBase,1);
-                    cellB{iBase,1} = ones(nLayers,usersPerCell(iBase,1),nBands) * 10 + rand(nLayers,usersPerCell(iBase,1),nBands);
+                    cellP{iBase,1} = p_o(:,cellUserIndices{iBase,1},:);
+                    cellQ{iBase,1} = q_o(:,cellUserIndices{iBase,1},:);
+                    cellB{iBase,1} = b_o(:,cellUserIndices{iBase,1},:);
                 end
             else
                 for iBase = 1:nBases
@@ -284,7 +279,9 @@ switch selectionMethod
                         H = cH{baseNode,iBand}(:,:,iUser);
                         xUser = (iUser == cellUserIndices{baseNode,1});
                         W{iUser,iBand}(:,iLayer) = R \ (H * cellM{baseNode,1}(:,iLayer,xUser,iBand));
-                        W{iUser,iBand}(:,iLayer) = W{iUser,iBand}(:,iLayer) / norm(W{iUser,iBand}(:,iLayer),2);
+                        if (norm(W{iUser,iBand}(:,iLayer),2) ~= 0)
+                            W{iUser,iBand}(:,iLayer) = W{iUser,iBand}(:,iLayer) / norm(W{iUser,iBand}(:,iLayer),2);
+                        end
                     end
                 end
             end
@@ -299,24 +296,19 @@ switch selectionMethod
         
     case 'ADMMMethod'
         
-        alpha = 0.25;
+        alpha = 0.5;
         nLayers = SimParams.maxRank;
         cellP = cell(nBases,1);cellQ = cell(nBases,1);cellB = cell(nBases,1);
-        cellM = cell(nBases,1);cellX = cell(nBases,1);cellBH = cell(nBases,1);W = cell(nUsers,1);
+        cellM = cell(nBases,1);cellX = cell(nBases,1);cellBH = cell(nBases,1);
         
         xIteration = 0;
         scaContinue = 1;
-        for iBand = 1:nBands
-            for iUser = 1:nUsers
-                W{iUser,iBand} = ones(SimParams.nRxAntenna,nLayers) / sqrt(SimParams.nRxAntenna);
-            end
-        end
-        
         for iBase = 1:nBases
             cellX{iBase,1} = zeros(nLayers,nUsers,nBases,nBands);
         end
-        
+
         currentDual = zeros(nLayers,nUsers,nBases,nBands);
+        [p_o,q_o,b_o,W] = randomizeInitialSCApoint(SimParams,SimStructs);
         
         while scaContinue
             
@@ -325,9 +317,9 @@ switch selectionMethod
             
             if xIteration == 0
                 for iBase = 1:nBases
-                    cellP{iBase,1} = ones(nLayers,usersPerCell(iBase,1),nBands) / usersPerCell(iBase,1);
-                    cellQ{iBase,1} = ones(nLayers,usersPerCell(iBase,1),nBands) / usersPerCell(iBase,1);
-                    cellB{iBase,1} = ones(nLayers,usersPerCell(iBase,1),nBands) * 10 + rand(nLayers,usersPerCell(iBase,1),nBands);
+                    cellP{iBase,1} = p_o(:,cellUserIndices{iBase,1},:);
+                    cellQ{iBase,1} = q_o(:,cellUserIndices{iBase,1},:);
+                    cellB{iBase,1} = b_o(:,cellUserIndices{iBase,1},:);
                 end
             else
                 for iBase = 1:nBases
@@ -554,7 +546,9 @@ switch selectionMethod
                         H = cH{baseNode,iBand}(:,:,iUser);
                         xUser = (iUser == cellUserIndices{baseNode,1});
                         W{iUser,iBand}(:,iLayer) = R \ (H * cellM{baseNode,1}(:,iLayer,xUser,iBand));
-                        W{iUser,iBand}(:,iLayer) = W{iUser,iBand}(:,iLayer) / norm(W{iUser,iBand}(:,iLayer),2);
+                        if norm(W{iUser,iBand}(:,iLayer),2) ~= 0
+                            W{iUser,iBand}(:,iLayer) = W{iUser,iBand}(:,iLayer) / norm(W{iUser,iBand}(:,iLayer),2);
+                        end
                     end
                 end
             end

@@ -1,64 +1,40 @@
 
-function plotFigure(varargin)
+function plotFigure(figStruct)
 
-figColor = 'm';
-figMarker = 'o';
+figColor = 'c';
+figMarker = '.';
 figLineType = '-.';
 figLineWidth = 1;
-
-switch nargin
-    case 1
-        yValues = varargin{1,1};
-        xValues = 1:length(yValues);
-        figPage = 1;figType = 'plot';
-        
-    case 2
-        xValues = varargin{1,1};
-        if ischar(varargin{1,2})
-            figType = varargin{1,2};
-            figPage = 1;
-            yValues = 1:length(xValues);
-        else
-            yValues = varargin{1,2};
-            figPage = 1;figType = 'plot';
-        end
-        
-    case 3
-        xValues = varargin{1,1};yValues = varargin{1,2};
-        if ischar(varargin{1,3})
-            figType = varargin{1,3};
-            figPage = 1;
-        else
-            figPage = varargin{1,3};
-            figType = 'plot';
-        end
-        
-    case 4
-        xValues = varargin{1,1};yValues = varargin{1,2};
-        figPage = varargin{1,3};figType = varargin{1,4};
-        
-    otherwise
-        display('invalid argument !');
-        
-end
     
-figure(figPage);hold all;grid on;
+if ~isfield(figStruct,'N')
+    figStruct.N = 1;
+end
 
-switch figType
+if ~isfield(figStruct,'X')
+    figStruct.X = 1:length(figStruct.Y);
+end
+
+if ~isfield(figStruct,'P')
+    figStruct.P = 'plot';
+end
+
+figure(figStruct.N);hold all;grid on;
+
+switch figStruct.P
     
     case 'plot'
         
-        plot(xValues,yValues,'Color',figColor,'LineWidth',figLineWidth,...
+        plot(figStruct.X,figStruct.Y,'Color',figColor,'LineWidth',figLineWidth,...
             'LineStyle',figLineType,'MarkerFaceColor',figColor,'Marker',figMarker);
         
     case 'semilogy'
         
-        semilogy(xValues,yValues,'Color',figColor,'LineWidth',figLineWidth,...
+        semilogy(figStruct.X,figStruct.Y,'Color',figColor,'LineWidth',figLineWidth,...
             'LineStyle',figLineType,'MarkerFaceColor',figColor,'Marker',figMarker);
         
     case 'cdfplot'
         
-        [yValues, xValues] = cdfcalc(xValues);        
+        [yValues, xValues] = cdfcalc(figStruct.Y);        
         stairs(xValues,yValues(2:end),'Color',figColor,'LineWidth',figLineWidth,...
             'LineStyle',figLineType,'MarkerFaceColor',figColor,'Marker',figMarker);
 

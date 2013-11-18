@@ -227,7 +227,7 @@ for iBase = 1:SimParams.nBases
                 
                 for iUser = 1:kUsers
                     cUser = uIndices(iUser,1);
-                    [U,~,~] = getIterateSVDFP(eH(:,:,iUser),6,32,16);
+                    [U,~,~] = getIterateSVDFP(eH(:,:,iUser),6,32,10);
                     if SimParams.queueWt
                         M = U' * eH(:,:,iUser) * (SimStructs.userStruct{cUser,1}.weighingFactor);
                     else

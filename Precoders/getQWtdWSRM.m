@@ -36,6 +36,7 @@ for iBase = 1:nBases
     end
 end
 
+userWts = QueuedPkts;
 underscore_location = strfind(SimParams.weightedSumRateMethod,'_');
 if isempty(underscore_location)
     qExponent = 1;
@@ -113,7 +114,7 @@ switch selectionMethod
             subject to
             
             for iUser = 1:nUsers
-                abs(QueuedPkts(iUser,1) - sum(t(iUser,:))) <= userObjective(iUser,1);
+                userWts(iUser,1) * abs(QueuedPkts(iUser,1) - sum(t(iUser,:))) <= userObjective(iUser,1);
             end
             
             epiObjective >= norm(userObjective,qExponent);
@@ -223,7 +224,7 @@ switch selectionMethod
             subject to
             
             for iUser = 1:nUsers
-                abs(QueuedPkts(iUser,1) - sum(t(iUser,:))) <= userObjective(iUser,1);
+                userWts(iUser,1) * abs(QueuedPkts(iUser,1) - sum(t(iUser,:))) <= userObjective(iUser,1);
             end
             
             epiObjective >= norm(userObjective,qExponent);
@@ -334,7 +335,7 @@ switch selectionMethod
                 subject to
                 
                 for iUser = 1:nUsers
-                    abs(QueuedPkts(iUser,1) - t(iUser,1)) <= userObjective(iUser,1);
+                    userWts(iUser,1) * abs(QueuedPkts(iUser,1) - t(iUser,1)) <= userObjective(iUser,1);
                 end
                 
                 epiObjective >= norm(userObjective,qExponent);
@@ -449,7 +450,7 @@ switch selectionMethod
             subject to
             
             for iUser = 1:nUsers
-                abs(QueuedPkts(iUser,1) - sum(vec(t(:,iUser,:)))) <= userObjective(iUser,1);
+                userWts(iUser,1) * abs(QueuedPkts(iUser,1) - sum(vec(t(:,iUser,:)))) <= userObjective(iUser,1);
             end
             
             epiObjective >= norm(userObjective,qExponent);
@@ -608,7 +609,7 @@ switch selectionMethod
                 subject to
                 
                 for iUser = 1:nUsers
-                    abs(QueuedPkts(iUser,1) - sum(vec(t(:,iUser)))) <= userObjective(iUser,1);
+                    userWts(iUser,1) * abs(QueuedPkts(iUser,1) - sum(vec(t(:,iUser)))) <= userObjective(iUser,1);
                 end
                 
                 epiObjective >= norm(userObjective,qExponent);
@@ -759,7 +760,7 @@ switch selectionMethod
             subject to
             
             for iUser = 1:nUsers
-                abs(QueuedPkts(iUser,1) - sum(vec(t(:,iUser,:)))) <= userObjective(iUser,1);
+                userWts(iUser,1) * abs(QueuedPkts(iUser,1) - sum(vec(t(:,iUser,:)))) <= userObjective(iUser,1);
             end
             
             epiObjective >= norm(userObjective,qExponent);
@@ -927,7 +928,7 @@ switch selectionMethod
             subject to
             
             for iUser = 1:nUsers
-                abs(QueuedPkts(iUser,1) - sum(vec(t(:,iUser,:)))) <= userObjective(iUser,1);
+                userWts(iUser,1) * abs(QueuedPkts(iUser,1) - sum(vec(t(:,iUser,:)))) <= userObjective(iUser,1);
             end
             
             epiObjective >= norm(userObjective,qExponent);

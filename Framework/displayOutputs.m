@@ -8,25 +8,37 @@ switch SimParams.plotMode
         SimResults.thrptFairness = sum(SimParams.fairness(:,:,end),2);
         SimParams.sumThrpt = SimResults.sumThrpt;
         
-        plotFigure(SimParams.snrIndex,SimParams.sumThrpt,1,'plot');
+        figStruct.N = 1;figStruct.P = 'plot';
+        figStruct.X = SimParams.snrIndex;figStruct.Y = SimParams.sumThrpt;
+        
+        plotFigure(figStruct);
         xlabel('SNR in dB');ylabel('sum rate in bits/sec/Hz');
         
         JainMean = mean(SimParams.Thrpt,2).^2;JainVar = var(SimParams.Thrpt,0,2);
         JainIndex_capacity = JainMean ./ (JainMean + JainVar);
         
-        %         plotFigure(SimParams.snrIndex,JainIndex_capacity,2,'plot');
-        %         xlabel('SNR in dB');ylabel('Rate Deviation across Users in bits/sec/Hz');
+        figStruct.N = 2;figStruct.P = 'plot';
+        figStruct.X = SimParams.snrIndex;figStruct.Y = JainIndex_capacity;
+
+%         plotFigure(figStruct);
+%         xlabel('SNR in dB');ylabel('Rate Deviation across Users in bits/sec/Hz');
         
         JainMean = mean(SimParams.fairness,2).^2;JainVar = var(SimParams.fairness,0,2);
         JainIndex_utility = JainMean ./ (JainMean + JainVar);
         
-        %         plotFigure(SimParams.snrIndex,JainIndex_utility,3,'plot');
-        %         xlabel('SNR in dB');ylabel('Network Utility Deviation across Users');
+        figStruct.N = 2;figStruct.P = 'plot';
+        figStruct.X = SimParams.snrIndex;figStruct.Y = JainIndex_utility;
+
+%         plotFigure(figStruct);
+%         xlabel('SNR in dB');ylabel('Network Utility Deviation across Users');
         
         
     case 'QA'
+
+        figStruct.N = 1;figStruct.P = 'plot';
+        figStruct.X = 1:SimParams.nDrops;figStruct.Y = sum(squeeze(SimParams.QueueInfo.queueBackLogsOverTime(end,:,end,:)),1);
         
-        plotFigure(1:SimParams.nDrops,sum(squeeze(SimParams.QueueInfo.queueBackLogsOverTime(end,:,end,:)),1),4,'plot');
+        plotFigure(figStruct);
         xlabel('Slot Index');ylabel('Queue Backlogs (pkts) over Time');grid on;
         
         %         plotFigure(1:SimParams.nDrops,std(squeeze(SimParams.QueueInfo.queueBackLogsOverTime(end,:,end,:)),1),5,'plot');
@@ -38,15 +50,17 @@ switch SimParams.plotMode
     case 'STA'
         
         nT = 1e3;nPRB = 50;nREinPRB = 120;nTot = nT * nPRB * nREinPRB * 1e-6;
+
+        figStruct.N = 1;figStruct.P = 'cdfplot';
+        figStruct.Y = SimParams.Thrpt(1,:,1) * nTot;
         
-        hold all;
-        plotFigure(SimParams.Thrpt(1,:,1) * nTot,1,1,'cdfplot');
+        plotFigure(figStruct);
         xlabel('Throughput in Mbps');
         ylabel('CDF of Throughput in Mbps');
         
     case 'NRA'
         
-        plotFigure(1:SimParams.nDrops,SimParams.sumRateInstant,1,'plot');
+        plotFigure(struct('Y',SimParams.sumRateInstant));
         
     case 'QInfo'
         
@@ -61,7 +75,15 @@ switch SimParams.plotMode
         
     case 'QTimePlot'
         
-        plotFigure(sum(squeeze(SimParams.QueueInfo.queueResiduesOverTime(end,:,end,:))));
+        plotFigure(struct('Y',sum(squeeze(SimParams.QueueInfo.queueResiduesOverTime(end,:,end,:)))));
+        
+    case 'CPlot'
+        
+        displaySystemDetails;
+        displayChannel(SimParams,SimStructs);
+        displayQueues(SimParams,SimStructs);
+        plotFigure(struct('Y',sum(cell2mat(SimParams.Debug.tempResource{3,1}))));
+        xlabel('Iteration count');ylabel('Queue deviation in bits / channel use');
         
     otherwise
         
