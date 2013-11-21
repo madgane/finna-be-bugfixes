@@ -1,6 +1,7 @@
 
 function [SimParams,SimStructs] = getQWtdWSRMDist(SimParams,SimStructs)
 
+globalMode = 'false';
 cH = SimStructs.linkChan;
 nBases = SimParams.nBases;
 nBands = SimParams.nBands;
@@ -9,7 +10,7 @@ usersPerCell = zeros(nBases,1);
 cellUserIndices = cell(nBases,1);
 cellNeighbourIndices = cell(nBases,1);
 
-mIterationsSCA = 20;mIterationsSG = 10;sumDeviationH = -50;
+mIterationsSCA = 20;mIterationsSG = 5;sumDeviationH = -50;
 
 % Debug Buffers initialization
 
@@ -63,7 +64,7 @@ switch selectionMethod
         
         xIteration = 0;
         scaContinue = 1;
-        currentIF = ones(nLayers,nUsers,nBases,nBands) * 10;
+        currentIF = zeros(nLayers,nUsers,nBases,nBands);
         [p_o,q_o,b_o,W] = randomizeInitialSCApoint(SimParams,SimStructs);
         
         while scaContinue
@@ -163,7 +164,6 @@ switch selectionMethod
                                 
                                 p(iLayer,iUser,iBand) = real(W{cUser,iBand}(:,iLayer)' * H * M(:,iLayer,iUser,iBand));
                                 q(iLayer,iUser,iBand) = imag(W{cUser,iBand}(:,iLayer)' * H * M(:,iLayer,iUser,iBand));
-                                q(iLayer,iUser,iBand) == 0;
                                 
                                 (cellP{iBase,1}(iLayer,iUser,iBand)^2 + cellQ{iBase,1}(iLayer,iUser,iBand)^2) / (cellB{iBase,1}(iLayer,iUser,iBand)) + ...
                                     (2 / cellB{iBase,1}(iLayer,iUser,iBand)) * (cellP{iBase,1}(iLayer,iUser,iBand) * (p(iLayer,iUser,iBand) - cellP{iBase,1}(iLayer,iUser,iBand))) + ...
@@ -306,7 +306,7 @@ switch selectionMethod
         for iBase = 1:nBases
             cellX{iBase,1} = zeros(nLayers,nUsers,nBases,nBands);
         end
-
+        
         currentDual = zeros(nLayers,nUsers,nBases,nBands);
         [p_o,q_o,b_o,W] = randomizeInitialSCApoint(SimParams,SimStructs);
         
@@ -429,7 +429,6 @@ switch selectionMethod
                                 
                                 p(iLayer,iUser,iBand) = real(W{cUser,iBand}(:,iLayer)' * H * M(:,iLayer,iUser,iBand));
                                 q(iLayer,iUser,iBand) = imag(W{cUser,iBand}(:,iLayer)' * H * M(:,iLayer,iUser,iBand));
-                                q(iLayer,iUser,iBand) == 0;
                                 
                                 (cellP{iBase,1}(iLayer,iUser,iBand)^2 + cellQ{iBase,1}(iLayer,iUser,iBand)^2) / (cellB{iBase,1}(iLayer,iUser,iBand)) + ...
                                     (2 / cellB{iBase,1}(iLayer,iUser,iBand)) * (cellP{iBase,1}(iLayer,iUser,iBand) * (p(iLayer,iUser,iBand) - cellP{iBase,1}(iLayer,iUser,iBand))) + ...
@@ -565,7 +564,7 @@ switch selectionMethod
         
         alpha = 0.5;
         nLayers = SimParams.maxRank;
-        W = cell(nUsers,1);cellD = cell(nBases,1);cellM = cell(nBases,1);cellTH = cell(nBases,1);
+        W = cell(nUsers,nBands);cellD = cell(nBases,1);cellM = cell(nBases,1);cellTH = cell(nBases,1);
         
         xIteration = 0;
         scaContinue = 1;
@@ -783,7 +782,7 @@ switch selectionMethod
         
         alpha = 0.25;
         nLayers = SimParams.maxRank;
-        cellM = cell(nBases,1);cellX = cell(nBases,1);cellBH = cell(nBases,1);W = cell(nUsers,1);
+        cellM = cell(nBases,1);cellX = cell(nBases,1);cellBH = cell(nBases,1);W = cell(nUsers,nBands);
         
         xIteration = 0;
         scaContinue = 1;
@@ -1027,7 +1026,7 @@ switch selectionMethod
         
     case 'MSEKKTMethod'
         
-        vW = cell(nUsers,nBands);
+        W = cell(nUsers,nBands);
         maxRank = SimParams.maxRank;
         
         xIndex = 0;
@@ -1038,15 +1037,15 @@ switch selectionMethod
         cvx_hist = -500 * ones(2,1);
         
         M = cell(nUsers,nBands);
-        R = cell(maxRank,nUsers,nBands);        
+        R = cell(maxRank,nUsers,nBands);
         t = ones(maxRank,nUsers,nBands);
         betaLKN = zeros(maxRank,nUsers,nBands);
         lambdaLKN = zeros(maxRank,nUsers,nBands);
-        mseError_o = ones(maxRank,nUsers,nBands) * 0.5;
+        mseError_o = ones(maxRank,nUsers,nBands);
         
         for iBand = 1:nBands
             for iUser = 1:nUsers
-                vW{iUser,iBand} = ones(SimParams.nRxAntenna,maxRank) / sqrt(SimParams.nRxAntenna);
+                W{iUser,iBand} = ones(SimParams.nRxAntenna,maxRank) / sqrt(SimParams.nRxAntenna);
             end
         end
         
@@ -1055,81 +1054,115 @@ switch selectionMethod
             for iBand = 1:nBands
                 for iUser = 1:nUsers
                     for iRank = 1:maxRank
-                        lambdaLKN(iRank,iUser,iBand) = qExponent * abs(QueuedPkts(iUser,1) - sum(vec(t(:,iUser,:))))^(qExponent - 1);
+                        lambdaLKN(iRank,iUser,iBand) = max(qExponent * (QueuedPkts(iUser,1) - sum(vec(t(:,iUser,:))))^(qExponent - 1),0);
                         betaLKN(iRank,iUser,iBand) = lambdaLKN(iRank,iUser,iBand) / mseError_o(iRank,iUser,iBand);
                     end
                 end
-            end     
+            end
             
             for iBand = 1:nBands
                 for iUser = 1:nUsers
                     xNode = SimStructs.userStruct{iUser,1}.baseNode;
                     for iLayer = 1:maxRank
                         I = zeros(SimParams.nTxAntenna);
-                        for jUser = 1:nUsers                            
+                        for jUser = 1:nUsers
                             for jLayer = 1:maxRank
-                                I = I + cH{xNode,iBand}(:,:,jUser)' * vW{jUser,iBand}(:,jLayer) * vW{jUser,iBand}(:,jLayer)' * cH{xNode,iBand}(:,:,jUser) * betaLKN(jLayer,jUser,iBand);
+                                I = I + cH{xNode,iBand}(:,:,jUser)' * W{jUser,iBand}(:,jLayer) * W{jUser,iBand}(:,jLayer)' * cH{xNode,iBand}(:,:,jUser) * betaLKN(jLayer,jUser,iBand);
                             end
                         end
-                        R{iLayer,iUser,iBand} = I;                        
+                        R{iLayer,iUser,iBand} = I;
                     end
-                end                
+                end
             end
             
-            for iBase = 1:nBases
+            if strcmpi(globalMode,'false')
                 
-                muMax = 1000;
-                muMin = 0;
-                iterateAgain = 1;
-                while iterateAgain
-                    totalPower = 0;
-                    currentMu = (muMax + muMin) / 2;                    
+                for iBase = 1:nBases
                     for iBand = 1:nBands
-                        for iUser = 1:usersPerCell(iBase,1)
-                            cUser = cellUserIndices{iBase,1}(iUser,1);
-                            for iLayer = 1:maxRank
-                                M{cUser,iBand}(:,iLayer) = pinv(currentMu * eye(SimParams.nTxAntenna) + R{iLayer,cUser,iBand}) * betaLKN(iLayer,cUser,iBand) * cH{iBase,iBand}(:,:,cUser)' * vW{cUser,iBand}(:,iLayer);
-                                totalPower = totalPower + real(trace(M{cUser,iBand}(:,iLayer) * M{cUser,iBand}(:,iLayer)'));
+                        muMin = 0;
+                        muMax = 1000;
+                        iterateAgain = 1;
+                        while iterateAgain
+                            totalPower = 0;
+                            currentMu = (muMax + muMin) / 2;
+                            for iUser = 1:usersPerCell(iBase,1)
+                                cUser = cellUserIndices{iBase,1}(iUser,1);
+                                for iLayer = 1:maxRank
+                                    M{cUser,iBand}(:,iLayer) = (currentMu * eye(SimParams.nTxAntenna) + R{iLayer,cUser,iBand}) \ (betaLKN(iLayer,cUser,iBand) * cH{iBase,iBand}(:,:,cUser)' * W{cUser,iBand}(:,iLayer));
+                                    totalPower = totalPower + real(trace(M{cUser,iBand}(:,iLayer) * M{cUser,iBand}(:,iLayer)'));
+                                end
+                            end
+                            
+                            if totalPower > (SimStructs.baseStruct{iBase,1}.sPower(1,iBand))
+                                muMin = currentMu;
+                            else
+                                muMax = currentMu;
+                            end
+                            
+                            if abs(muMin - muMax) <= 1e-5
+                                iterateAgain = 0;
                             end
                         end
                     end
-                    
-                    if totalPower > sum(SimStructs.baseStruct{iBase,1}.sPower)
-                        muMin = currentMu;
-                    else
-                        muMax = currentMu;
-                    end
-                    
-                    if abs(muMin - muMax) <= 1e-5
-                        iterateAgain = 0;
-                    end
-                    
                 end
+                
+            else
+                
+                for iBase = 1:nBases                    
+                    muMax = 1000;
+                    muMin = 0;
+                    iterateAgain = 1;
+                    while iterateAgain
+                        totalPower = 0;
+                        currentMu = (muMax + muMin) / 2;
+                        for iBand = 1:nBands
+                            for iUser = 1:usersPerCell(iBase,1)
+                                cUser = cellUserIndices{iBase,1}(iUser,1);
+                                for iLayer = 1:maxRank
+                                    M{cUser,iBand}(:,iLayer) = (currentMu * eye(SimParams.nTxAntenna) + R{iLayer,cUser,iBand}) \ (betaLKN(iLayer,cUser,iBand) * cH{iBase,iBand}(:,:,cUser)' * W{cUser,iBand}(:,iLayer));
+                                    totalPower = totalPower + real(trace(M{cUser,iBand}(:,iLayer) * M{cUser,iBand}(:,iLayer)'));
+                                end
+                            end
+                        end
+                        
+                        if totalPower > sum(SimStructs.baseStruct{iBase,1}.sPower)
+                            muMin = currentMu;
+                        else
+                            muMax = currentMu;
+                        end
+                        
+                        if abs(muMin - muMax) <= 1e-5
+                            iterateAgain = 0;
+                        end
+                        
+                    end
+                end
+                
             end
             
             for iBand = 1:nBands
                 for iUser = 1:nUsers
                     baseNode = SimStructs.userStruct{iUser,1}.baseNode;
                     for iLayer = 1:maxRank
-                        intVector = sqrt(SimParams.N) * vW{iUser,iBand}(:,iLayer);
+                        intVector = sqrt(SimParams.N) * W{iUser,iBand}(:,iLayer);
                         for jUser = 1:nUsers
                             ifNode = SimStructs.userStruct{jUser,1}.baseNode;
                             currentH = cH{ifNode,iBand}(:,:,iUser);
                             if jUser == iUser
                                 for jLayer = 1:maxRank
                                     if jLayer ~= iLayer
-                                        intVector = [intVector ; vW{iUser,iBand}(:,iLayer)' * currentH * M{jUser,iBand}(:,jLayer)];
+                                        intVector = [intVector ; W{iUser,iBand}(:,iLayer)' * currentH * M{jUser,iBand}(:,jLayer)];
                                     end
                                 end
                             else
                                 for jLayer = 1:maxRank
-                                    intVector = [intVector ; vW{iUser,iBand}(:,iLayer)' * currentH * M{jUser,iBand}(:,jLayer)];
+                                    intVector = [intVector ; W{iUser,iBand}(:,iLayer)' * currentH * M{jUser,iBand}(:,jLayer)];
                                 end
                             end
                         end
                         
                         currentH = cH{baseNode,iBand}(:,:,iUser);
-                        givenVector = (1 - vW{iUser,iBand}(:,iLayer)' * currentH * M{iUser,iBand}(:,iLayer));
+                        givenVector = (1 - W{iUser,iBand}(:,iLayer)' * currentH * M{iUser,iBand}(:,iLayer));
                         intVector = [intVector ; givenVector];
                         mseError(iLayer,iUser,iBand) = norm(intVector,2)^2;
                     end
@@ -1142,29 +1175,30 @@ switch selectionMethod
                         t(iRank,iUser,iBand) = (-log(mseError_o(iRank,iUser,iBand)) - (mseError(iRank,iUser,iBand) - mseError_o(iRank,iUser,iBand)) / mseError_o(iRank,iUser,iBand)) * log2(exp(1));
                     end
                 end
-            end   
+            end
             
             cvx_optval = 0;
             for iUser = 1:nUsers
                 cvx_optval = cvx_optval + abs(QueuedPkts(iUser,1) - sum(vec(t(:,iUser,:))));
             end
             
+            tz = max(t,0);
             mseError_o = mseError;
             for iBand = 1:nBands
                 for iBase = 1:nBases
                     for iUser = 1:usersPerCell(iBase,1)
                         cUser = cellUserIndices{iBase,1}(iUser,1);
                         if iBand == 1
-                            qDeviation = max(QueuedPkts(cUser,1) - sum(vec(t(:,cUser,:))),0);
-                            SimParams.Debug.tempResource{2,SimParams.iDrop}{cUser,1} = [SimParams.Debug.tempResource{2,SimParams.iDrop}{cUser,1} sum(vec(t(:,cUser,:)))];
+                            qDeviation = max(QueuedPkts(cUser,1) - sum(vec(tz(:,cUser,:))),0);
+                            SimParams.Debug.tempResource{2,SimParams.iDrop}{cUser,1} = [SimParams.Debug.tempResource{2,SimParams.iDrop}{cUser,1} sum(vec(tz(:,cUser,:)))];
                             SimParams.Debug.tempResource{3,SimParams.iDrop}{cUser,1} = [SimParams.Debug.tempResource{3,SimParams.iDrop}{cUser,1} qDeviation];
                         end
                         
-                        SimParams.Debug.tempResource{4,SimParams.iDrop}{cUser,iBand} = [SimParams.Debug.tempResource{4,SimParams.iDrop}{cUser,iBand} sum(vec(t(:,cUser,iBand)))];
+                        SimParams.Debug.tempResource{4,SimParams.iDrop}{cUser,iBand} = [SimParams.Debug.tempResource{4,SimParams.iDrop}{cUser,iBand} sum(vec(tz(:,cUser,iBand)))];
                     end
                 end
             end
-                
+            
             for iBand = 1:nBands
                 for iBase = 1:nBases
                     for iUser = 1:usersPerCell(iBase,1)
@@ -1179,19 +1213,19 @@ switch selectionMethod
                                 end
                             end
                             H = cH{iBase,iBand}(:,:,cUser);
-                            vW{cUser,iBand}(:,iLayer) = X \ (H * M{cUser,iBand}(:,iLayer));
+                            W{cUser,iBand}(:,iLayer) = X \ (H * M{cUser,iBand}(:,iLayer));
                         end
                     end
                 end
             end
-                
+            
             if min(abs(cvx_optval - cvx_hist)) <= epsilonT
                 reIterate = 0;
             else
                 xIndex = xIndex + 1;
                 cvx_hist(mod(xIndex,2) + 1,1) = cvx_optval;
             end
-                  
+            
             currentIteration = currentIteration + 1;
             if currentIteration > maxIterations
                 reIterate = 0;
@@ -1217,5 +1251,6 @@ for iUser = 1:nUsers
     SimParams.Debug.tempResource{2,SimParams.iDrop}{iUser,1} = SimParams.Debug.tempResource{2,SimParams.iDrop}{iUser,1};
     for iBand = 1:nBands
         SimParams.Debug.tempResource{4,SimParams.iDrop}{iUser,iBand} = SimParams.Debug.tempResource{4,SimParams.iDrop}{iUser,iBand};
+        SimStructs.userStruct{iUser,1}.W{iBand,1} = W{iUser,iBand};
     end
 end

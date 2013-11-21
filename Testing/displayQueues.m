@@ -25,7 +25,8 @@ Qdeviation = sum(max((Queues - servedPkts),0));
 QueueMatrix = [txPkts Queues servedPkts presentQueues];
 
 display(QueueMatrix);
-fprintf('Queue Deviation - %f \n',Qdeviation);
+fprintf('Queue Deviation - %f bits \n',Qdeviation);
+fprintf('Total Tx Rate - %f bits \n',sum(txPkts(:)));
 
 % Displaying in Latex import format
 

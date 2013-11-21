@@ -60,10 +60,10 @@ for iBase = 1:nBases
             cUser = cellUserIndices{iBase,1}(iUser,1);
             totPower = totPower + real(trace(M(:,:,cUser,iBand) * M(:,:,cUser,iBand)'));
         end   
-        totPower = SimStructs.baseStruct{iBase,1}.sPower(1,iBand) * totPower;
+        totPower = SimStructs.baseStruct{iBase,1}.sPower(1,iBand) / totPower;
         for iUser = 1:usersPerCell(iBase,1)
             cUser = cellUserIndices{iBase,1}(iUser,1);
-            M(:,:,cUser,iBand) = M(:,:,cUser,iBand) / sqrt(totPower);
+            M(:,:,cUser,iBand) = M(:,:,cUser,iBand) * sqrt(totPower);
         end   
     end
 end
@@ -83,7 +83,9 @@ for iBand = 1:nBands
                 end
                 H = cH{iBase,iBand}(:,:,cUser);
                 W{cUser,iBand}(:,iLayer) = R \ (H * M(:,iLayer,cUser,iBand));
-                W{cUser,iBand}(:,iLayer) = W{cUser,iBand}(:,iLayer) / norm(W{cUser,iBand}(:,iLayer));
+                if nargout < 4
+                    W{cUser,iBand}(:,iLayer) = W{cUser,iBand}(:,iLayer) / norm(W{cUser,iBand}(:,iLayer));
+                end
             end
         end
     end

@@ -29,12 +29,18 @@ for iUser = 1:SimParams.nUsers
         end
     end
     
+    Wmmse = cUser.W{iBand,1};
+    if isempty(Wmmse)
+        display('No RX Beamformer !');
+        Wmmse = eye(SimParams.nRxAntenna);
+    end
+    
     if userActive
         if strcmp(SimParams.pathLossModel(1:uscoreIndex(1,1) - 1),'3GPP')
             RoI = 10^(SimStructs.userStruct{iUser,1}.phyParams.restOfIF / 10);
-            I = (SimParams.N + RoI) * eye(SimParams.nRxAntenna);
+            I = (SimParams.N + RoI) * eye(SimParams.nRxAntenna) * (Wmmse' * Wmmse);
         else
-            I = SimParams.N * eye(SimParams.nRxAntenna);
+            I = SimParams.N * eye(SimParams.nRxAntenna) * (Wmmse' * Wmmse);
         end
     else
         I = 1;
@@ -54,7 +60,7 @@ for iUser = 1:SimParams.nUsers
             pIndices = iUser == cBase.assignedUsers{iBand,1};
             P = gP(:,pIndices);
             H = linkChannel{baseIndex,iBand}(:,:,iUser);
-            S = H * P + S;
+            S = Wmmse' * H * P + S;
             
             % Intra Stream Calculation
             
@@ -92,7 +98,7 @@ for iUser = 1:SimParams.nUsers
             H = linkChannel{baseIndex,iBand}(:,:,iUser);
             
             if ~isempty(P)
-                N = H * P;
+                N = Wmmse' * H * P;
                 I = I + N * N';
             end
             
@@ -113,7 +119,7 @@ for iUser = 1:SimParams.nUsers
             pIndices = iUser == cBase.assignedUsers{iBand,1};
             P = gP(:,pIndices);
             H = linkChannel{baseIndex,iBand}(:,:,iUser);
-            S = H * P + S;
+            S = Wmmse' * H * P + S;
             
             % Intra Stream Calculation
             
@@ -121,7 +127,7 @@ for iUser = 1:SimParams.nUsers
             P = gP(:,pIndices);
             
             if ~isempty(P)
-                N = H * P;
+                N = Wmmse' * H * P;
                 if performCooperation
                     Nacc = Nacc + N;
                 else
@@ -151,7 +157,7 @@ for iUser = 1:SimParams.nUsers
             H = linkChannel{baseIndex,iBand}(:,:,iUser);
             
             if ~isempty(P)
-                N = H * P;
+                N = Wmmse' * H * P;
                 I = I + N * N';
             end
             
@@ -163,11 +169,13 @@ for iUser = 1:SimParams.nUsers
         
     end
     
-    L = eye(size(I)) + (S * S') / (I);
+    L = eye(size(I)) + I \ (S * S');
     xThrpt = log2(real(det(L)));
     
     if ~isnan(xThrpt)
         SimParams.Debug.privateExchanges.resAllocation(iBand,iUser) = xThrpt;
+    else
+        SimParams.Debug.privateExchanges.resAllocation(iBand,iUser) = 0;
     end
     
 end

@@ -110,14 +110,14 @@ for iBand = bandRange
         
         W_prev = W;
         iIter = iIter + 1;
-        [sumCap,qDev,rVec] = performMockReception(SimParams,SimStructs,V,iBand);
+        [sumCap,qDev,rVec] = performMockReception(SimParams,SimStructs,V,U,W,iBand);
         
         SumCapacity{iBand,1} = [SumCapacity{iBand,1} ; sumCap];
         for iUser = 1:SimParams.nUsers
             SimParams.Debug.tempResource{3,SimParams.iDrop}{iUser,1} = [SimParams.Debug.tempResource{3,SimParams.iDrop}{iUser,1} qDev(iUser,1)];
             SimParams.Debug.tempResource{4,SimParams.iDrop}{iUser,iBand} = [SimParams.Debug.tempResource{4,SimParams.iDrop}{iUser,iBand} (rVec(iUser,1))];
         end
-        
+
     end
     
     % Assigning the V and U to the corresponding users

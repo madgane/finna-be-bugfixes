@@ -36,7 +36,7 @@ for iBase = 1:nBases
     end
 end
 
-userWts = QueuedPkts;
+userWts = ones(nUsers,1);
 underscore_location = strfind(SimParams.weightedSumRateMethod,'_');
 if isempty(underscore_location)
     qExponent = 1;
@@ -83,8 +83,7 @@ switch selectionMethod
                 SimParams.Debug.tempResource{2,SimParams.iDrop}{cUser,1} = sumRateOverBand;
             end
         end
-        
-        
+                
         SimParams.PrecodingMethod = currentDesign;
         SimParams.weightedSumRateMethod = currentApproach;
         SimParams.privateExchanges = rmfield(SimParams.Debug.privateExchanges,'takeOverBand');
@@ -141,9 +140,7 @@ switch selectionMethod
                         currentH = cH{iBase,iBand}(:,:,cUser);
                         p(cUser,iBand) = real(currentH * M(:,cUser,iBand));
                         q(cUser,iBand) = imag(currentH * M(:,cUser,iBand));
-                        
-                        q(cUser,iBand) == 0;
-                        
+
                         (p_o(cUser,iBand)^2 + q_o(cUser,iBand)^2) / (b_o(cUser,iBand)) + ...
                             (2 / b_o(cUser,iBand)) * (p_o(cUser,iBand) * (p(cUser,iBand) - p_o(cUser,iBand))) + ...
                             (2 / b_o(cUser,iBand)) * (q_o(cUser,iBand) * (q(cUser,iBand) - q_o(cUser,iBand))) - ...
@@ -161,8 +158,9 @@ switch selectionMethod
             cvx_end
             
             if strfind(cvx_status,'Solved')
-                
+               
                 b_o = b;
+                M = full(M);
                 for iBand = 1:nBands
                     for iBase = 1:nBases
                         for iUser = 1:usersPerCell(iBase,1)
@@ -198,6 +196,18 @@ switch selectionMethod
             end
 
         end
+        
+        updatePrecoders = 'false';
+        for iBase = 1:nBases
+            for iBand = 1:nBands
+                SimStructs.baseStruct{iBase,1}.P{iBand,1} = zeros(SimParams.nTxAntenna,usersPerCell(iBase,1));
+                for iUser = 1:usersPerCell(iBase,1)
+                    cUser = cellUserIndices{iBase,1}(iUser,1);
+                    SimStructs.baseStruct{iBase,1}.P{iBand,1}(:,iUser) = M(:,cUser,iBand);
+                end
+            end
+        end
+
         
     case 'GMApproxAlloc'
         
@@ -251,8 +261,6 @@ switch selectionMethod
                         currentH = cH{iBase,iBand}(:,:,cUser);
                         p(cUser,iBand) = real(currentH * M(:,cUser,iBand));
                         q(cUser,iBand) = imag(currentH * M(:,cUser,iBand));
-                        
-                        q(cUser,iBand) == 0;
                         
                         p_o(cUser,iBand)^2 + q_o(cUser,iBand)^2 + ...
                             2 * (p_o(cUser,iBand) * (p(cUser,iBand) - p_o(cUser,iBand))) + ...
@@ -310,6 +318,17 @@ switch selectionMethod
 
         end
         
+        updatePrecoders = 'false';
+        for iBase = 1:nBases
+            for iBand = 1:nBands
+                SimStructs.baseStruct{iBase,1}.P{iBand,1} = zeros(SimParams.nTxAntenna,usersPerCell(iBase,1));
+                for iUser = 1:usersPerCell(iBase,1)
+                    cUser = cellUserIndices{iBase,1}(iUser,1);
+                    SimStructs.baseStruct{iBase,1}.P{iBand,1}(:,iUser) = M(:,cUser,iBand);
+                end
+            end
+        end
+
     case 'JointBandAlloc'
         
         for iBand = 1:nBands
@@ -362,7 +381,6 @@ switch selectionMethod
                         p(cUser,1) = real(currentH * M(:,cUser));
                         q(cUser,1) = imag(currentH * M(:,cUser));
                         
-                        q(cUser,1) == 0;                        
                         (p_o(cUser,1)^2 + q_o(cUser,1)^2) / (b_o(cUser,1)) + ...
                             (2 / b_o(cUser,1)) * (p_o(cUser,1) * (p(cUser,1) - p_o(cUser,1))) + ...
                             (2 / b_o(cUser,1)) * (q_o(cUser,1) * (q(cUser,1) - q_o(cUser,1))) - ...
@@ -422,7 +440,7 @@ switch selectionMethod
             
             [SimParams,SimStructs] = performDummyReception(SimParams,SimStructs,iBand);
             QueuedPkts = max(QueuedPkts - SimParams.Debug.privateExchanges.resAllocation(iBand,:)',0);
-            bandRateMax(:,iBand) = log(2) * SimParams.Debug.privateExchanges.resAllocation(iBand,:)';
+            bandRateMax(:,iBand) = SimParams.Debug.privateExchanges.resAllocation(iBand,:)';
         end
         
         updatePrecoders = 'false';
@@ -488,8 +506,6 @@ switch selectionMethod
                             p(iLayer,cUser,iBand) = real(vW{cUser,iBand}(:,iLayer)' * currentH * M(:,iLayer,cUser,iBand));
                             q(iLayer,cUser,iBand) = imag(vW{cUser,iBand}(:,iLayer)' * currentH * M(:,iLayer,cUser,iBand));
                             
-                            q(iLayer,cUser,iBand) == 0;
-                            
                             (p_o(iLayer,cUser,iBand)^2 + q_o(iLayer,cUser,iBand)^2) / (b_o(iLayer,cUser,iBand)) + ...
                                 (2 / b_o(iLayer,cUser,iBand)) * (p_o(iLayer,cUser,iBand) * (p(iLayer,cUser,iBand) - p_o(iLayer,cUser,iBand))) + ...
                                 (2 / b_o(iLayer,cUser,iBand)) * (q_o(iLayer,cUser,iBand) * (q(iLayer,cUser,iBand) - q_o(iLayer,cUser,iBand))) - ...
@@ -544,9 +560,9 @@ switch selectionMethod
                                 end
                                 H = cH{iBase,iBand}(:,:,cUser);
                                 vW{cUser,iBand}(:,iLayer) = R \ (H * M(:,iLayer,cUser,iBand));
-                                if norm(vW{cUser,iBand}(:,iLayer),2) ~= 0
-                                    vW{cUser,iBand}(:,iLayer) = vW{cUser,iBand}(:,iLayer) / norm(vW{cUser,iBand}(:,iLayer),2);
-                                end
+%                                 if norm(vW{cUser,iBand}(:,iLayer)) ~= 0
+%                                     vW{cUser,iBand}(:,iLayer) = vW{cUser,iBand}(:,iLayer) / norm(vW{cUser,iBand}(:,iLayer));
+%                                 end
                             end
                         end
                     end
@@ -571,7 +587,6 @@ switch selectionMethod
 
         end
         
-        updatePrecoders = 'false';
         for iBase = 1:nBases
             for iBand = 1:nBands
                 P = [];
@@ -646,8 +661,6 @@ switch selectionMethod
                             p(iLayer,cUser) = real(vW{cUser,1}(:,iLayer)' * currentH * M(:,iLayer,cUser));
                             q(iLayer,cUser) = imag(vW{cUser,1}(:,iLayer)' * currentH * M(:,iLayer,cUser));
                             
-                            q(iLayer,cUser) == 0;
-                            
                             (p_o(iLayer,cUser)^2 + q_o(iLayer,cUser)^2) / (b_o(iLayer,cUser)) + ...
                                 (2 / b_o(iLayer,cUser)) * (p_o(iLayer,cUser) * (p(iLayer,cUser) - p_o(iLayer,cUser))) + ...
                                 (2 / b_o(iLayer,cUser)) * (q_o(iLayer,cUser) * (q(iLayer,cUser) - q_o(iLayer,cUser))) - ...
@@ -697,7 +710,9 @@ switch selectionMethod
                                 end
                                 H = cH{iBase,iBand}(:,:,cUser);
                                 vW{cUser,1}(:,iLayer) = R \ (H * M(:,iLayer,cUser));
-                                vW{cUser,1}(:,iLayer) = vW{cUser,1}(:,iLayer) / norm(vW{cUser,1}(:,iLayer),2);
+                                if norm(vW{cUser,iBand}(:,iLayer)) ~= 0
+                                    vW{cUser,iBand}(:,iLayer) = vW{cUser,iBand}(:,iLayer) / norm(vW{cUser,iBand}(:,iLayer));
+                                end
                             end
                         end
                     end
@@ -720,7 +735,6 @@ switch selectionMethod
 
             end
             
-            updatePrecoders = 'false';
             for iBase = 1:nBases
                 P = [];
                 SimStructs.baseStruct{iBase,1}.P{iBand,1} = zeros(SimParams.nTxAntenna,usersPerCell(iBase,1));
@@ -733,7 +747,7 @@ switch selectionMethod
             
             [SimParams,SimStructs] = performDummyReception(SimParams,SimStructs,iBand);
             QueuedPkts = max(QueuedPkts - SimParams.Debug.privateExchanges.resAllocation(iBand,:)',0);
-            bandRateMax(:,iBand) = log(2) * SimParams.Debug.privateExchanges.resAllocation(iBand,:)';
+            bandRateMax(:,iBand) = SimParams.Debug.privateExchanges.resAllocation(iBand,:)';
             
         end
         
@@ -798,8 +812,6 @@ switch selectionMethod
                             p(iLayer,cUser,iBand) = real(vW{cUser,iBand}(:,iLayer)' * currentH * M(:,iLayer,cUser,iBand));
                             q(iLayer,cUser,iBand) = imag(vW{cUser,iBand}(:,iLayer)' * currentH * M(:,iLayer,cUser,iBand));
                             
-                            q(iLayer,cUser,iBand) == 0;
-                            
                             (p_o(iLayer,cUser,iBand)^2 + q_o(iLayer,cUser,iBand)^2) / (b_o(iLayer,cUser,iBand)) + ...
                                 (2 / b_o(iLayer,cUser,iBand)) * (p_o(iLayer,cUser,iBand) * (p(iLayer,cUser,iBand) - p_o(iLayer,cUser,iBand))) + ...
                                 (2 / b_o(iLayer,cUser,iBand)) * (q_o(iLayer,cUser,iBand) * (q(iLayer,cUser,iBand) - q_o(iLayer,cUser,iBand))) - ...
@@ -856,7 +868,9 @@ switch selectionMethod
                                 end
                                 H = cH{iBase,iBand}(:,:,cUser);
                                 vW{cUser,iBand}(:,iLayer) = R \ (H * M(:,iLayer,cUser,iBand));
-                                vW{cUser,iBand}(:,iLayer) = vW{cUser,iBand}(:,iLayer) / norm(vW{cUser,iBand}(:,iLayer),2);
+                                if norm(vW{cUser,iBand}(:,iLayer)) ~= 0
+                                    vW{cUser,iBand}(:,iLayer) = vW{cUser,iBand}(:,iLayer) / norm(vW{cUser,iBand}(:,iLayer));
+                                end
                             end
                         end
                     end
@@ -880,7 +894,6 @@ switch selectionMethod
 
         end
         
-        updatePrecoders = 'false';
         for iBase = 1:nBases
             for iBand = 1:nBands
                 P = [];
@@ -1027,7 +1040,6 @@ switch selectionMethod
 
         end
         
-        updatePrecoders = 'false';
         for iBase = 1:nBases
             for iBand = 1:nBands
                 P = [];
@@ -1042,22 +1054,13 @@ switch selectionMethod
                 
 end
 
-if strcmp(updatePrecoders,'true')
-    for iBase = 1:nBases
-        for iBand = 1:nBands
-            SimStructs.baseStruct{iBase,1}.P{iBand,1} = zeros(SimParams.nTxAntenna,usersPerCell(iBase,1));
-            for iUser = 1:usersPerCell(iBase,1)
-                cUser = cellUserIndices{iBase,1}(iUser,1);
-                SimStructs.baseStruct{iBase,1}.P{iBand,1}(:,iUser) = M(:,cUser,iBand);
-            end
-        end
-    end
-end
-
 for iUser = 1:nUsers
     SimParams.Debug.tempResource{2,SimParams.iDrop}{iUser,1} = SimParams.Debug.tempResource{2,SimParams.iDrop}{iUser,1};
     for iBand = 1:nBands
         SimParams.Debug.tempResource{4,SimParams.iDrop}{iUser,iBand} = SimParams.Debug.tempResource{4,SimParams.iDrop}{iUser,iBand};
+        if strcmp(updatePrecoders,'true')
+            SimStructs.userStruct{iUser,1}.W{iBand,1} = vW{iUser,iBand};
+        end
     end
 end
 
