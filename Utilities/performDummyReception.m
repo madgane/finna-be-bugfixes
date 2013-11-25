@@ -68,7 +68,7 @@ for iUser = 1:SimParams.nUsers
             P = gP(:,pIndices);
             
             if ~isempty(P)
-                N = H * P;
+                N = Wmmse' * H * P;
                 if performCooperation
                     Nacc = Nacc + N;
                 else
