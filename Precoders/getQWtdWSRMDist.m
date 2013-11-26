@@ -1054,7 +1054,7 @@ switch selectionMethod
             for iBand = 1:nBands
                 for iUser = 1:nUsers
                     for iRank = 1:maxRank
-                        lambdaLKN(iRank,iUser,iBand) = max(qExponent * (QueuedPkts(iUser,1) - sum(vec(t(:,iUser,:))))^(qExponent - 1),0);
+                        lambdaLKN(iRank,iUser,iBand) = qExponent * (QueuedPkts(iUser,1) - sum(vec(t(:,iUser,:))))^(qExponent - 1);
                         betaLKN(iRank,iUser,iBand) = lambdaLKN(iRank,iUser,iBand) / mseError_o(iRank,iUser,iBand);
                     end
                 end

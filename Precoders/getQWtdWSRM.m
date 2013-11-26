@@ -78,7 +78,7 @@ switch selectionMethod
                 sumRateOverBand = [];bandMaxRate = 0;
                 for iBand = 1:nBands
                     sumRateOverBand = [sumRateOverBand (SimParams.Debug.tempResource{4,SimParams.iDrop}{cUser,iBand} + bandMaxRate)];
-                    bandMaxRate = max(sumRateOverBand);
+                    bandMaxRate = sumRateOverBand(1,end);
                 end
                 SimParams.Debug.tempResource{2,SimParams.iDrop}{cUser,1} = sumRateOverBand;
             end
