@@ -10,7 +10,7 @@ usersPerCell = zeros(nBases,1);
 cellUserIndices = cell(nBases,1);
 cellNeighbourIndices = cell(nBases,1);
 
-mIterationsSCA = 20;mIterationsSG = 5;sumDeviationH = -50;
+mIterationsSCA = 50;mIterationsSG = 5;sumDeviationH = -50;
 
 % Debug Buffers initialization
 
@@ -57,14 +57,14 @@ switch selectionMethod
     
     case 'PrimalMethod'
         
-        alpha = 0.25;
+        alpha = 0.01;
         nLayers = SimParams.maxRank;
         cellP = cell(nBases,1);cellQ = cell(nBases,1);cellB = cell(nBases,1);
         cellM = cell(nBases,1);cellD = cell(nBases,1);cellBH = cell(nBases,1);
         
         xIteration = 0;
         scaContinue = 1;
-        currentIF = zeros(nLayers,nUsers,nBases,nBands);
+        currentIF = ones(nLayers,nUsers,nBases,nBands) * 0.5;
         [p_o,q_o,b_o,W] = randomizeInitialSCApoint(SimParams,SimStructs);
         
         while scaContinue
@@ -279,9 +279,6 @@ switch selectionMethod
                         H = cH{baseNode,iBand}(:,:,iUser);
                         xUser = (iUser == cellUserIndices{baseNode,1});
                         W{iUser,iBand}(:,iLayer) = R \ (H * cellM{baseNode,1}(:,iLayer,xUser,iBand));
-                        if (norm(W{iUser,iBand}(:,iLayer),2) ~= 0)
-                            W{iUser,iBand}(:,iLayer) = W{iUser,iBand}(:,iLayer) / norm(W{iUser,iBand}(:,iLayer),2);
-                        end
                     end
                 end
             end
@@ -391,7 +388,7 @@ switch selectionMethod
                         
                     end
                     
-                    epiObjective >= norm(userObjective,qExponent) + tempFirst - tempSecond + tempADMM * alpha;
+                    epiObjective >= norm(userObjective,qExponent) + tempFirst - tempSecond + tempADMM * (alpha / 2);
                     
                     for iBand = 1:nBands
                         
@@ -545,9 +542,6 @@ switch selectionMethod
                         H = cH{baseNode,iBand}(:,:,iUser);
                         xUser = (iUser == cellUserIndices{baseNode,1});
                         W{iUser,iBand}(:,iLayer) = R \ (H * cellM{baseNode,1}(:,iLayer,xUser,iBand));
-                        if norm(W{iUser,iBand}(:,iLayer),2) ~= 0
-                            W{iUser,iBand}(:,iLayer) = W{iUser,iBand}(:,iLayer) / norm(W{iUser,iBand}(:,iLayer),2);
-                        end
                     end
                 end
             end

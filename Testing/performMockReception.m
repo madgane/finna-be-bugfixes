@@ -36,24 +36,53 @@ nStreams = min(SimParams.maxRank,SimParams.nRxAntenna);
 
 for iBase = 1:xParams.nBases
     cBase = xStructs.baseStruct{iBase,1};
+
+    if ~strcmp(SimParams.weightedSumRateMethod,'PerformScheduling')
     
-    cBase.P{iBand,1} = [];
-    cBase.assignedUsers{iBand,1} = [];
-    cBase.assignedStreams{iBand,1} = [];
-    
-    for iUser = 1:length(cBase.linkedUsers)
-        cUserIndex = cBase.linkedUsers(iUser,1);
-        cUser = xStructs.userStruct{cUserIndex,1};
-        cBase.P{iBand,1} = [cBase.P{iBand,1} , V{cUserIndex,1}];
-        cUser.W{iBand,1} = U{cUserIndex,1};
+        assignedUsers = cBase.assignedUsers{iBand,1};
         
-        xStreams = (1:nStreams)';
-        cBase.assignedUsers{iBand,1} = [cBase.assignedUsers{iBand,1} ; repmat(cUserIndex,length(xStreams),1)];
-        cBase.assignedStreams{iBand,1} = [cBase.assignedStreams{iBand,1} ; xStreams];
-        xStructs.userStruct{cUserIndex,1} = cUser;
+        cBase.P{iBand,1} = [];
+        uAssignedUsers = unique(assignedUsers);
+        agUser = zeros(nStreams * length(uAssignedUsers),1);
+        
+        for iUser = 1:length(uAssignedUsers)
+            
+            cUserIndex = uAssignedUsers(iUser,1);
+            cUser = SimStructs.userStruct{cUserIndex,1};
+            cBase.P{iBand,1} = [cBase.P{iBand,1} , V{cUserIndex,1}];
+            
+            sI = (iUser - 1) * nStreams + 1;
+            eI = sI + nStreams - 1;
+            agUser(sI:eI,1) = cUserIndex;
+            
+            cUser.W{iBand,1} = U{cUserIndex,1};
+            xStructs.userStruct{cUserIndex,1} = cUser;
+        end
+        
+        cBase.assignedUsers{iBand,1} = agUser;
+        xStructs.baseStruct{iBase,1} = cBase;
+            
+    else
+        
+        cBase.P{iBand,1} = [];
+        cBase.assignedUsers{iBand,1} = [];
+        cBase.assignedStreams{iBand,1} = [];
+        
+        for iUser = 1:length(cBase.linkedUsers)
+            cUserIndex = cBase.linkedUsers(iUser,1);
+            cUser = xStructs.userStruct{cUserIndex,1};
+            cBase.P{iBand,1} = [cBase.P{iBand,1} , V{cUserIndex,1}];
+            cUser.W{iBand,1} = U{cUserIndex,1};
+            
+            xStreams = (1:nStreams)';
+            cBase.assignedUsers{iBand,1} = [cBase.assignedUsers{iBand,1} ; repmat(cUserIndex,length(xStreams),1)];
+            cBase.assignedStreams{iBand,1} = [cBase.assignedStreams{iBand,1} ; xStreams];
+            xStructs.userStruct{cUserIndex,1} = cUser;
+        end
+        
+        xStructs.baseStruct{iBase,1} = cBase;
+        
     end
-    
-    xStructs.baseStruct{iBase,1} = cBase;
 end
 
 for iUser = 1:xParams.nUsers

@@ -7,11 +7,11 @@ epsilonCheck = min(1e-4,max(SimParams.sPower)^(-2));
 nStreams = min(SimParams.maxRank,SimParams.nRxAntenna);
 
 SumCapacity = cell(SimParams.nBands,1);
-
 if isfield(SimParams.Debug.privateExchanges,'takeOverBand')
     bandRange = SimParams.Debug.privateExchanges.takeOverBand;
 else
     bandRange = 1:SimParams.nBands;
+    SimParams.Debug.tempResource{2,1} = cell(SimParams.nUsers,1);
 end            
         
 for iBand = bandRange
@@ -123,7 +123,16 @@ for iBand = bandRange
         
         W_prev = W;
         iIter = iIter + 1;
-        SumCapacity{iBand,1} = [SumCapacity{iBand,1} ; performMockReception(SimParams,SimStructs,V,iBand)];
+        [sumCap,qDev,rVec] = performMockReception(SimParams,SimStructs,V,U,W,iBand);
+        
+        SumCapacity{iBand,1} = [SumCapacity{iBand,1} ; sumCap];
+        for iUser = 1:SimParams.nUsers
+            if ~isfield(SimParams.Debug.privateExchanges,'takeOverBand')
+                SimParams.Debug.tempResource{2,SimParams.iDrop}{iUser,1} = [SimParams.Debug.tempResource{2,SimParams.iDrop}{iUser,1} rVec(iUser,1)];
+            end
+            SimParams.Debug.tempResource{3,SimParams.iDrop}{iUser,1} = [SimParams.Debug.tempResource{3,SimParams.iDrop}{iUser,1} qDev(iUser,1)];
+            SimParams.Debug.tempResource{4,SimParams.iDrop}{iUser,iBand} = [SimParams.Debug.tempResource{4,SimParams.iDrop}{iUser,iBand} (rVec(iUser,1))];
+        end
         
     end
     

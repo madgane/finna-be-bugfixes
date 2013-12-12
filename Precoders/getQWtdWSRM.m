@@ -560,9 +560,6 @@ switch selectionMethod
                                 end
                                 H = cH{iBase,iBand}(:,:,cUser);
                                 vW{cUser,iBand}(:,iLayer) = R \ (H * M(:,iLayer,cUser,iBand));
-%                                 if norm(vW{cUser,iBand}(:,iLayer)) ~= 0
-%                                     vW{cUser,iBand}(:,iLayer) = vW{cUser,iBand}(:,iLayer) / norm(vW{cUser,iBand}(:,iLayer));
-%                                 end
                             end
                         end
                     end
@@ -710,9 +707,6 @@ switch selectionMethod
                                 end
                                 H = cH{iBase,iBand}(:,:,cUser);
                                 vW{cUser,1}(:,iLayer) = R \ (H * M(:,iLayer,cUser));
-                                if norm(vW{cUser,iBand}(:,iLayer)) ~= 0
-                                    vW{cUser,iBand}(:,iLayer) = vW{cUser,iBand}(:,iLayer) / norm(vW{cUser,iBand}(:,iLayer));
-                                end
                             end
                         end
                     end
@@ -868,9 +862,6 @@ switch selectionMethod
                                 end
                                 H = cH{iBase,iBand}(:,:,cUser);
                                 vW{cUser,iBand}(:,iLayer) = R \ (H * M(:,iLayer,cUser,iBand));
-                                if norm(vW{cUser,iBand}(:,iLayer)) ~= 0
-                                    vW{cUser,iBand}(:,iLayer) = vW{cUser,iBand}(:,iLayer) / norm(vW{cUser,iBand}(:,iLayer));
-                                end
                             end
                         end
                     end

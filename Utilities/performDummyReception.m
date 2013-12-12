@@ -173,7 +173,7 @@ for iUser = 1:SimParams.nUsers
     xThrpt = log2(real(det(L)));
     
     if ~isnan(xThrpt)
-        SimParams.Debug.privateExchanges.resAllocation(iBand,iUser) = xThrpt;
+        SimParams.Debug.privateExchanges.resAllocation(iBand,iUser) = real(xThrpt);
     else
         SimParams.Debug.privateExchanges.resAllocation(iBand,iUser) = 0;
     end

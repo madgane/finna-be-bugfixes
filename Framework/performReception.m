@@ -190,7 +190,7 @@ for iBand = 1:SimParams.nBands
         xThrpt = log2(real(det(L)));
         
         if ~isnan(xThrpt)
-            SimStructs.userStruct{iUser,1}.crThrpt = SimStructs.userStruct{iUser,1}.crThrpt + xThrpt;
+            SimStructs.userStruct{iUser,1}.crThrpt = SimStructs.userStruct{iUser,1}.crThrpt + real(xThrpt);
             SimStructs.userStruct{iUser,1}.lastThrpt = xThrpt + SimStructs.userStruct{iUser,1}.lastThrpt;
             SimStructs.userStruct{iUser,1}.dropThrpt(SimParams.iDrop,1) = xThrpt;
             SimParams.Debug.resAllocation(SimParams.iDrop,iBand,iUser,SimParams.iSNR) = xThrpt;

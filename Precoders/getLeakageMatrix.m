@@ -18,7 +18,6 @@ for iBase = 1:SimParams.nBases
             Q(iUser,1) = SimStructs.userStruct{cUser,1}.trafficStats.backLogPkt;
         end
 
-        
         eigLoading = zeros(kUsers,1);
         eP = zeros(SimParams.nTxAntenna,kUsers);
         
