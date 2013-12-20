@@ -10,7 +10,7 @@ usersPerCell = zeros(nBases,1);
 cellUserIndices = cell(nBases,1);
 cellNeighbourIndices = cell(nBases,1);
 
-mIterationsSCA = 50;mIterationsSG = 5;sumDeviationH = -50;
+mIterationsSCA = 25;mIterationsSG = 5;sumDeviationH = -50;
 
 % Debug Buffers initialization
 
@@ -57,15 +57,23 @@ switch selectionMethod
     
     case 'PrimalMethod'
         
-        alpha = 0.01;
+        alpha = 0.001;
         nLayers = SimParams.maxRank;
         cellP = cell(nBases,1);cellQ = cell(nBases,1);cellB = cell(nBases,1);
         cellM = cell(nBases,1);cellD = cell(nBases,1);cellBH = cell(nBases,1);
         
         xIteration = 0;
         scaContinue = 1;
-        currentIF = ones(nLayers,nUsers,nBases,nBands) * 0.5;
+        currentIF = zeros(nLayers,nUsers,nBases,nBands);
         [p_o,q_o,b_o,W] = randomizeInitialSCApoint(SimParams,SimStructs);
+        
+        for iBand = 1:nBands
+            for iUser = 1:nUsers
+                for iLayer = 1:nLayers
+                    currentIF(iLayer,iUser,:,iBand) = b_o(iLayer,iUser,iBand) / nBases;
+                end
+            end
+        end
         
         while scaContinue
             
@@ -290,13 +298,13 @@ switch selectionMethod
         
         xIteration = 0;
         scaContinue = 1;
-        for iBase = 1:nBases
-            cellX{iBase,1} = zeros(nLayers,nUsers,nBases,nBands);
-        end
-        
-        currentDual = zeros(nLayers,nUsers,nBases,nBands);
+        currentDual = ones(nLayers,nUsers,nBases,nBands);
         [p_o,q_o,b_o,W] = randomizeInitialSCApoint(SimParams,SimStructs);
         
+        for iBase = 1:nBases
+            cellX{iBase,1} = ones(nLayers,nUsers,nBases,nBands);
+        end
+
         while scaContinue
             
             yIteration = 0;
