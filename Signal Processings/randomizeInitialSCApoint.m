@@ -60,7 +60,7 @@ for iBase = 1:nBases
             cUser = cellUserIndices{iBase,1}(iUser,1);
             totPower = totPower + real(trace(M(:,:,cUser,iBand) * M(:,:,cUser,iBand)'));
         end   
-        totPower = sqrt(SimStructs.baseStruct{iBase,1}.sPower(1,iBand)) / totPower;
+        totPower = sqrt(SimStructs.baseStruct{iBase,1}.sPower(1,iBand)) / sqrt(totPower);
         for iUser = 1:usersPerCell(iBase,1)
             cUser = cellUserIndices{iBase,1}(iUser,1);
             M(:,:,cUser,iBand) = M(:,:,cUser,iBand) * totPower;
