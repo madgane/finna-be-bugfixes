@@ -30,7 +30,7 @@ SimParams.robustNoise = 0;
 SimParams.weighingEqual = 'false';
 SimParams.SchedType = 'SkipScheduling';
 SimParams.PrecodingMethod = 'Best_QwtWSRMD_Method';
-SimParams.weightedSumRateMethod = 'ADMMMethod';
+SimParams.weightedSumRateMethod = 'ADMMMSEMethod';
 
 SimParams.nDrops = 1;
 SimParams.snrIndex = [10];

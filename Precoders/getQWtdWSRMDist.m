@@ -10,7 +10,7 @@ usersPerCell = zeros(nBases,1);
 cellUserIndices = cell(nBases,1);
 cellNeighbourIndices = cell(nBases,1);
 
-mIterationsSCA = 25;mIterationsSG = 5;sumDeviationH = -50;
+mIterationsSCA = 20;mIterationsSG = 5;sumDeviationH = -50;
 
 % Debug Buffers initialization
 
@@ -70,7 +70,7 @@ switch selectionMethod
         for iBand = 1:nBands
             for iUser = 1:nUsers
                 for iLayer = 1:nLayers
-                    currentIF(iLayer,iUser,:,iBand) = b_o(iLayer,iUser,iBand) / nBases;
+                    currentIF(iLayer,iUser,:,iBand) = b_o(iLayer,iUser,iBand);
                 end
             end
         end
@@ -755,7 +755,7 @@ switch selectionMethod
         
     case 'ADMMMSEMethod'
         
-        alpha = 0.1;
+        alpha = 0.5;
         nLayers = SimParams.maxRank;
         cellM = cell(nBases,1);cellX = cell(nBases,1);cellBH = cell(nBases,1);W = cell(nUsers,nBands);
         
@@ -993,7 +993,6 @@ switch selectionMethod
         
     case 'MSEKKTMethod'
         
-        W = cell(nUsers,nBands);
         maxRank = SimParams.maxRank;
         
         xIndex = 0;
@@ -1008,13 +1007,7 @@ switch selectionMethod
         t = ones(maxRank,nUsers,nBands);
         betaLKN = zeros(maxRank,nUsers,nBands);
         lambdaLKN = zeros(maxRank,nUsers,nBands);
-        mseError_o = ones(maxRank,nUsers,nBands);
-        
-        for iBand = 1:nBands
-            for iUser = 1:nUsers
-                W{iUser,iBand} = ones(SimParams.nRxAntenna,maxRank) / sqrt(SimParams.nRxAntenna);
-            end
-        end
+        [mseError_o,W] = randomizeInitialMSESCApoint(SimParams,SimStructs);
         
         while reIterate
             

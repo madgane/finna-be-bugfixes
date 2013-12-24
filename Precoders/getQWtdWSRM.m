@@ -394,7 +394,6 @@ switch selectionMethod
         
     case 'GlobalMSEAlloc'
         
-        vW = cell(nUsers,nBands);
         maxRank = SimParams.maxRank;
         
         xIndex = 0;
@@ -402,16 +401,7 @@ switch selectionMethod
         currentIteration = 0;
         cvx_hist = -500 * ones(2,1);
         
-        for iBase = 1:nBases
-            for iUser = 1:usersPerCell(iBase,1)
-                cUser = cellUserIndices{iBase,1}(iUser,1);
-                for iBand = 1:nBands
-                    vW{cUser,iBand} = ones(SimParams.nRxAntenna,maxRank) / sqrt(SimParams.nRxAntenna);
-                end
-            end
-        end
-        
-        mseError_o = ones(maxRank,nUsers,nBands);
+        [mseError_o,vW] = randomizeInitialMSESCApoint(SimParams,SimStructs);
         
         while reIterate
             

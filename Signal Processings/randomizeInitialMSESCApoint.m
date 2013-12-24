@@ -1,7 +1,7 @@
 
-function [varargout] = randomizeInitialSCApoint(varargin)
+function [varargout] = randomizeInitialMSESCApoint(varargin)
 
-initPrecPoint = 'Random';
+initPrecPoint = 'Ones';
 
 switch nargin
     case 2
@@ -68,39 +68,27 @@ for iBase = 1:nBases
     end
 end
 
-switch SimParams.nRxAntenna
-    
-    case 1
-        
-        for iUser = 1:nUsers
-            for iBand = 1:nBands
-                W{iUser,iBand} = 1;
-            end
-        end
-        
-    otherwise
-        
-        for iBand = 1:nBands
-            for iBase = 1:nBases
-                for iUser = 1:usersPerCell(iBase,1)
-                    cUser = cellUserIndices{iBase,1}(iUser,1);
-                    for iLayer = 1:maxRank
-                        R = SimParams.N * eye(SimParams.nRxAntenna);
-                        for jBase = 1:nBases
-                            for jUser = 1:usersPerCell(jBase,1)
-                                rUser = cellUserIndices{jBase,1}(jUser,1);
-                                H = cH{jBase,iBand}(:,:,cUser);
-                                R = R + H * M(:,:,rUser,iBand) * M(:,:,rUser,iBand)' * H';
-                            end
-                        end
-                        H = cH{iBase,iBand}(:,:,cUser);
-                        W{cUser,iBand}(:,iLayer) = R \ (H * M(:,iLayer,cUser,iBand));
+for iBand = 1:nBands
+    for iBase = 1:nBases
+        for iUser = 1:usersPerCell(iBase,1)
+            cUser = cellUserIndices{iBase,1}(iUser,1);
+            for iLayer = 1:maxRank
+                R = SimParams.N * eye(SimParams.nRxAntenna);
+                for jBase = 1:nBases
+                    for jUser = 1:usersPerCell(jBase,1)
+                        rUser = cellUserIndices{jBase,1}(jUser,1);
+                        H = cH{jBase,iBand}(:,:,cUser);
+                        R = R + H * M(:,:,rUser,iBand) * M(:,:,rUser,iBand)' * H';
                     end
                 end
+                H = cH{iBase,iBand}(:,:,cUser);
+                W{cUser,iBand}(:,iLayer) = R \ (H * M(:,iLayer,cUser,iBand));
             end
         end
-        
+    end
 end
+
+mseError = zeros(maxRank,nUsers,nBands);
 
 for iBand = 1:nBands
     for iUser = 1:nUsers
@@ -121,32 +109,18 @@ for iBand = 1:nBands
                     end
                 end
             end
-            
-            b(iLayer,iUser,iBand) = N;
-            p(iLayer,iUser,iBand) = real(cW' * cH{SimStructs.userStruct{iUser,1}.baseNode,iBand}(:,:,iUser) * M(:,iLayer,iUser,iBand));
-            q(iLayer,iUser,iBand) = imag(cW' * cH{SimStructs.userStruct{iUser,1}.baseNode,iBand}(:,:,iUser) * M(:,iLayer,iUser,iBand));
+
+            S = cW' * cH{SimStructs.userStruct{iUser,1}.baseNode,iBand}(:,:,iUser) * M(:,iLayer,iUser,iBand);
+            mseError(iLayer,iUser,iBand) = abs(1 - S)^2 + N;
             
         end
         
     end
 end
 
-switch nargin
-    case 2
-        varargout{1} = p;varargout{2} = q;varargout{3} = b;
-        if nargout == 4
-            varargout{4} = W;
-        end
-    case 3
-    varargout{1} = p(:,:,currentBand);varargout{2} = q(:,:,currentBand);varargout{3} = b(:,:,currentBand);
-    if nargout == 4
-        xW = cell(nUsers,1);
-        for iUser = 1:nUsers
-            xW{iUser,1} = W{iUser,currentBand};
-        end
-        varargout{4} = xW;
-    end
-end
+varargout = cell(1,2);
+varargout{1,1} = mseError;
+varargout{1,2} = W;
 
 end
 
