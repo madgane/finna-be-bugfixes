@@ -399,8 +399,7 @@ switch selectionMethod
         xIndex = 0;
         reIterate = 1;
         currentIteration = 0;
-        cvx_hist = -500 * ones(2,1);
-        
+        cvx_hist = -500 * ones(2,1);        
         [mseError_o,vW] = randomizeInitialMSESCApoint(SimParams,SimStructs);
         
         while reIterate

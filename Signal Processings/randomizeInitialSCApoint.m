@@ -41,9 +41,9 @@ b = zeros(maxRank,nUsers,nBands);
 switch initPrecPoint
     
     case 'Ones'
-        M = ones(SimParams.nTxAntenna,maxRank,nUsers,nBands);
+        M = complex(ones(SimParams.nTxAntenna,maxRank,nUsers,nBands),ones(SimParams.nTxAntenna,maxRank,nUsers,nBands)) / sqrt(SimParams.nTxAntenna * 2);
     case 'Random'
-        M = randn(SimParams.nTxAntenna,maxRank,nUsers,nBands);
+        M = complex(randn(SimParams.nTxAntenna,maxRank,nUsers,nBands),randn(SimParams.nTxAntenna,maxRank,nUsers,nBands)) / sqrt(SimParams.nTxAntenna * 2);
     case 'BF'
         for iBand = 1:nBands
             for iUser = 1:nUsers
@@ -53,24 +53,25 @@ switch initPrecPoint
         end
 end
 
-for iBase = 1:nBases
-    for iBand = 1:nBands
-        totPower = 0;
-        for iUser = 1:usersPerCell(iBase,1)
-            cUser = cellUserIndices{iBase,1}(iUser,1);
-            totPower = totPower + real(trace(M(:,:,cUser,iBand) * M(:,:,cUser,iBand)'));
-        end   
-        totPower = sqrt(SimStructs.baseStruct{iBase,1}.sPower(1,iBand)) / sqrt(totPower);
-        for iUser = 1:usersPerCell(iBase,1)
-            cUser = cellUserIndices{iBase,1}(iUser,1);
-            M(:,:,cUser,iBand) = M(:,:,cUser,iBand) * totPower;
-        end   
+if strcmp(SimParams.totalPwrDistOverSC,'false')
+    for iBase = 1:nBases
+        for iBand = 1:nBands
+            totPower = norm(vec(M(:,:,cellUserIndices{iBase,1},iBand)))^2;
+            totPower = sqrt(SimStructs.baseStruct{iBase,1}.sPower(1,iBand) / totPower);
+            M(:,:,cellUserIndices{iBase,1},iBand) = M(:,:,cellUserIndices{iBase,1},iBand) * totPower;
+        end
+    end
+else
+    for iBase = 1:nBases
+        totPower = norm(vec(M(:,:,cellUserIndices{iBase,1},:)))^2;
+        totPower = sqrt(sum(SimStructs.baseStruct{iBase,1}.sPower) / totPower);
+        M(:,:,cellUserIndices{iBase,1},:) = M(:,:,cellUserIndices{iBase,1},:) * totPower;
     end
 end
 
 switch SimParams.nRxAntenna
     
-    case 1
+    case 0
         
         for iUser = 1:nUsers
             for iBand = 1:nBands

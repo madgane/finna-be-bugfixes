@@ -10,7 +10,7 @@ usersPerCell = zeros(nBases,1);
 cellUserIndices = cell(nBases,1);
 cellNeighbourIndices = cell(nBases,1);
 
-mIterationsSCA = 20;mIterationsSG = 5;sumDeviationH = -50;
+mIterationsSCA = 100;mIterationsSG = 1;sumDeviationH = -50;
 
 % Debug Buffers initialization
 
@@ -101,14 +101,14 @@ switch selectionMethod
             end
             
             xIteration = xIteration + 1;
-            if xIteration > mIterationsSCA
+            if xIteration >= mIterationsSCA
                 scaContinue = 0;
             end
             
             while masterContinue
                 
                 yIteration = yIteration + 1;
-                if yIteration > mIterationsSG
+                if yIteration >= mIterationsSG
                     masterContinue = 0;
                 end
                 
@@ -203,7 +203,7 @@ switch selectionMethod
                             norm(vec(M(:,:,:,iBand)),2) <= sqrt(SimStructs.baseStruct{iBase,1}.sPower(1,iBand));
                         end
                     else
-                        norm(vec(M(:,:,:,:)),2) <= sqrt(sum(SimStructs.baseStruct{iBase,1}.sPower(1,:)));
+                        norm(vec(M),2) <= sqrt(sum(SimStructs.baseStruct{iBase,1}.sPower(1,:)));
                     end
                     
                     cvx_end
@@ -244,10 +244,12 @@ switch selectionMethod
                     end
                 end
                 
-                if strcmp(SimParams.Debug,'true')
+                if strcmp(SimParams.DebugMode,'true')
+                    status = strcat(status,'-',sprintf('%d',yIteration),'-',sprintf('%d',xIteration));
                     display(status);
-                    display(currentIF);
+                    %display(currentIF);
                 end
+                
                 currentIF = max(currentIF,0);
                 if norm(vec(currentIF - currentIFH),2) <= 1e-4
                     masterContinue = 0;
@@ -291,7 +293,7 @@ switch selectionMethod
         
     case 'ADMMMethod'
         
-        alpha = 0.5;
+        alpha = 0.25;
         nLayers = SimParams.maxRank;
         cellP = cell(nBases,1);cellQ = cell(nBases,1);cellB = cell(nBases,1);
         cellM = cell(nBases,1);cellX = cell(nBases,1);cellBH = cell(nBases,1);
@@ -332,14 +334,14 @@ switch selectionMethod
             end
             
             xIteration = xIteration + 1;
-            if xIteration > mIterationsSCA
+            if xIteration >= mIterationsSCA
                 scaContinue = 0;
             end
             
             while masterContinue
                 
                 yIteration = yIteration + 1;
-                if yIteration > mIterationsSG
+                if yIteration >= mIterationsSG
                     masterContinue = 0;
                 end
                 
@@ -456,7 +458,7 @@ switch selectionMethod
                             norm(vec(M(:,:,:,iBand)),2) <= sqrt(SimStructs.baseStruct{iBase,1}.sPower(1,iBand));
                         end
                     else
-                        norm(vec(M(:,:,:,:)),2) <= sqrt(sum(SimStructs.baseStruct{iBase,1}.sPower(1,:)));
+                        norm(vec(M),2) <= sqrt(sum(SimStructs.baseStruct{iBase,1}.sPower(1,:)));
                     end
 
                     cvx_end
@@ -499,10 +501,11 @@ switch selectionMethod
                     end
                 end
                 
-                if strcmp(SimParams.Debug,'true')
+                if strcmp(SimParams.DebugMode,'true')
+                    status = strcat(status,'-',sprintf('%d',yIteration),'-',sprintf('%d',xIteration));
                     display(status);
-                    display(currentDual);
-                    display([squeeze(cellX{1}) squeeze(cellX{2})]);
+                    %display(currentDual);
+                    %display([squeeze(cellX{1}) squeeze(cellX{2})]);
                 end
                 if norm(vec(currentDual - currentDualH),2) <= 1e-4
                     masterContinue = 0;
@@ -546,17 +549,18 @@ switch selectionMethod
         
     case 'PrimalMSEMethod'
         
-        alpha = 0.05;
+        alpha = 0.0001;
         nLayers = SimParams.maxRank;
         cellD = cell(nBases,1);cellM = cell(nBases,1);cellTH = cell(nBases,1);
         
         xIteration = 0;
         scaContinue = 1;
         currentIF = ones(nLayers,nUsers,nBases,nBands) * 10;
-        [initialMSE,W] = randomizeInitialMSESCApoint(SimParams,SimStructs);
+        [initialMSE,W,currentF] = randomizeInitialMSESCApoint(SimParams,SimStructs);
         
         for iBase = 1:nBases
             cellTH{iBase,1} = initialMSE(:,cellUserIndices{iBase,1},:);
+            currentIF(:,:,iBase,:) = currentF / nBases;
         end
         
         while scaContinue
@@ -564,7 +568,7 @@ switch selectionMethod
             yIteration = 0;
             masterContinue = 1;
             xIteration = xIteration + 1;
-            if xIteration > mIterationsSCA
+            if xIteration >= mIterationsSCA
                 scaContinue = 0;
             end
             
@@ -572,7 +576,7 @@ switch selectionMethod
             while masterContinue
                 
                 yIteration = yIteration + 1;
-                if yIteration > mIterationsSG
+                if yIteration >= mIterationsSG
                     masterContinue = 0;
                 end
                 
@@ -703,9 +707,10 @@ switch selectionMethod
                     end
                 end
                 
-                if strcmp(SimParams.Debug,'true')
+                if strcmp(SimParams.DebugMode,'true')
+                    status = strcat(status,'-',sprintf('%d',yIteration),'-',sprintf('%d',xIteration));
                     display(status);
-                    display(currentIF);
+                    %display(currentIF);
                 end
                 currentIF = max(currentIF,0);
                 if norm(vec(currentIF - currentIFH),2) <= 1e-4
@@ -750,14 +755,14 @@ switch selectionMethod
         
     case 'ADMMMSEMethod'
         
-        alpha = 0.5;
+        alpha = 0.05;
         nLayers = SimParams.maxRank;
         cellM = cell(nBases,1);cellX = cell(nBases,1);cellBH = cell(nBases,1);
         
         xIteration = 0;
         scaContinue = 1;        
         currentDual = zeros(nLayers,nUsers,nBases,nBands);
-        [initialMSE,W] = randomizeInitialMSESCApoint(SimParams,SimStructs);
+        [initialMSE,W,currentF] = randomizeInitialMSESCApoint(SimParams,SimStructs);
         
         for iBase = 1:nBases
             cellBH{iBase,1} = initialMSE(:,cellUserIndices{iBase,1},:);
@@ -770,10 +775,13 @@ switch selectionMethod
             
             for iBase = 1:nBases
                 cellX{iBase,1} = zeros(nLayers,nUsers,nBases,nBands);
+                for jBase = 1:nBases
+                    cellX{iBase,1}(:,:,jBase,:) = currentF;
+                end
             end
             
             xIteration = xIteration + 1;
-            if xIteration > mIterationsSCA
+            if xIteration >= mIterationsSCA
                 scaContinue = 0;
             end
             
@@ -781,7 +789,7 @@ switch selectionMethod
             while masterContinue
                 
                 yIteration = yIteration + 1;
-                if yIteration > mIterationsSG
+                if yIteration >= mIterationsSG
                     masterContinue = 0;
                 end
                 
@@ -936,10 +944,11 @@ switch selectionMethod
                     end
                 end
                 
-                if strcmp(SimParams.Debug,'true')
+                if strcmp(SimParams.DebugMode,'true')
+                    status = strcat(status,'-',sprintf('%d',yIteration),'-',sprintf('%d',xIteration));
                     display(status);
-                    display(currentDual);
-                    display([squeeze(cellX{1}) squeeze(cellX{2})]);
+                    %display(currentDual);
+                    %display([squeeze(cellX{1}) squeeze(cellX{2})]);
                 end
                 if norm(vec(currentDual - currentDualH),2) <= 1e-4
                     masterContinue = 0;

@@ -15,9 +15,9 @@ SimParams.plotMode = 'CPlot';
 prelimCheck;
 preConfiguration;
 SimParams.sysMode = 'false';
-SimParams.DebugMode = 'false';
+SimParams.DebugMode = 'true';
 SimParams.precoderWithIdealChn = 'false';
-SimParams.totalPwrDistOverSC = 'false';
+SimParams.totalPwrDistOverSC = 'true';
 
 SimParams.ChannelModel = 'IID';
 SimParams.pathLossModel = 'Perturbed_3';
@@ -42,7 +42,7 @@ SimParams.estError = 0.00;
 SimParams.fbFraction = 0.00;
 
 SimParams.nBands = 5;
-SimParams.nBases = 3;
+SimParams.nBases = 2;
 SimParams.nUsers = 12;
 
 SimParams.nTxAntenna = 4;
@@ -61,10 +61,6 @@ if strcmp(SimParams.sysMode,'true')
     SimParams.nBands = 1;
     SimParams.nBases = 57;
     SimParams.nUsers = 570;
-end
-
-if strcmp(SimParams.DebugMode,'true')
-    keyboard;
 end
 
 [SimParams,SimStructs] = initializeBuffers(SimParams);

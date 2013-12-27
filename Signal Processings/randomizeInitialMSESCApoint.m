@@ -1,16 +1,12 @@
 
 function [varargout] = randomizeInitialMSESCApoint(varargin)
 
-initPrecPoint = 'Ones';
+initPrecPoint = 'Random';
 
 switch nargin
     case 2
         SimParams = varargin{1};
         SimStructs = varargin{2};
-    case 3
-        SimParams = varargin{1};
-        SimStructs = varargin{2};
-        currentBand = varargin{3};
     otherwise
         display('Unknown arguments !');
 end
@@ -32,18 +28,14 @@ end
 
 nUsers = sum(usersPerCell);
 maxRank = SimParams.maxRank;
-
 W = cell(nUsers,nBands);
-p = zeros(maxRank,nUsers,nBands);
-q = zeros(maxRank,nUsers,nBands);
-b = zeros(maxRank,nUsers,nBands);
 
 switch initPrecPoint
     
     case 'Ones'
-        M = ones(SimParams.nTxAntenna,maxRank,nUsers,nBands);
+        M = complex(ones(SimParams.nTxAntenna,maxRank,nUsers,nBands),ones(SimParams.nTxAntenna,maxRank,nUsers,nBands)) / sqrt(2);
     case 'Random'
-        M = randn(SimParams.nTxAntenna,maxRank,nUsers,nBands);
+        M = complex(randn(SimParams.nTxAntenna,maxRank,nUsers,nBands),randn(SimParams.nTxAntenna,maxRank,nUsers,nBands)) / sqrt(2);
     case 'BF'
         for iBand = 1:nBands
             for iUser = 1:nUsers
@@ -53,18 +45,19 @@ switch initPrecPoint
         end
 end
 
-for iBase = 1:nBases
-    for iBand = 1:nBands
-        totPower = 0;
-        for iUser = 1:usersPerCell(iBase,1)
-            cUser = cellUserIndices{iBase,1}(iUser,1);
-            totPower = totPower + real(trace(M(:,:,cUser,iBand) * M(:,:,cUser,iBand)'));
-        end   
-        totPower = sqrt(SimStructs.baseStruct{iBase,1}.sPower(1,iBand)) / sqrt(totPower);
-        for iUser = 1:usersPerCell(iBase,1)
-            cUser = cellUserIndices{iBase,1}(iUser,1);
-            M(:,:,cUser,iBand) = M(:,:,cUser,iBand) * totPower;
-        end   
+if strcmp(SimParams.totalPwrDistOverSC,'false')
+    for iBase = 1:nBases
+        for iBand = 1:nBands
+            totPower = norm(vec(M(:,:,cellUserIndices{iBase,1},iBand)))^2;
+            totPower = sqrt(SimStructs.baseStruct{iBase,1}.sPower(1,iBand) / totPower);
+            M(:,:,cellUserIndices{iBase,1},iBand) = M(:,:,cellUserIndices{iBase,1},iBand) * totPower;
+        end
+    end
+else
+    for iBase = 1:nBases
+        totPower = norm(vec(M(:,:,cellUserIndices{iBase,1},iBand)))^2;
+        totPower = sqrt(sum(SimStructs.baseStruct{iBase,1}.sPower) / totPower);
+        M(:,:,cellUserIndices{iBase,1},:) = M(:,:,cellUserIndices{iBase,1},:) * totPower;
     end
 end
 
@@ -88,6 +81,7 @@ for iBand = 1:nBands
     end
 end
 
+ifMatrix = zeros(maxRank,nUsers,nBands);
 mseError = zeros(maxRank,nUsers,nBands);
 
 for iBand = 1:nBands
@@ -112,6 +106,7 @@ for iBand = 1:nBands
 
             S = cW' * cH{SimStructs.userStruct{iUser,1}.baseNode,iBand}(:,:,iUser) * M(:,iLayer,iUser,iBand);
             mseError(iLayer,iUser,iBand) = abs(1 - S)^2 + N;
+            ifMatrix(iLayer,iUser,iBand) = N;
             
         end
         
@@ -121,6 +116,7 @@ end
 varargout = cell(1,2);
 varargout{1,1} = mseError;
 varargout{1,2} = W;
+varargout{1,3} = ifMatrix;
 
 end
 
