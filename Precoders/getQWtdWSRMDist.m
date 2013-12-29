@@ -10,7 +10,7 @@ usersPerCell = zeros(nBases,1);
 cellUserIndices = cell(nBases,1);
 cellNeighbourIndices = cell(nBases,1);
 
-mIterationsSCA = 50;mIterationsSG = 1;sumDeviationH = -50;
+mIterationsSCA = 15;mIterationsSG = 2;sumDeviationH = -50;
 
 % Debug Buffers initialization
 
@@ -64,7 +64,7 @@ switch selectionMethod
         
         xIteration = 0;
         scaContinue = 1;
-        currentIF = ones(nLayers,nUsers,nBases,nBands);
+        currentIF = zeros(nLayers,nUsers,nBases,nBands);
         [p_o,q_o,b_o,W] = randomizeInitialSCApoint(SimParams,SimStructs);
         
         for iBase = 1:nBases
@@ -285,7 +285,7 @@ switch selectionMethod
         
     case 'ADMMMethod'
         
-        alpha = 2;
+        alpha = 5;
         nLayers = SimParams.maxRank;
         cellP = cell(nBases,1);cellQ = cell(nBases,1);cellB = cell(nBases,1);
         cellM = cell(nBases,1);cellX = cell(nBases,1);cellBH = cell(nBases,1);
@@ -298,7 +298,7 @@ switch selectionMethod
         for iBase = 1:nBases
             cellX{iBase,1} = zeros(nLayers,nUsers,nBases,nBands);
             for jBase = 1:nBases
-                cellX{iBase,1}(:,:,jBase,:) = b_o / (nBases - 1);
+                cellX{iBase,1}(:,:,jBase,:) = b_o;
             end
         end
 
@@ -555,7 +555,7 @@ switch selectionMethod
         
         for iBase = 1:nBases
             cellTH{iBase,1} = initialMSE(:,cellUserIndices{iBase,1},:);
-            currentIF(:,:,iBase,:) = currentF / (nBases - 1);
+            currentIF(:,:,iBase,:) = currentF;
         end
         
         while scaContinue
@@ -750,7 +750,7 @@ switch selectionMethod
         
     case 'ADMMMSEMethod'
         
-        alpha = 1;
+        alpha = 10;
         nLayers = SimParams.maxRank;
         cellM = cell(nBases,1);cellX = cell(nBases,1);cellBH = cell(nBases,1);
         
@@ -771,7 +771,7 @@ switch selectionMethod
             for iBase = 1:nBases
                 cellX{iBase,1} = zeros(nLayers,nUsers,nBases,nBands);
                 for jBase = 1:nBases
-                    cellX{iBase,1}(:,:,jBase,:) = currentF / (nBases - 1);
+                    cellX{iBase,1}(:,:,jBase,:) = currentF;
                 end
             end
             
