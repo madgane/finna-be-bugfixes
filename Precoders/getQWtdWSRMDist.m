@@ -10,7 +10,7 @@ usersPerCell = zeros(nBases,1);
 cellUserIndices = cell(nBases,1);
 cellNeighbourIndices = cell(nBases,1);
 
-mIterationsSCA = 100;mIterationsSG = 1;sumDeviationH = -50;
+mIterationsSCA = 50;mIterationsSG = 1;sumDeviationH = -50;
 
 % Debug Buffers initialization
 
@@ -64,17 +64,13 @@ switch selectionMethod
         
         xIteration = 0;
         scaContinue = 1;
-        currentIF = zeros(nLayers,nUsers,nBases,nBands);
+        currentIF = ones(nLayers,nUsers,nBases,nBands);
         [p_o,q_o,b_o,W] = randomizeInitialSCApoint(SimParams,SimStructs);
         
-        for iBand = 1:nBands
-            for iUser = 1:nUsers
-                for iLayer = 1:nLayers
-                    currentIF(iLayer,iUser,:,iBand) = b_o(iLayer,iUser,iBand);
-                end
-            end
+        for iBase = 1:nBases
+            currentIF(:,:,iBase,:) = b_o;
         end
-        
+                
         while scaContinue
             
             yIteration = 0;
@@ -214,16 +210,12 @@ switch selectionMethod
                         status = strcat(status,'-',cvx_status);
                     end
                     
-                    if strfind(cvx_status,'Solved')
-                        
+                    if strfind(cvx_status,'Solved')                        
                         cellM{iBase,1} = M;
                         cellBH{iBase,1} = b;
-                        cellD{iBase,1} = dualD;
-                        
-                    else
-                        
-                        cellM{iBase,1} = zeros(size(M));
-                        
+                        cellD{iBase,1} = dualD;                        
+                    else                        
+                        cellM{iBase,1} = zeros(size(M));                        
                     end                    
                     
                 end
@@ -293,7 +285,7 @@ switch selectionMethod
         
     case 'ADMMMethod'
         
-        alpha = 0.25;
+        alpha = 2;
         nLayers = SimParams.maxRank;
         cellP = cell(nBases,1);cellQ = cell(nBases,1);cellB = cell(nBases,1);
         cellM = cell(nBases,1);cellX = cell(nBases,1);cellBH = cell(nBases,1);
@@ -304,7 +296,10 @@ switch selectionMethod
         [p_o,q_o,b_o,W] = randomizeInitialSCApoint(SimParams,SimStructs);
         
         for iBase = 1:nBases
-            cellX{iBase,1} = ones(nLayers,nUsers,nBases,nBands);
+            cellX{iBase,1} = zeros(nLayers,nUsers,nBases,nBands);
+            for jBase = 1:nBases
+                cellX{iBase,1}(:,:,jBase,:) = b_o / (nBases - 1);
+            end
         end
 
         while scaContinue
@@ -388,7 +383,7 @@ switch selectionMethod
                         
                     end
                     
-                    epiObjective >= norm(userObjective,qExponent) + tempFirst - tempSecond + tempADMM * (alpha);
+                    epiObjective >= norm(userObjective,qExponent) + tempFirst - tempSecond + tempADMM * (alpha / 2);
                     
                     for iBand = 1:nBands
                         
@@ -549,18 +544,18 @@ switch selectionMethod
         
     case 'PrimalMSEMethod'
         
-        alpha = 0.0001;
+        alpha = 0.001;
         nLayers = SimParams.maxRank;
         cellD = cell(nBases,1);cellM = cell(nBases,1);cellTH = cell(nBases,1);
         
         xIteration = 0;
         scaContinue = 1;
-        currentIF = ones(nLayers,nUsers,nBases,nBands) * 10;
+        currentIF = zeros(nLayers,nUsers,nBases,nBands);
         [initialMSE,W,currentF] = randomizeInitialMSESCApoint(SimParams,SimStructs);
         
         for iBase = 1:nBases
             cellTH{iBase,1} = initialMSE(:,cellUserIndices{iBase,1},:);
-            currentIF(:,:,iBase,:) = currentF / nBases;
+            currentIF(:,:,iBase,:) = currentF / (nBases - 1);
         end
         
         while scaContinue
@@ -755,7 +750,7 @@ switch selectionMethod
         
     case 'ADMMMSEMethod'
         
-        alpha = 0.05;
+        alpha = 1;
         nLayers = SimParams.maxRank;
         cellM = cell(nBases,1);cellX = cell(nBases,1);cellBH = cell(nBases,1);
         
@@ -776,7 +771,7 @@ switch selectionMethod
             for iBase = 1:nBases
                 cellX{iBase,1} = zeros(nLayers,nUsers,nBases,nBands);
                 for jBase = 1:nBases
-                    cellX{iBase,1}(:,:,jBase,:) = currentF;
+                    cellX{iBase,1}(:,:,jBase,:) = currentF / (nBases - 1);
                 end
             end
             
@@ -837,7 +832,7 @@ switch selectionMethod
                         
                     end
                     
-                    epiObjective >= norm(userObjective,qExponent) + tempFirst - tempSecond + tempADMM * alpha;
+                    epiObjective >= norm(userObjective,qExponent) + tempFirst - tempSecond + tempADMM * (alpha / 2);
                     
                     for iBand = 1:nBands
                         

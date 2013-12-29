@@ -17,7 +17,7 @@ preConfiguration;
 SimParams.sysMode = 'false';
 SimParams.DebugMode = 'true';
 SimParams.precoderWithIdealChn = 'false';
-SimParams.totalPwrDistOverSC = 'true';
+SimParams.totalPwrDistOverSC = 'false';
 
 SimParams.ChannelModel = 'IID';
 SimParams.pathLossModel = 'Perturbed_3';
@@ -30,7 +30,7 @@ SimParams.robustNoise = 0;
 SimParams.weighingEqual = 'false';
 SimParams.SchedType = 'SkipScheduling';
 SimParams.PrecodingMethod = 'Best_QwtWSRMD_Method';
-SimParams.weightedSumRateMethod = 'ADMMMSEMethod';
+SimParams.weightedSumRateMethod = 'PrimalMethod';
 
 SimParams.nDrops = 1;
 SimParams.snrIndex = [10];

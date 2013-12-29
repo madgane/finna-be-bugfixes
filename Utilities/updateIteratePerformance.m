@@ -81,4 +81,6 @@ for iUser = 1:nUsers
     end
 end
 
+display(sum(cell2mat(SimParams.Debug.tempResource{2,SimParams.iDrop})));
+
 end
