@@ -68,40 +68,26 @@ else
         M(:,:,cellUserIndices{iBase,1},:) = M(:,:,cellUserIndices{iBase,1},:) * totPower;
     end
 end
-
-switch SimParams.nRxAntenna
     
-    case 0
-        
-        for iUser = 1:nUsers
-            for iBand = 1:nBands
-                W{iUser,iBand} = 1;
-            end
-        end
-        
-    otherwise
-        
-        for iBand = 1:nBands
-            for iBase = 1:nBases
-                for iUser = 1:usersPerCell(iBase,1)
-                    cUser = cellUserIndices{iBase,1}(iUser,1);
-                    for iLayer = 1:maxRank
-                        R = SimParams.N * eye(SimParams.nRxAntenna);
-                        for jBase = 1:nBases
-                            for jUser = 1:usersPerCell(jBase,1)
-                                rUser = cellUserIndices{jBase,1}(jUser,1);
-                                H = cH{jBase,iBand}(:,:,cUser);
-                                R = R + H * M(:,:,rUser,iBand) * M(:,:,rUser,iBand)' * H';
-                            end
-                        end
-                        H = cH{iBase,iBand}(:,:,cUser);
-                        W{cUser,iBand}(:,iLayer) = R \ (H * M(:,iLayer,cUser,iBand));
+for iBand = 1:nBands
+    for iBase = 1:nBases
+        for iUser = 1:usersPerCell(iBase,1)
+            cUser = cellUserIndices{iBase,1}(iUser,1);
+            for iLayer = 1:maxRank
+                R = SimParams.N * eye(SimParams.nRxAntenna);
+                for jBase = 1:nBases
+                    for jUser = 1:usersPerCell(jBase,1)
+                        rUser = cellUserIndices{jBase,1}(jUser,1);
+                        H = cH{jBase,iBand}(:,:,cUser);
+                        R = R + H * M(:,:,rUser,iBand) * M(:,:,rUser,iBand)' * H';
                     end
                 end
+                H = cH{iBase,iBand}(:,:,cUser);
+                W{cUser,iBand}(:,iLayer) = R \ (H * M(:,iLayer,cUser,iBand));
             end
         end
-        
-end
+    end
+end    
 
 for iBand = 1:nBands
     for iUser = 1:nUsers

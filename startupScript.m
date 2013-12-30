@@ -23,14 +23,14 @@ SimParams.ChannelModel = 'IID';
 SimParams.pathLossModel = 'Perturbed_3';
 SimParams.DopplerType = 'Uniform_1000';
 
-SimParams.queueWt = 2;
+SimParams.queueWt = 1;
 SimParams.mdpFactor = 0;
 SimParams.robustNoise = 0;
 
 SimParams.weighingEqual = 'false';
 SimParams.SchedType = 'SkipScheduling';
-SimParams.PrecodingMethod = 'Best_QwtWSRMD_Method';
-SimParams.weightedSumRateMethod = 'MSEKKTMethod';
+SimParams.PrecodingMethod = 'Best_QwtWSRM_Method';
+SimParams.weightedSumRateMethod = 'GlobalMSEAlloc_2';
 
 SimParams.nDrops = 1;
 SimParams.snrIndex = [10];

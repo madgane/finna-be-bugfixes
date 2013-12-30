@@ -186,9 +186,9 @@ for iBand = 1:SimParams.nBands
             
         end
         
-        L = eye(size(I)) + I \ (S * S');
-        xThrpt = log2(real(det(L)));
-        
+        L = eye(size(I)) + pinv(I) * (S * S');
+        xThrpt = real(log2(det(L)));
+
         if ~isnan(xThrpt)
             SimStructs.userStruct{iUser,1}.crThrpt = SimStructs.userStruct{iUser,1}.crThrpt + real(xThrpt);
             SimStructs.userStruct{iUser,1}.lastThrpt = xThrpt + SimStructs.userStruct{iUser,1}.lastThrpt;

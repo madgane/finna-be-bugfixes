@@ -1008,12 +1008,12 @@ switch selectionMethod
             for iBand = 1:nBands
                 for iUser = 1:nUsers
                     for iRank = 1:maxRank
-                        lambdaLKN(iRank,iUser,iBand) = qExponent * (QueuedPkts(iUser,1) - sum(vec(t(:,iUser,:))))^(qExponent - 1);
-                        betaLKN(iRank,iUser,iBand) = lambdaLKN(iRank,iUser,iBand) / mseError_o(iRank,iUser,iBand);
+                        lambdaLKN(iRank,iUser,iBand) = (qExponent * (QueuedPkts(iUser,1) - sum(vec(t(:,iUser,:))))^(qExponent - 1));
+                        betaLKN(iRank,iUser,iBand) = lambdaLKN(iRank,iUser,iBand) / (mseError_o(iRank,iUser,iBand) * log(2));
                     end
                 end
             end
-            
+           
             for iBand = 1:nBands
                 for iUser = 1:nUsers
                     xNode = SimStructs.userStruct{iUser,1}.baseNode;
@@ -1146,7 +1146,7 @@ switch selectionMethod
             for iBand = 1:nBands
                 for iUser = 1:nUsers
                     for iRank = 1:maxRank
-                        t(iRank,iUser,iBand) = (-log(mseError_o(iRank,iUser,iBand)) - (mseError(iRank,iUser,iBand) - mseError_o(iRank,iUser,iBand)) / mseError_o(iRank,iUser,iBand)) * log2(exp(1));
+                        t(iRank,iUser,iBand) = -log2(mseError_o(iRank,iUser,iBand)) - (mseError(iRank,iUser,iBand) - mseError_o(iRank,iUser,iBand)) / (mseError_o(iRank,iUser,iBand) * log(2));
                     end
                 end
             end
