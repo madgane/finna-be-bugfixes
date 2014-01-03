@@ -10,7 +10,7 @@ usersPerCell = zeros(nBases,1);
 cellUserIndices = cell(nBases,1);
 cellNeighbourIndices = cell(nBases,1);
 
-mIterationsSCA = 15;mIterationsSG = 2;sumDeviationH = -50;
+mIterationsSCA = 50;mIterationsSG = 2;sumDeviationH = -50;
 
 % Debug Buffers initialization
 
@@ -44,6 +44,7 @@ for iBase = 1:nBases
     end
 end
 
+epsilonT = 1e-4;
 underscore_location = strfind(SimParams.weightedSumRateMethod,'_');
 if isempty(underscore_location)
     qExponent = 1;
@@ -57,7 +58,7 @@ switch selectionMethod
     
     case 'PrimalMethod'
         
-        alpha = 0.001;
+        alpha = 0.01;
         nLayers = SimParams.maxRank;
         cellP = cell(nBases,1);cellQ = cell(nBases,1);cellB = cell(nBases,1);
         cellM = cell(nBases,1);cellD = cell(nBases,1);cellBH = cell(nBases,1);
@@ -70,7 +71,7 @@ switch selectionMethod
         for iBase = 1:nBases
             currentIF(:,:,iBase,:) = b_o;
         end
-                
+        
         while scaContinue
             
             yIteration = 0;
@@ -210,13 +211,13 @@ switch selectionMethod
                         status = strcat(status,'-',cvx_status);
                     end
                     
-                    if strfind(cvx_status,'Solved')                        
+                    if strfind(cvx_status,'Solved')
                         cellM{iBase,1} = M;
                         cellBH{iBase,1} = b;
-                        cellD{iBase,1} = dualD;                        
-                    else                        
-                        cellM{iBase,1} = zeros(size(M));                        
-                    end                    
+                        cellD{iBase,1} = dualD;
+                    else
+                        cellM{iBase,1} = zeros(size(M));
+                    end
                     
                 end
                 
@@ -243,14 +244,14 @@ switch selectionMethod
                 end
                 
                 currentIF = max(currentIF,0);
-                if norm(vec(currentIF - currentIFH),2) <= 1e-4
+                if norm(vec(currentIF - currentIFH),2) <= epsilonT
                     masterContinue = 0;
                 end
                 
             end
             
             sumDeviation = sum(cell2mat(SimParams.Debug.tempResource{3,SimParams.iDrop}));
-            if abs(sumDeviation(1,end) - sumDeviationH) < 1e-4
+            if abs(sumDeviation(1,end) - sumDeviationH) < epsilonT
                 scaContinue = 0;
             else
                 sumDeviationH = sumDeviation(1,end);
@@ -301,7 +302,7 @@ switch selectionMethod
                 cellX{iBase,1}(:,:,jBase,:) = b_o;
             end
         end
-
+        
         while scaContinue
             
             yIteration = 0;
@@ -455,7 +456,7 @@ switch selectionMethod
                     else
                         norm(vec(M),2) <= sqrt(sum(SimStructs.baseStruct{iBase,1}.sPower(1,:)));
                     end
-
+                    
                     cvx_end
                     
                     if iBase == 1
@@ -502,14 +503,14 @@ switch selectionMethod
                     %display(currentDual);
                     %display([squeeze(cellX{1}) squeeze(cellX{2})]);
                 end
-                if norm(vec(currentDual - currentDualH),2) <= 1e-4
+                if norm(vec(currentDual - currentDualH),2) <= epsilonT
                     masterContinue = 0;
                 end
                 
             end
             
             sumDeviation = sum(cell2mat(SimParams.Debug.tempResource{3,SimParams.iDrop}));
-            if abs(sumDeviation(1,end) - sumDeviationH) < 1e-4
+            if abs(sumDeviation(1,end) - sumDeviationH) < epsilonT
                 scaContinue = 0;
             else
                 sumDeviationH = sumDeviation(1,end);
@@ -663,7 +664,7 @@ switch selectionMethod
                     else
                         norm(vec(M(:,:,:,:)),2) <= sqrt(sum(SimStructs.baseStruct{iBase,1}.sPower(1,:)));
                     end
-
+                    
                     cvx_end
                     
                     if iBase == 1
@@ -677,12 +678,12 @@ switch selectionMethod
                         cellM{iBase,1} = M;
                         cellD{iBase,1} = dualD;
                         cellTH{iBase,1} = mseError;
-                                                
+                        
                     else
                         
                         cellM{iBase,1} = zeros(size(M));
                         
-                    end                    
+                    end
                     
                 end
                 
@@ -708,14 +709,14 @@ switch selectionMethod
                     %display(currentIF);
                 end
                 currentIF = max(currentIF,0);
-                if norm(vec(currentIF - currentIFH),2) <= 1e-4
+                if norm(vec(currentIF - currentIFH),2) <= epsilonT
                     masterContinue = 0;
                 end
                 
             end
             
             sumDeviation = sum(cell2mat(SimParams.Debug.tempResource{3,SimParams.iDrop}));
-            if abs(sumDeviation(1,end) - sumDeviationH) < 1e-4
+            if abs(sumDeviation(1,end) - sumDeviationH) < epsilonT
                 scaContinue = 0;
             else
                 sumDeviationH = sumDeviation(1,end);
@@ -755,7 +756,7 @@ switch selectionMethod
         cellM = cell(nBases,1);cellX = cell(nBases,1);cellBH = cell(nBases,1);
         
         xIteration = 0;
-        scaContinue = 1;        
+        scaContinue = 1;
         currentDual = zeros(nLayers,nUsers,nBases,nBands);
         [initialMSE,W,currentF] = randomizeInitialMSESCApoint(SimParams,SimStructs);
         
@@ -898,7 +899,7 @@ switch selectionMethod
                     else
                         norm(vec(M(:,:,:,:)),2) <= sqrt(sum(SimStructs.baseStruct{iBase,1}.sPower(1,:)));
                     end
-
+                    
                     cvx_end
                     
                     if iBase == 1
@@ -914,7 +915,7 @@ switch selectionMethod
                         cellBH{iBase,1} = mseError;
                         
                     else
-                    
+                        
                         cellM{iBase,1} = zeros(size(M));
                         
                     end
@@ -945,14 +946,14 @@ switch selectionMethod
                     %display(currentDual);
                     %display([squeeze(cellX{1}) squeeze(cellX{2})]);
                 end
-                if norm(vec(currentDual - currentDualH),2) <= 1e-4
+                if norm(vec(currentDual - currentDualH),2) <= epsilonT
                     masterContinue = 0;
                 end
                 
             end
             
             sumDeviation = sum(cell2mat(SimParams.Debug.tempResource{3,SimParams.iDrop}));
-            if abs(sumDeviation(1,end) - sumDeviationH) < 1e-4
+            if abs(sumDeviation(1,end) - sumDeviationH) < epsilonT
                 scaContinue = 0;
             else
                 sumDeviationH = sumDeviation(1,end);
@@ -991,7 +992,6 @@ switch selectionMethod
         
         xIndex = 0;
         reIterate = 1;
-        epsilonT = 1e-4;
         maxIterations = 500;
         currentIteration = 0;
         cvx_hist = -500 * ones(2,1);
@@ -1008,12 +1008,12 @@ switch selectionMethod
             for iBand = 1:nBands
                 for iUser = 1:nUsers
                     for iRank = 1:maxRank
-                        lambdaLKN(iRank,iUser,iBand) = (qExponent * (QueuedPkts(iUser,1) - sum(vec(t(:,iUser,:))))^(qExponent - 1));
-                        betaLKN(iRank,iUser,iBand) = lambdaLKN(iRank,iUser,iBand) / (mseError_o(iRank,iUser,iBand) * log(2));
+                        lambdaLKN(iRank,iUser,iBand) = qExponent * (QueuedPkts(iUser,1) - sum(vec(t(:,iUser,:))))^(qExponent - 1) / log(2);
+                        betaLKN(iRank,iUser,iBand) = lambdaLKN(iRank,iUser,iBand) / (mseError_o(iRank,iUser,iBand));
                     end
                 end
             end
-           
+            
             for iBand = 1:nBands
                 for iUser = 1:nUsers
                     xNode = SimStructs.userStruct{iUser,1}.baseNode;
@@ -1034,7 +1034,7 @@ switch selectionMethod
                 for iBase = 1:nBases
                     for iBand = 1:nBands
                         muMin = 0;
-                        muMax = 1000;
+                        muMax = 100000;
                         iterateAgain = 1;
                         while iterateAgain
                             totalPower = 0;
@@ -1053,7 +1053,7 @@ switch selectionMethod
                                 muMax = currentMu;
                             end
                             
-                            if abs(muMin - muMax) <= 1e-5
+                            if abs(muMin - muMax) <= 1e-4
                                 iterateAgain = 0;
                             end
                         end
@@ -1063,7 +1063,7 @@ switch selectionMethod
             else
                 
                 for iBase = 1:nBases
-                    muMax = 1000;
+                    muMax = 100000;
                     muMin = 0;
                     iterateAgain = 1;
                     while iterateAgain
@@ -1085,7 +1085,7 @@ switch selectionMethod
                             muMax = currentMu;
                         end
                         
-                        if abs(muMin - muMax) <= 1e-5
+                        if abs(muMin - muMax) <= 1e-4
                             iterateAgain = 0;
                         end
                         
@@ -1158,7 +1158,7 @@ switch selectionMethod
             
             mseError_o = mseError;
             [SimParams,SimStructs] = updateIteratePerformance(SimParams,SimStructs,M,W);
-                                    
+            
             if min(abs(cvx_optval - cvx_hist)) <= epsilonT
                 reIterate = 0;
             else
