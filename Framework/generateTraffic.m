@@ -23,6 +23,8 @@ switch queueType
         randArrival = SimParams.FixedPacketArrivals;
     case 'ConstFixed'
         randArrival = ones(1,SimParams.nUsers) * maxPktArrival;
+    case 'ConstFlow'
+        randArrival = SimParams.FixedPacketArrivals;
 end
 
 SimParams.avgPktValues = randArrival;
@@ -42,6 +44,10 @@ for iUser = 1:SimParams.nUsers
     end
     
     if strcmp(queueType,'ConstFixed')
+    poissonArrivals = SimParams.avgPktValues(1,iUser) * ones(1,length(poissonArrivals));
+    end
+    
+    if strcmp(queueType,'ConstFlow')
     poissonArrivals = SimParams.avgPktValues(1,iUser) * ones(1,length(poissonArrivals));
     end
     

@@ -123,4 +123,6 @@ for iUser = 1:SimParams.nUsers
     end
 end
 
+saveChannelInformation;
+
 end

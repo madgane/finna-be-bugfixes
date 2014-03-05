@@ -88,6 +88,17 @@ switch SimParams.plotMode
         plotFigure(struct('Y',sum(cell2mat(SimParams.Debug.tempResource{2,1})),'N',2));
         xlabel('Iteration count');ylabel('Sum rate in bits / channel use');        
         
+    case 'DSU'
+        
+        fprintf(1,'\n');
+        for iBase = 1:SimParams.nBases
+            for iBand = 1:SimParams.nBands
+                fprintf(1,'eNodeB - %d, Band - %d, Scheduled Users - %s \n',iBase,iBand,mat2str(SimStructs.baseStruct{iBase,1}.assignedUsers{iBand,1}));
+            end
+        end
+           
+        %displayChannels;
+        
     otherwise
         
         display('Simulation Completed without any display !');
