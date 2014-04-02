@@ -1,7 +1,7 @@
 
 function [SimParams,SimStructs] = getQWtdWSRM(SimParams,SimStructs)
 
-epsilonT = 1e-3;
+epsilonT = 1e-5;
 maxIterations = 50;
 cH = SimStructs.linkChan;
 nBases = SimParams.nBases;
@@ -589,9 +589,9 @@ switch selectionMethod
                 
             end
             
-%             for iUser = 1:nUsers
-%                 sum(vec(t(:,iUser,:))) <= QueuedPkts(iUser,1);
-%             end
+            for iUser = 1:nUsers
+                sum(vec(t(:,iUser,:))) <= QueuedPkts(iUser,1);
+            end
             
             for iBase = 1:nBases
                 if strcmp(globalMode,'false')

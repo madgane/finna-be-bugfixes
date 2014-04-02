@@ -7,7 +7,7 @@ clc;clear all;
 
 saveContents = 'false';
 SimParams.outFile = 'defaultFile';
-SimParams.saveChannelInfo = 'false';
+SimParams.saveChannelInfo = 'true';
 SimParams.channelSaveFolder = 'Results';
 
 SimParams.maxDebugCells = 4;
@@ -17,13 +17,13 @@ SimParams.plotMode = 'CPlot';
 prelimCheck;
 preConfiguration;
 SimParams.sysMode = 'false';
-SimParams.DebugMode = 'true';
+SimParams.DebugMode = 'false';
 SimParams.precoderWithIdealChn = 'false';
 SimParams.totalPwrDistOverSC = 'true';
 
-SimParams.ChannelModel = 'IID';
-SimParams.pathLossModel = 'CellEdge';
-SimParams.DopplerType = 'Uniform_1000';
+SimParams.ChannelModel = 'Jakes';
+SimParams.pathLossModel = 'Perturbed_6';
+SimParams.DopplerType = 'Uniform_10';
 
 SimParams.queueWt = 1;
 SimParams.mdpFactor = 0;
@@ -31,8 +31,8 @@ SimParams.robustNoise = 0;
 
 SimParams.weighingEqual = 'true';
 SimParams.SchedType = 'SkipScheduling';
-SimParams.PrecodingMethod = 'Best_QwtWSRM_Method';
-SimParams.weightedSumRateMethod = 'JointWSRMAlloc';
+SimParams.PrecodingMethod = 'Best_QwtWSRMD_Method';
+SimParams.weightedSumRateMethod = 'ADMMMSEMethod';
 
 SimParams.nDrops = 1;
 SimParams.snrIndex = [10];
@@ -54,8 +54,8 @@ SimParams.ffrProfile_dB = zeros(1,SimParams.nBands);
 SimParams.gracePeriod = 0;
 SimParams.arrivalDist = 'Constant';
 
-SimParams.maxArrival = 10;
-SimParams.FixedPacketArrivals = [6,6,6];
+SimParams.maxArrival = 12;
+SimParams.FixedPacketArrivals = [6,6,6,6,6];
 SimParams.PL_Profile = [5 -inf 5 -inf 5 -inf 1e-20 0; -inf 5 -inf 5 -inf 5 0 1e-20];
 
 if strcmp(SimParams.sysMode,'true')

@@ -85,10 +85,11 @@ switch SimParams.plotMode
         plotFigure(struct('Y',sum(cell2mat(SimParams.Debug.tempResource{3,1})),'N',1));
         xlabel('Iteration count');ylabel('Queue deviation in bits / channel use');
         
+        box on;
         plotFigure(struct('Y',sum(cell2mat(SimParams.Debug.tempResource{2,1})),'N',2));
         xlabel('Iteration count');ylabel('Sum rate in bits / channel use');        
         
-    case 'DSU'
+    case 'DispSchedUsers'
         
         fprintf(1,'\n');
         for iBase = 1:SimParams.nBases

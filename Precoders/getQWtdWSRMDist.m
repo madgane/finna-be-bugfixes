@@ -10,7 +10,7 @@ usersPerCell = zeros(nBases,1);
 cellUserIndices = cell(nBases,1);
 cellNeighbourIndices = cell(nBases,1);
 
-mIterationsSCA = 50;mIterationsSG = 2;sumDeviationH = -50;
+mIterationsSCA = 50;mIterationsSG = 5;sumDeviationH = -50;
 
 % Debug Buffers initialization
 
@@ -44,7 +44,7 @@ for iBase = 1:nBases
     end
 end
 
-epsilonT = 1e-4;
+epsilonT = 0.5e-3;
 underscore_location = strfind(SimParams.weightedSumRateMethod,'_');
 if isempty(underscore_location)
     qExponent = 1;
@@ -58,7 +58,7 @@ switch selectionMethod
     
     case 'PrimalMethod'
         
-        alpha = 0.01;
+        alpha = 5e-3;
         nLayers = SimParams.maxRank;
         cellP = cell(nBases,1);cellQ = cell(nBases,1);cellB = cell(nBases,1);
         cellM = cell(nBases,1);cellD = cell(nBases,1);cellBH = cell(nBases,1);
@@ -545,7 +545,7 @@ switch selectionMethod
         
     case 'PrimalMSEMethod'
         
-        alpha = 0.001;
+        alpha = 1e-4;
         nLayers = SimParams.maxRank;
         cellD = cell(nBases,1);cellM = cell(nBases,1);cellTH = cell(nBases,1);
         
@@ -751,7 +751,7 @@ switch selectionMethod
         
     case 'ADMMMSEMethod'
         
-        alpha = 10;
+        alpha = 5;
         nLayers = SimParams.maxRank;
         cellM = cell(nBases,1);cellX = cell(nBases,1);cellBH = cell(nBases,1);
         
