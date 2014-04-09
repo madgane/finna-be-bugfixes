@@ -82,11 +82,13 @@ switch SimParams.plotMode
         displaySystemDetails;
         displayChannel(SimParams,SimStructs);
         displayQueues(SimParams,SimStructs);
-        plotFigure(struct('Y',sum(cell2mat(SimParams.Debug.tempResource{3,1})),'N',1));
+        totalDeviation = sum(cell2mat(SimParams.Debug.tempResource{3,1}));
+        plotFigure(struct('Y',totalDeviation,'N',1));
         xlabel('Iteration count');ylabel('Queue deviation in bits / channel use');
         
         box on;
-        plotFigure(struct('Y',sum(cell2mat(SimParams.Debug.tempResource{2,1})),'N',2));
+        totalThroughput = sum(cell2mat(SimParams.Debug.tempResource{2,1}));
+        plotFigure(struct('Y',totalThroughput,'N',2));
         xlabel('Iteration count');ylabel('Sum rate in bits / channel use');        
         
     case 'DispSchedUsers'

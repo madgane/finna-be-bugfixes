@@ -5,9 +5,9 @@
 
 clc;clear all;
 
-saveContents = 'false';
+saveContents = 'true';
 SimParams.outFile = 'defaultFile';
-SimParams.saveChannelInfo = 'true';
+SimParams.saveChannelInfo = 'false';
 SimParams.channelSaveFolder = 'Results';
 
 SimParams.maxDebugCells = 4;
@@ -32,7 +32,7 @@ SimParams.robustNoise = 0;
 SimParams.weighingEqual = 'true';
 SimParams.SchedType = 'SkipScheduling';
 SimParams.PrecodingMethod = 'Best_QwtWSRMD_Method';
-SimParams.weightedSumRateMethod = 'ADMMMSEMethod';
+SimParams.weightedSumRateMethod = 'PrimalMethod';
 
 SimParams.nDrops = 1;
 SimParams.snrIndex = [10];

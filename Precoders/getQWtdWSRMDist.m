@@ -58,7 +58,7 @@ switch selectionMethod
     
     case 'PrimalMethod'
         
-        alpha = 5e-3;
+        alpha = 5e-4;
         nLayers = SimParams.maxRank;
         cellP = cell(nBases,1);cellQ = cell(nBases,1);cellB = cell(nBases,1);
         cellM = cell(nBases,1);cellD = cell(nBases,1);cellBH = cell(nBases,1);
