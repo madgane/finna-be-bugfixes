@@ -42,7 +42,9 @@ for iBand = 1:SimParams.nBands
         
         Wmmse = cUser.W{iBand,1};
         if isempty(Wmmse)
-            display('No RX Beamformer !');
+            if strcmp(SimParams.DebugMode,'true')
+                display('No RX Beamformer !');
+            end
             Wmmse = eye(SimParams.nRxAntenna);
         end
         

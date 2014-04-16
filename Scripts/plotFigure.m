@@ -1,9 +1,9 @@
 
 function plotFigure(figStruct)
 
-figColor = 'c';
+figColor = 'r';
 figMarker = '.';
-figLineType = '-.';
+figLineType = '-';
 figLineWidth = 1;
     
 if ~isfield(figStruct,'N')

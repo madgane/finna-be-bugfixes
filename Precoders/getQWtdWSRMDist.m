@@ -10,7 +10,7 @@ usersPerCell = zeros(nBases,1);
 cellUserIndices = cell(nBases,1);
 cellNeighbourIndices = cell(nBases,1);
 
-mIterationsSCA = 50;mIterationsSG = 5;sumDeviationH = -50;
+mIterationsSCA = 40;mIterationsSG = 5;sumDeviationH = -50;
 
 % Debug Buffers initialization
 
@@ -545,7 +545,7 @@ switch selectionMethod
         
     case 'PrimalMSEMethod'
         
-        alpha = 1e-4;
+        alpha = 1e-3;
         nLayers = SimParams.maxRank;
         cellD = cell(nBases,1);cellM = cell(nBases,1);cellTH = cell(nBases,1);
         
@@ -1004,7 +1004,7 @@ switch selectionMethod
         t = -log2(mseError_o);
         
         while reIterate
-            
+        
             for iBand = 1:nBands
                 for iUser = 1:nUsers
                     for iRank = 1:maxRank
@@ -1184,7 +1184,7 @@ switch selectionMethod
                 SimStructs.baseStruct{iBase,1}.P{iBand,1} = P;
             end
         end
-        
+                
 end
 
 for iUser = 1:nUsers

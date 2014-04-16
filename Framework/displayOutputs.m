@@ -79,17 +79,27 @@ switch SimParams.plotMode
         
     case 'CPlot'
         
+        profile on;
+        
         displaySystemDetails;
         displayChannel(SimParams,SimStructs);
         displayQueues(SimParams,SimStructs);
-        totalDeviation = sum(cell2mat(SimParams.Debug.tempResource{3,1}));
-        plotFigure(struct('Y',totalDeviation,'N',1));
-        xlabel('Iteration count');ylabel('Queue deviation in bits / channel use');
         
-        box on;
-        totalThroughput = sum(cell2mat(SimParams.Debug.tempResource{2,1}));
+        totalDeviation = cell2mat(SimParams.Debug.tempResource{3,1});
+        totalThroughput = cell2mat(SimParams.Debug.tempResource{2,1});
+        
+        totalDeviation = sum(totalDeviation);
+        totalThroughput = sum(totalThroughput);
+        
+        plotFigure(struct('Y',totalDeviation,'N',1));
+        xlabel('Iteration count');
+        ylabel('Queue deviation in bits / channel use');
+        
         plotFigure(struct('Y',totalThroughput,'N',2));
-        xlabel('Iteration count');ylabel('Sum rate in bits / channel use');        
+        xlabel('Iteration count');
+        ylabel('Sum rate in bits / channel use');   
+        
+        profile off;
         
     case 'DispSchedUsers'
         
