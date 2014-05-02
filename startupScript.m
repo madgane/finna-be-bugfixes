@@ -12,7 +12,7 @@ SimParams.channelSaveFolder = 'Results';
 
 SimParams.maxDebugCells = 4;
 SimParams.version = version;
-SimParams.plotMode = 'QInfo';
+SimParams.plotMode = 'QTimePlot';
 
 prelimCheck;
 preConfiguration;
@@ -22,19 +22,19 @@ SimParams.precoderWithIdealChn = 'false';
 SimParams.totalPwrDistOverSC = 'true';
 
 SimParams.ChannelModel = 'Jakes';
-SimParams.pathLossModel = 'Perturbed_3';
-SimParams.DopplerType = 'Uniform_10';
+SimParams.pathLossModel = 'Perturbed_6';
+SimParams.DopplerType = 'Uniform_1';
 
 SimParams.queueWt = 1;
 SimParams.mdpFactor = 0;
 SimParams.robustNoise = 0;
 
-SimParams.weighingEqual = 'true';
+SimParams.weighingEqual = 'false';
 SimParams.SchedType = 'SkipScheduling';
 SimParams.PrecodingMethod = 'Best_QwtWSRM_Method';
-SimParams.weightedSumRateMethod = 'GenAlloc_Inf';
+SimParams.weightedSumRateMethod = 'GenAlloc';
 
-SimParams.nDrops = 1;
+SimParams.nDrops = 10;
 SimParams.snrIndex = [10];
 
 SimParams.PF_dur = 40;
@@ -44,7 +44,7 @@ SimParams.estError = 0.00;
 SimParams.fbFraction = 0.00;
 
 SimParams.nBands = 5;
-SimParams.nBases = 1;
+SimParams.nBases = 2;
 SimParams.nUsers = 8;
 
 SimParams.nTxAntenna = 4;
@@ -54,8 +54,8 @@ SimParams.ffrProfile_dB = zeros(1,SimParams.nBands);
 SimParams.gracePeriod = 0;
 SimParams.arrivalDist = 'SteadyFlow';
 
-SimParams.maxArrival = 20;
-SimParams.FixedPacketArrivals = [randi([10,20],1,8)];
+SimParams.maxArrival = 10;
+SimParams.FixedPacketArrivals = ones(1,8) * 10;%[randi([10,20],1,8)];
 SimParams.PL_Profile = [5 -inf 5 -inf 5 -inf 1e-20 0; -inf 5 -inf 5 -inf 5 0 1e-20];
 
 if strcmp(SimParams.sysMode,'true')
