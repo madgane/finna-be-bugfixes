@@ -10,7 +10,7 @@ usersPerCell = zeros(nBases,1);
 cellUserIndices = cell(nBases,1);
 cellNeighbourIndices = cell(nBases,1);
 
-mIterationsSCA = 1;mIterationsSG = 1;sumDeviationH = -50;
+mIterationsSCA = 10;mIterationsSG = 1;sumDeviationH = -50;
 
 % Debug Buffers initialization
 
@@ -58,7 +58,7 @@ switch selectionMethod
     
     case 'PrimalMethod'
         
-        alpha = 1e-2;
+        alpha = 5e-4;
         nLayers = SimParams.maxRank;
         cellP = cell(nBases,1);cellQ = cell(nBases,1);cellB = cell(nBases,1);
         cellM = cell(nBases,1);cellD = cell(nBases,1);cellBH = cell(nBases,1);
@@ -176,7 +176,7 @@ switch selectionMethod
                                 (cellP{iBase,1}(iLayer,iUser,iBand)^2 + cellQ{iBase,1}(iLayer,iUser,iBand)^2) / (cellB{iBase,1}(iLayer,iUser,iBand)) + ...
                                     (2 / cellB{iBase,1}(iLayer,iUser,iBand)) * (cellP{iBase,1}(iLayer,iUser,iBand) * (p(iLayer,iUser,iBand) - cellP{iBase,1}(iLayer,iUser,iBand))) + ...
                                     (2 / cellB{iBase,1}(iLayer,iUser,iBand)) * (cellQ{iBase,1}(iLayer,iUser,iBand) * (q(iLayer,iUser,iBand) - cellQ{iBase,1}(iLayer,iUser,iBand))) - ...
-                                    (cellP{iBase,1}(iLayer,iUser,iBand)^2 + cellQ{iBase,1}(iLayer,iUser,iBand)^2) / (2 * cellB{iBase,1}(iLayer,iUser,iBand)^2) * ...
+                                    (cellP{iBase,1}(iLayer,iUser,iBand)^2 + cellQ{iBase,1}(iLayer,iUser,iBand)^2) / (cellB{iBase,1}(iLayer,iUser,iBand)^2) * ...
                                     (b(iLayer,iUser,iBand) - cellB{iBase,1}(iLayer,iUser,iBand)) >= g(iLayer,iUser,iBand);
                                 
                             end
@@ -317,14 +317,21 @@ switch selectionMethod
         
         xIteration = 0;
         scaContinue = 1;
-        currentDual = ones(nLayers,nUsers,nBases,nBands);
         [p_o,q_o,b_o,W] = randomizeInitialSCApoint(SimParams,SimStructs);
         
-        for iBase = 1:nBases
-            cellX{iBase,1} = zeros(nLayers,nUsers,nBases,nBands);
-            for jBase = 1:nBases
-                cellX{iBase,1}(:,:,jBase,:) = b_o;
+        if SimParams.iDrop == 1
+            for iBase = 1:nBases
+                cellX{iBase,1} = zeros(nLayers,nUsers,nBases,nBands);
+                for jBase = 1:nBases
+                    cellX{iBase,1}(:,:,jBase,:) = b_o;
+                end
             end
+            currentDual = ones(nLayers,nUsers,nBases,nBands);
+        else
+            for iBase = 1:nBases
+                cellX{iBase,1} = SimParams.Debug.DataExchange{5,1}{iBase,1};
+            end
+            currentDual = SimParams.Debug.DataExchange{6,1};
         end
         
         while scaContinue
@@ -450,7 +457,7 @@ switch selectionMethod
                                 (cellP{iBase,1}(iLayer,iUser,iBand)^2 + cellQ{iBase,1}(iLayer,iUser,iBand)^2) / (cellB{iBase,1}(iLayer,iUser,iBand)) + ...
                                     (2 / cellB{iBase,1}(iLayer,iUser,iBand)) * (cellP{iBase,1}(iLayer,iUser,iBand) * (p(iLayer,iUser,iBand) - cellP{iBase,1}(iLayer,iUser,iBand))) + ...
                                     (2 / cellB{iBase,1}(iLayer,iUser,iBand)) * (cellQ{iBase,1}(iLayer,iUser,iBand) * (q(iLayer,iUser,iBand) - cellQ{iBase,1}(iLayer,iUser,iBand))) - ...
-                                    (cellP{iBase,1}(iLayer,iUser,iBand)^2 + cellQ{iBase,1}(iLayer,iUser,iBand)^2) / (2 * cellB{iBase,1}(iLayer,iUser,iBand)^2) * ...
+                                    (cellP{iBase,1}(iLayer,iUser,iBand)^2 + cellQ{iBase,1}(iLayer,iUser,iBand)^2) / (cellB{iBase,1}(iLayer,iUser,iBand)^2) * ...
                                     (b(iLayer,iUser,iBand) - cellB{iBase,1}(iLayer,iUser,iBand)) >= g(iLayer,iUser,iBand);
                                 
                             end
@@ -559,6 +566,26 @@ switch selectionMethod
                 end
             end
             
+        end
+        
+        for iBand = 1:nBands
+            for iBase = 1:nBases
+                for iUser = 1:usersPerCell(iBase)
+                    cUser = cellUserIndices{iBase,1}(iUser,1);
+                    for iLayer = 1:nLayers
+                        SimParams.Debug.DataExchange{1,1}(iLayer,cUser,iBand) = real(W{cUser,iBand}(:,iLayer)' * cH{iBase,iBand}(:,:,cUser) * cellM{iBase,1}(:,iLayer,iUser,iBand));
+                        SimParams.Debug.DataExchange{2,1}(iLayer,cUser,iBand) = imag(W{cUser,iBand}(:,iLayer)' * cH{iBase,iBand}(:,:,cUser) * cellM{iBase,1}(:,iLayer,iUser,iBand));
+                        SimParams.Debug.DataExchange{3,1}(iLayer,cUser,iBand) = cellBH{iBase,1}(iLayer,iUser,iBand);
+                    end
+                end
+            end
+        end
+        
+        SimParams.Debug.DataExchange{4,1} = W;
+        SimParams.Debug.DataExchange{5,1} = cell(nBases,1);
+        SimParams.Debug.DataExchange{6,1} = currentDual;
+        for iBase = 1:nBases
+            SimParams.Debug.DataExchange{5,1}{iBase,1} = cellX{iBase,1};
         end
         
         for iBand = 1:nBands

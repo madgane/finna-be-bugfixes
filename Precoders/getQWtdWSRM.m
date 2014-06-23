@@ -155,7 +155,7 @@ switch selectionMethod
                             (p_o(iLayer,cUser,iBand)^2 + q_o(iLayer,cUser,iBand)^2) / (b_o(iLayer,cUser,iBand)) + ...
                                 (2 / b_o(iLayer,cUser,iBand)) * (p_o(iLayer,cUser,iBand) * (p(iLayer,cUser,iBand) - p_o(iLayer,cUser,iBand))) + ...
                                 (2 / b_o(iLayer,cUser,iBand)) * (q_o(iLayer,cUser,iBand) * (q(iLayer,cUser,iBand) - q_o(iLayer,cUser,iBand))) - ...
-                                (p_o(iLayer,cUser,iBand)^2 + q_o(iLayer,cUser,iBand)^2) / (2 * b_o(iLayer,cUser,iBand)^2) * ...
+                                (p_o(iLayer,cUser,iBand)^2 + q_o(iLayer,cUser,iBand)^2) / (b_o(iLayer,cUser,iBand)^2) * ...
                                 (b(iLayer,cUser,iBand) - b_o(iLayer,cUser,iBand)) >= g(iLayer,cUser,iBand);
                             
                         end
@@ -223,7 +223,7 @@ switch selectionMethod
             end
             
             currentIteration = currentIteration + 1;
-            if currentIteration > maxIterations
+            if currentIteration >= maxIterations
                 reIterate = 0;
             end
             
@@ -313,7 +313,7 @@ switch selectionMethod
                             (p_o(iLayer,cUser)^2 + q_o(iLayer,cUser)^2) / (b_o(iLayer,cUser)) + ...
                                 (2 / b_o(iLayer,cUser)) * (p_o(iLayer,cUser) * (p(iLayer,cUser) - p_o(iLayer,cUser))) + ...
                                 (2 / b_o(iLayer,cUser)) * (q_o(iLayer,cUser) * (q(iLayer,cUser) - q_o(iLayer,cUser))) - ...
-                                (p_o(iLayer,cUser)^2 + q_o(iLayer,cUser)^2) / (2 * b_o(iLayer,cUser)^2) * ...
+                                (p_o(iLayer,cUser)^2 + q_o(iLayer,cUser)^2) / (b_o(iLayer,cUser)^2) * ...
                                 (b(iLayer,cUser) - b_o(iLayer,cUser)) >= g(iLayer,cUser);
                             
                         end
@@ -374,7 +374,7 @@ switch selectionMethod
                 end
                 
                 currentIteration = currentIteration + 1;
-                if currentIteration > maxIterations
+                if currentIteration >= maxIterations
                     reIterate = 0;
                 end
                 
@@ -508,7 +508,7 @@ switch selectionMethod
             end
             
             currentIteration = currentIteration + 1;
-            if currentIteration > maxIterations
+            if currentIteration >= maxIterations
                 reIterate = 0;
             end
             
@@ -640,7 +640,7 @@ switch selectionMethod
             end
             
             currentIteration = currentIteration + 1;
-            if currentIteration > maxIterations
+            if currentIteration >= maxIterations
                 reIterate = 0;
             end
             

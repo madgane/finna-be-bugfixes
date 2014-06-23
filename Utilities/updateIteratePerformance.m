@@ -37,12 +37,7 @@ if iscell(cellM)
     else
         for iBase = 1:nBases
             for iBand = 1:nBands
-                P = [];
-                for iUser = 1:usersPerCell(iBase,1)
-                    cUser = cellUserIndices{iBase,1}(iUser,1);
-                    P = [P cellM{cUser,iBand}];
-                end
-                SimStructs.baseStruct{iBase,1}.P{iBand,1} = P;
+                SimStructs.baseStruct{iBase,1}.P{iBand,1} = cellM{iBase,1}(:,:,:,iBand);
             end
         end
     end
