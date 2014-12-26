@@ -2,7 +2,7 @@ function fitnessWeights = fitnessFunction_1(GenStruct,newGenChromozomes)
 
 iBand = GenStruct.iBand;
 userLinkage = cell(GenStruct.nGenes,1);
-fitnessWeights = zeros(1,GenStruct.xLen);
+fitnessWeights = zeros(1,GenStruct.xGen);
 
 for iBase = 1:GenStruct.nGenes
     userLinkage{iBase,1} = GenStruct.SimStructs.baseStruct{iBase,1}.linkedUsers';

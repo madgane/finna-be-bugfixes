@@ -1,7 +1,7 @@
 function [SimParams,SimStructs] = getGeneticScheduling_4(SimParams,SimStructs)
 
-GenStruct.xGen = 10;
-GenStruct.xPop = 10;
+GenStruct.xGen = 10; % Total random genes to be initialized 
+GenStruct.xPop = 10; % Number of population in a generation
 GenStruct.xLen = SimParams.nUsers / SimParams.nBases;
 GenStruct.nGenes = SimParams.nBases;
 
@@ -10,9 +10,9 @@ GenStruct.pMutation = 1;
 GenStruct.pInversion = 0.25;
 GenStruct.XoverPoints = 1:2:10;
 
-GenStruct.globalXInit = @initializeFunction_1;
-GenStruct.geneConstFunc = @constraintViolations_1;
-GenStruct.geneFitnessFunc = @fitnessFunction_1;
+GenStruct.globalXInit = @initializeFunction_1; % Initialize the population with different groupings
+GenStruct.geneConstFunc = @constraintViolations_1; % Checking for any constraint violation (same user shudn't be in the group)
+GenStruct.geneFitnessFunc = @fitnessFunction_1; % Evaluating the total achievable sum rate
 
 GenStruct.SimParams = SimParams;
 GenStruct.SimStructs = SimStructs;
